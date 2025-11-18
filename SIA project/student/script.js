@@ -51,9 +51,9 @@ function navigateTo(page) {
 
 
 /* ============================================
-   COUNSELING PAGE FUNCTIONS (DYNAMIC VERSION)
-   (With Read/Unread and Modal Logic)
-   ============================================ */
+   COUNSELING PAGE FUNCTIONS (DYNAMIC VERSION)
+   (With Read/Unread and Modal Logic)
+   ============================================ */
 
 // --- Global variables for this page ---
 let allStudentSessions = []; // This will hold our fetched sessions
@@ -62,227 +62,303 @@ let allAnnouncements = []; // This will hold our fetched announcements
 // --- 1. LOCALSTORAGE HELPER FUNCTIONS ---
 // These functions will "remember" what you've read
 
+// --- THIS IS THE FIXED CODE ---
 function getReadAnnouncements() {
-    const read = localStorage.getItem('readCounselingAnnouncements');
-    return read ? JSON.parse(read) : [];
+    const read = localStorage.getItem('counselingAnnouncements'); // <-- This is the fix
+    return read ? JSON.parse(read) : [];
 }
 
 function saveReadAnnouncements(idArray) {
-    localStorage.setItem('counselingAnnouncements', JSON.stringify(idArray));
+    localStorage.setItem('counselingAnnouncements', JSON.stringify(idArray));
 }
 
 function markAnnouncementAsRead(itemId) {
-    let readIds = getReadAnnouncements();
-    if (!readIds.includes(itemId)) {
-        readIds.push(itemId);
-        saveReadAnnouncements(readIds);
-    }
-    // Update the UI
-    const itemEl = document.querySelector(`.announcement-item[data-id="${itemId}"]`);
-    if (itemEl) {
-        itemEl.setAttribute('data-read', 'true');
-    }
-    updateUnreadCount();
+    let readIds = getReadAnnouncements();
+    if (!readIds.includes(itemId)) {
+        readIds.push(itemId);
+        saveReadAnnouncements(readIds);
+    }
+    // Update the UI
+    const itemEl = document.querySelector(`.announcement-item[data-id="${itemId}"]`);
+    if (itemEl) {
+        itemEl.setAttribute('data-read', 'true');
+    }
+    updateUnreadCount();
 }
 
 function markAllAsRead(event) {
-    event.preventDefault();
-    let readIds = allAnnouncements.map(item => item._id); // Get all IDs
-    saveReadAnnouncements(readIds);
-    
-    // Update all UI elements
-    document.querySelectorAll('.announcement-item').forEach(el => {
-        el.setAttribute('data-read', 'true');
-    });
-    
-    updateUnreadCount();
-    filterAnnouncements('all'); // Switch to the "All" tab
+    event.preventDefault();
+    let readIds = allAnnouncements.map(item => item._id); // Get all IDs
+    saveReadAnnouncements(readIds);
+    
+    // Update all UI elements
+    document.querySelectorAll('.announcement-item').forEach(el => {
+        el.setAttribute('data-read', 'true');
+    });
+    
+    updateUnreadCount();
+    filterAnnouncements('all'); // Switch to the "All" tab
 }
 
-// --- 2. DYNAMIC ANNOUNCEMENTS ---
+// --- 2. DYNAMIC ANNOUNCEMENTS (FIXED) ---
 async function fetchAndRenderAnnouncements() {
-    const listEl = document.getElementById('announcementsList');
-    if (!listEl) return;
-    
-    const readIds = getReadAnnouncements();
+    const listEl = document.getElementById('announcementsList');
+    if (!listEl) return;
+    
+    // Get the dedicated message element
+    const noAnnouncementsMessageEl = document.getElementById('noAnnouncementsMessage'); 
+    const readIds = getReadAnnouncements();
 
-    try {
-        const response = await fetch('http://localhost:3001/api/announcements');
-        allAnnouncements = await response.json(); // Save to global variable
+    try {
+        const response = await fetch('http://localhost:3001/api/announcements');
+        allAnnouncements = await response.json(); // Save to global variable
 
-        listEl.innerHTML = ''; 
-        if (allAnnouncements.length === 0) {
-            listEl.innerHTML = '<p>No announcements at this time.</p>';
-            return;
-        }
+        listEl.innerHTML = ''; // Clear the list
+        noAnnouncementsMessageEl.style.display = 'none'; // Hide the message
 
-        allAnnouncements.forEach(item => {
-            const isRead = readIds.includes(item._id);
-            const announcementItem = document.createElement('div');
-            announcementItem.className = 'announcement-item';
-            announcementItem.setAttribute('data-id', item._id);
-            announcementItem.setAttribute('data-read', isRead);
-            
-            announcementItem.innerHTML = `
-                <h3 class="announcement-title">${item.title}</h3>
-                <div class="announcement-meta">
-                    <span class="meta-item">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="2" width="12" height="12" rx="1"/><path d="M2 6h12"/></svg>
-                        Posted on: ${new Date(item.createdAt).toLocaleDateString()}
-                    </span>
-                </div>
-                <p class="announcement-description">${item.content.substring(0, 100)}...</p>
-            `;
-            
-            // Add click listener to open the modal
-            announcementItem.addEventListener('click', () => openAnnouncementDetailModal(item._id));
-            
-            listEl.appendChild(announcementItem);
-        });
-        
-        updateUnreadCount();
-        filterAnnouncements('unread'); // Start on the "Unread" tab
+        if (allAnnouncements.length === 0) {
+            // Use the dedicated message element instead of replacing list HTML
+            noAnnouncementsMessageEl.textContent = 'No announcements at this time.';
+            noAnnouncementsMessageEl.style.display = 'block';
+            return; // Stop here
+        }
 
-    } catch (error) {
-        console.error('Error fetching announcements:', error);
-        listEl.innerHTML = '<p>Could not load announcements.</p>';
-    }
+        allAnnouncements.forEach(item => {
+            const isRead = readIds.includes(item._id);
+            const announcementItem = document.createElement('div');
+            announcementItem.className = 'announcement-item';
+            announcementItem.setAttribute('data-id', item._id);
+            announcementItem.setAttribute('data-read', isRead);
+            
+            announcementItem.innerHTML = `
+                <h3 class="announcement-title">${item.title}</h3>
+                <div class="announcement-meta">
+                    <span class="meta-item" style="line-height: 1.4;">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="2" width="12" height="12" rx="1"/><path d="M2 6h12"/></svg>
+                        Posted on: ${new Date(item.createdAt).toLocaleDateString()}
+                    </span>
+                </div>
+                <p class="announcement-description">${item.content.substring(0, 100)}...</p>
+
+                <!-- === ADD THIS NEW BUTTON === -->
+                <button class="request-event-btn" data-id="${item._id}" data-title="${item.title}">
+                    Sign Up for this Event
+                </button>
+                <!-- === END OF NEW BUTTON === -->
+            `;
+            
+           // Add click listener to open the modal
+            announcementItem.addEventListener('click', (e) => {
+                // --- NEW LOGIC: Stop click if it's on the button ---
+                if (e.target.classList.contains('request-event-btn')) {
+                    e.stopPropagation(); // Stop the event from bubbling up
+                    return;
+                }
+                // --- END OF NEW LOGIC ---
+                openAnnouncementDetailModal(item._id);
+            });
+            
+            listEl.appendChild(announcementItem);
+
+            // --- NEW: Add click listener for the new button ---
+            const requestBtn = announcementItem.querySelector('.request-event-btn');
+            if (requestBtn) {
+                requestBtn.addEventListener('click', () => {
+                    // 1. Pre-fill the form with event details
+                    document.getElementById('relatedAnnouncementId').value = item._id;
+                    document.getElementById('eventRequestTitle').textContent = item.title;
+                    document.getElementById('eventRequestContext').style.display = 'block';
+
+                    // 2. Open the request form modal
+                    openRequestFormModal();
+                });
+            }
+            // --- END OF NEW LISTENER ---
+        });
+        
+        updateUnreadCount();
+        filterAnnouncements('unread'); // Start on the "Unread" tab
+
+    } catch (error) {
+        console.error('Error fetching announcements:', error);
+        listEl.innerHTML = ''; // Clear loading message
+        // Use the dedicated message element for errors
+        noAnnouncementsMessageEl.textContent = 'Could not load announcements.';
+        noAnnouncementsMessageEl.style.display = 'block';
+    }
 }
 
-// --- 3. FILTER & COUNT FUNCTIONS ---
+// --- 3. FILTER & COUNT FUNCTIONS (FIXED) ---
 function filterAnnouncements(filterType) {
-    // Update button active state
-    document.getElementById('filterUnread').classList.toggle('active', filterType === 'unread');
-    document.getElementById('filterAll').classList.toggle('active', filterType === 'all');
+    // Update button active state
+    document.getElementById('filterUnread').classList.toggle('active', filterType === 'unread');
+    document.getElementById('filterAll').classList.toggle('active', filterType === 'all');
+    
+    const items = document.querySelectorAll('.announcement-item');
+    // Get the dedicated message element
+    const noAnnouncementsMessageEl = document.getElementById('noAnnouncementsMessage');
+    
+    let hasUnread = false;
+
+    items.forEach(item => {
+        const isRead = item.getAttribute('data-read') === 'true';
+        if (filterType === 'unread') {
+            if (isRead) {
+                item.style.display = 'none';
+            } else {
+                item.style.display = 'block';
+                hasUnread = true;
+            }
+           } else {
+            // "All" tab
+            item.style.display = 'block';
+        }
+    });
+
+    // --- NEW LOGIC ---
+    // This section now correctly shows/hides the message
+    // without destroying the announcement items.
     
-    const items = document.querySelectorAll('.announcement-item');
-    let hasUnread = false;
+    // First, always hide the message
+    noAnnouncementsMessageEl.style.display = 'none';
 
-    items.forEach(item => {
-        const isRead = item.getAttribute('data-read') === 'true';
-        if (filterType === 'unread') {
-            if (isRead) {
-                item.style.display = 'none';
-            } else {
-                item.style.display = 'block';
-                hasUnread = true;
-            }
-        } else {
-            // "All" tab
-            item.style.display = 'block';
-        }
-    });
-
-    if (filterType === 'unread' && !hasUnread) {
-         document.getElementById('announcementsList').innerHTML = '<p>No unread announcements!</p>';
+    if (filterType === 'unread' && !hasUnread) {
+        // If "Unread" tab is active and no items are unread
+        noAnnouncementsMessageEl.textContent = 'No unread announcements!';
+        noAnnouncementsMessageEl.style.display = 'block';
+    } else if (filterType === 'all' && items.length === 0) {
+        // If "All" tab is active and there are no items at all
+        noAnnouncementsMessageEl.textContent = 'No announcements at this time.';
+        noAnnouncementsMessageEl.style.display = 'block';
     }
 }
 
 function updateUnreadCount() {
-    const readIds = getReadAnnouncements();
-    const unreadCount = allAnnouncements.filter(item => !readIds.includes(item._id)).length;
-    
-    const badge = document.getElementById('unreadCount');
-    if (badge) {
-        badge.textContent = unreadCount;
-        badge.style.display = unreadCount > 0 ? 'flex' : 'none';
-    }
+    const readIds = getReadAnnouncements();
+    const unreadCount = allAnnouncements.filter(item => !readIds.includes(item._id)).length;
+    
+    const badge = document.getElementById('unreadCount');
+    if (badge) {
+        badge.textContent = unreadCount;
+        badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+    }
 }
 
 // --- 4. DYNAMIC FAQs ---
 async function fetchAndRenderFAQs() {
-    // ... (This function is already correct, no changes needed) ...
-    const listEl = document.getElementById('faqsList');
-    if (!listEl) return;
-    try {
-        const response = await fetch('http://localhost:3001/api/faqs');
-        const faqs = await response.json();
-        listEl.innerHTML = ''; 
-        faqs.forEach((item, idx) => {
-            const wrapper = document.createElement('div');
-            wrapper.style.cssText = 'background:#fff; border:1px solid #e8e8e8; border-radius:8px; padding:10px;';
-            const qBtn = document.createElement('button');
-            qBtn.style.cssText = 'display:flex; justify-content:space-between; align-items:center; width:100%; border:0; background:transparent; cursor:pointer; text-align:left; padding:6px 0;';
-            const qText = document.createElement('span');
-            qText.style.cssText = 'font-weight:600; color:#2c3e7f;';
-            qText.textContent = item.question;
-            const icon = document.createElement('span');
-            icon.style.cssText = 'font-size:18px; color:#666; font-weight:600;';
-            icon.textContent = '+';
-            qBtn.appendChild(qText);
-            qBtn.appendChild(icon);
-            const answer = document.createElement('div');
-            answer.style.cssText = 'display:none; margin-top:8px; color:#444; line-height:1.5; font-size:13px;';
-            answer.textContent = item.answer;
-            qBtn.addEventListener('click', function (e) {
-                e.preventDefault();
-                const expanded = answer.style.display === 'block';
-                if (!expanded) {
-                    answer.style.display = 'block';
-                    icon.textContent = '-';
-                } else {
-                    answer.style.display = 'none';
-                    icon.textContent = '+';
-                }
-            });
-            wrapper.appendChild(qBtn);
-            wrapper.appendChild(answer);
-            listEl.appendChild(wrapper);
-        });
-    } catch (error) {
-        console.error('Error fetching FAQs:', error);
-        listEl.innerHTML = '<p>Could not load FAQs.</p>';
-    }
+    // ... (This function is already correct, no changes needed) ...
+    const listEl = document.getElementById('faqsList');
+    if (!listEl) return;
+    try {
+        const response = await fetch('http://localhost:3001/api/faqs');
+        const faqs = await response.json();
+        listEl.innerHTML = ''; 
+        faqs.forEach((item, idx) => {
+         const wrapper = document.createElement('div');
+            wrapper.style.cssText = 'background:#fff; border:1px solid #e8e8e8; border-radius:8px; padding:10px;';
+            const qBtn = document.createElement('button');
+            qBtn.style.cssText = 'display:flex; justify-content:space-between; align-items:center; width:100%; border:0; background:transparent; cursor:pointer; text-align:left; padding:6px 0;';
+            const qText = document.createElement('span');
+            qText.style.cssText = 'font-weight:600; color:#2c3e7f;';
+            qText.textContent = item.question;
+            const icon = document.createElement('span');
+            icon.style.cssText = 'font-size:18px; color:#666; font-weight:600;';
+            icon.textContent = '+';
+            qBtn.appendChild(qText);
+            qBtn.appendChild(icon);
+            const answer = document.createElement('div');
+            answer.style.cssText = 'display:none; margin-top:8px; color:#444; line-height:1.5; font-size:13px;';
+            answer.textContent = item.answer;
+            qBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const expanded = answer.style.display === 'block';
+                if (!expanded) {
+                    answer.style.display = 'block';
+                    icon.textContent = '-';
+                } else {
+                    answer.style.display = 'none';
+                    icon.textContent = '+';
+                }
+            });
+            wrapper.appendChild(qBtn);
+            wrapper.appendChild(answer);
+            listEl.appendChild(wrapper);
+        });
+    } catch (error) {
+        console.error('Error fetching FAQs:', error);
+        listEl.innerHTML = '<p>Could not load FAQs.</p>';
+    }
 }
 
 // --- 5. DYNAMIC REQUEST FORM ---
 async function handleRequestFormSubmit(e) {
-    // ... (This function is already correct, no changes needed) ...
-    e.preventDefault();
-    const form = e.target;
-    if (!form.checkValidity()) { form.reportValidity(); return; }
-    const formData = new FormData(form);
-    const payload = {
-        studentId: formData.get('studentId'),
-        studentFullName: formData.get('fullName'),
-        studentPhone: formData.get('phone'),
-        studentEmail: formData.get('email'),
-        referenceContact: {
-            name: formData.get('refName'),
-            relationship: formData.get('relationship'),
-            phone: formData.get('refPhone'),
-            email: formData.get('refEmail')
-        }
-    };
-    try {
-        const response = await fetch('http://localhost:3001/api/admin/counseling/appointments', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        if (!response.ok) throw new Error('Server error');
-        alert('Request submitted successfully!');
-        form.reset();
-        closeRequestFormModal();
-        fetchAndRenderSessions(); 
-    } catch (error) {
-        console.error('Error submitting request:', error);
-        alert('There was a problem submitting your request.');
-    }
+    // ... (This function is already correct, no changes needed) ...
+    e.preventDefault();
+    const form = e.target;
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+    const formData = new FormData(form);
+    const payload = {
+        studentId: formData.get('studentId'),
+        studentFullName: formData.get('fullName'),
+        studentPhone: formData.get('phone'),
+        studentEmail: formData.get('email'),
+        referenceContact: {
+            name: formData.get('refName'),
+            relationship: formData.get('relationship'),
+            phone: formData.get('refPhone'),
+            email: formData.get('refEmail')
+        },
+        // --- NEW: Get the announcement ID from the hidden field ---
+        relatedAnnouncementId: formData.get('relatedAnnouncementId') || null
+    };
+    try {
+        const response = await fetch('http://localhost:3001/api/admin/counseling/appointments', {
+           method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if (!response.ok) throw new Error('Server error');
+        alert('Request submitted successfully!');
+        
+        // --- NEW DYNAMIC CODE ---
+        // Save the student ID to the browser's memory
+        localStorage.setItem('currentStudentId', payload.studentId);
+        // --- END OF NEW CODE ---
+
+        form.reset();
+        closeRequestFormModal();
+        fetchAndRenderSessions(); 
+    } catch (error) {
+        console.error('Error submitting request:', error);
+        alert('There was a problem submitting your request.');
+    }
 }
 
 // --- 6. DYNAMIC "MY SESSIONS" LIST ---
 async function fetchAndRenderSessions() {
-    // ... (This function is already correct, no changes needed) ...
-    const listEl = document.getElementById('sessionsList');
-    if (!listEl) return;
-    listEl.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Loading sessions...</p>';
-    try {
-        const studentId = 'student-123'; 
-        const response = await fetch(`http://localhost:3001/api/counseling/my-appointments/${studentId}`);
-        allStudentSessions = await response.json();
-        updateTabCounts();
-        const activeTabBtn = document.querySelector('#sessionsModal .tab-btn.active');
+    // ... (This function is already correct, no changes needed) ...
+    const listEl = document.getElementById('sessionsList');
+    if (!listEl) return;
+    listEl.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Loading sessions...</p>';
+    try {
+
+        // --- NEW DYNAMIC CODE ---
+        // Get the student ID from the browser's memory
+        const studentId = localStorage.getItem('currentStudentId');
+
+        if (!studentId) {
+            // If no student ID is saved, show a message and stop
+            listEl.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Submit a request form to see your sessions.</p>';
+            allStudentSessions = []; // Ensure sessions are empty
+            updateTabCounts(); // Update counts to 0
+            return;
+        }
+        // --- END OF NEW CODE ---
+        
+        const response = await fetch(`http://localhost:3001/api/counseling/my-appointments/${studentId}`);
+        allStudentSessions = await response.json();
+        updateTabCounts();
+        const activeTabBtn = document.querySelector('#sessionsModal .tab-btn.active');
         const activeTabName = activeTabBtn.getAttribute('onclick').match(/'([^']+)'/)[1] || 'pending';
         renderSessionsList(activeTabName);
     } catch (error) {
@@ -292,185 +368,206 @@ async function fetchAndRenderSessions() {
 }
 
 function renderSessionsList(filterTab = 'pending') {
-    // ... (This function is already correct, no changes needed) ...
-    const listEl = document.getElementById('sessionsList');
-    if (!listEl) return;
-    const filtered = allStudentSessions.filter(s => s.status.toLowerCase() === filterTab.toLowerCase());
-    listEl.innerHTML = '';
-    if (filtered.length === 0) {
-        listEl.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">No sessions found.</p>';
-        return;
-    }
-    filtered.forEach(session => {
-        const card = document.createElement('div');
-        card.style.cssText = 'border: 1px solid #e8e8e8; border-radius: 8px; padding: 14px; background: #fff; cursor: pointer;';
-        const submittedDate = new Date(session.createdAt).toLocaleDateString();
-        const counselorName = session.assignedCounselor ? session.assignedCounselor.name : 'N/A';
-        const schedule = session.scheduledDateTime ? new Date(session.scheduledDateTime).toLocaleString() : 'Not Scheduled';
-        card.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                    <div style="font-weight:700;">Case #${session._id.slice(-6)}</div>
-                    <div style="font-size:12px; color:#999;">Submitted on ${submittedDate}</div>
-                </div>
-                <span style="background:#fff3cd; color:#333; padding:6px 10px; border-radius:14px; font-size:13px;">${session.status}</span>
-            </div>
-            <div style="display:grid; grid-template-columns:1fr auto; gap:12px; margin-top:12px;">
-                <div>
-                    <div style="font-size:13px; color:#666;">Name:</div>
-                    <div style="font-weight:600; color:#222;">${session.studentFullName}</div>
-                    <div style="font-size:13px; color:#666; margin-top:8px;">Assigned Counselor:</div>
-                    <div style="font-weight:600; color:#222;">${counselorName}</div>
-                </div>
-                <div style="text-align:right;">
-                    <div style="font-size:13px; color:#666;">Schedule:</div>
-                    <div style="font-weight:600; color:#222;">${schedule}</div>
-                </div>
-            </div>
-        `;
-        listEl.appendChild(card);
-    });
+    // ... (This function is already correct, no changes needed) ...
+    const listEl = document.getElementById('sessionsList');
+    if (!listEl) return;
+    const filtered = allStudentSessions.filter(s => s.status.toLowerCase() === filterTab.toLowerCase());
+    listEl.innerHTML = '';
+    if (filtered.length === 0) {
+        listEl.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">No sessions found.</p>';
+        return;
+    }
+    filtered.forEach(session => {
+        const card = document.createElement('div');
+        card.style.cssText = 'border: 1px solid #e8e8e8; border-radius: 8px; padding: 14px; background: #fff; cursor: pointer;';
+        const submittedDate = new Date(session.createdAt).toLocaleDateString();
+        const counselorName = session.assignedCounselor ? session.assignedCounselor.name : 'N/A';
+        const schedule = session.scheduledDateTime ? new Date(session.scheduledDateTime).toLocaleString() : 'Not Scheduled';
+        card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <div style="font-weight:700;">Case #${session._id.slice(-6)}</div>
+                    <div style="font-size:12px; color:#999;">Submitted on ${submittedDate}</div>
+                </div>
+                <span style="background:#fff3cd; color:#333; padding:6px 10px; border-radius:14px; font-size:13px;">${session.status}</span>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr auto; gap:12px; margin-top:12px;">
+                <div>
+                    <div style="font-size:13px; color:#666;">Name:</div>
+                    <div style="font-weight:600; color:#222;">${session.studentFullName}</div>
+                    <div style="font-size:13px; color:#666; margin-top:8px;">Assigned Counselor:</div>
+                    <div style="font-weight:600; color:#222;">${counselorName}</div>
+                 </div>
+                 <div style="text-align:right;">
+                    <div style="font-size:13px; color:#666;">Schedule:</div>
+                    <div style="font-weight:600; color:#222;">${schedule}</div>
+                </div>
+            </div>
+        `;
+        listEl.appendChild(card);
+    });
 }
 
 function updateTabCounts() {
-    // ... (This function is already correct, no changes needed) ...
-    const pendingCount = allStudentSessions.filter(s => s.status === 'Pending').length;
-    const scheduledCount = allStudentSessions.filter(s => s.status === 'Scheduled').length;
-    const completedCount = allStudentSessions.filter(s => s.status === 'Completed').length;
-    document.getElementById('countPending').textContent = pendingCount || '';
-    document.getElementById('countScheduled').textContent = scheduledCount || '';
-    document.getElementById('countCompleted').textContent = completedCount || '';
+    // ... (This function is already correct, no changes needed) ...
+    const pendingCount = allStudentSessions.filter(s => s.status === 'Pending').length;
+    const scheduledCount = allStudentSessions.filter(s => s.status === 'Scheduled').length;
+    const completedCount = allStudentSessions.filter(s => s.status === 'Completed').length;
+    document.getElementById('countPending').textContent = pendingCount || '';
+    document.getElementById('countScheduled').textContent = scheduledCount || '';
+    document.getElementById('countCompleted').textContent = completedCount || '';
 }
 
 function switchSessionTab(tabName) {
-    // ... (This function is already correct, no changes needed) ...
-    document.querySelectorAll('#sessionsModal .tab-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('onclick').includes(`'${tabName}'`));
-    });
-    renderSessionsList(tabName);
+    // ... (This function is already correct, no changes needed) ...
+    document.querySelectorAll('#sessionsModal .tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('onclick').includes(`'${tabName}'`));
+    });
+    renderSessionsList(tabName);
 }
 
 // --- 7. MODAL HELPER FUNCTIONS (With new Announcement Modal) ---
 
 function openAnnouncementDetailModal(itemId) {
-    const item = allAnnouncements.find(a => a._id === itemId);
-    if (!item) return;
+    const item = allAnnouncements.find(a => a._id === itemId);
+    if (!item) return;
 
-    const modal = document.getElementById('announcementDetailModal');
-    if (modal) {
-        document.getElementById('announcementDetailTitle').textContent = item.title;
-        document.getElementById('announcementDetailMeta').innerHTML = `
-            <span class="meta-item">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="2" width="12" height="12" rx="1"/><path d="M2 6h12"/></svg>
-                Posted on: ${new Date(item.createdAt).toLocaleDateString()}
-            </span>
-        `;
-        document.getElementById('announcementDetailContent').textContent = item.content;
-        
-        modal.setAttribute('aria-hidden', 'false');
-        modal.classList.add('open');
-        document.addEventListener('keydown', handleModalKeydown);
-        
-        // Mark as read and switch to "All" tab
-        markAnnouncementAsRead(item._id);
-        filterAnnouncements('all');
-    }
+    const modal = document.getElementById('announcementDetailModal');
+    if (modal) {
+        document.getElementById('announcementDetailTitle').textContent = item.title;
+        document.getElementById('announcementDetailMeta').innerHTML = `
+            <span class="meta-item">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="2" width="12" height="12" rx="1"/><path d="M2 6h12"/></svg>
+                Posted on: ${new Date(item.createdAt).toLocaleDateString()}
+            </span>
+        `;
+        document.getElementById('announcementDetailContent').textContent = item.content;
+        
+        modal.setAttribute('aria-hidden', 'false');
+        modal.classList.add('open');
+        document.addEventListener('keydown', handleModalKeydown);
+        
+        // Mark as read and switch to "All" tab
+        markAnnouncementAsRead(item._id);
+        filterAnnouncements('all');
+    }
 }
 function closeAnnouncementDetailModal() {
-    const modal = document.getElementById('announcementDetailModal');
-    if (modal) {
-        modal.setAttribute('aria-hidden', 'true');
-        modal.classList.remove('open');
-        document.removeEventListener('keydown', handleModalKeydown);
-    }
+    const modal = document.getElementById('announcementDetailModal');
+    if (modal) {
+        modal.setAttribute('aria-hidden', 'true');
+        modal.classList.remove('open');
+        document.removeEventListener('keydown', handleModalKeydown);
+    }
 }
 
 function openLearnMoreModal() {
-    // ... (This function is already correct, no changes needed) ...
-    const modal = document.getElementById('learnMoreModal');
-    if (modal) {
-        modal.setAttribute('aria-hidden', 'false');
-        modal.classList.add('open');
-        document.addEventListener('keydown', handleModalKeydown);
-    }
+    // ... (This function is already correct, no changes needed) ...
+    const modal = document.getElementById('learnMoreModal');
+    if (modal) {
+        modal.setAttribute('aria-hidden', 'false');
+        modal.classList.add('open');
+        document.addEventListener('keydown', handleModalKeydown);
+    }
 }
 function closeLearnMoreModal() {
-    // ... (This function is already correct, no changes needed) ...
-    const modal = document.getElementById('learnMoreModal');
-    if (modal) {
-        modal.setAttribute('aria-hidden', 'true');
-        modal.classList.remove('open');
-        document.removeEventListener('keydown', handleModalKeydown);
-    }
+    // ... (This function is already correct, no changes needed) ...
+    const modal = document.getElementById('learnMoreModal');
+    if (modal) {
+        modal.setAttribute('aria-hidden', 'true');
+        modal.classList.remove('open');
+        document.removeEventListener('keydown', handleModalKeydown);
+    }
 }
 function openRequestFormModal() {
-    // ... (This function is already correct, no changes needed) ...
-    const modal = document.getElementById('requestFormModal');
-    if (modal) {
-        modal.setAttribute('aria-hidden', 'false');
-        modal.classList.add('open');
-        document.addEventListener('keydown', handleModalKeydown);
-    }
+    // ... (This function is already correct, no changes needed) ...
+    const modal = document.getElementById('requestFormModal');
+    if (modal) {
+        modal.setAttribute('aria-hidden', 'false');
+        modal.classList.add('open');
+        document.addEventListener('keydown', handleModalKeydown);
+    }
 }
 function closeRequestFormModal() {
-    // ... (This function is already correct, no changes needed) ...
-    const modal = document.getElementById('requestFormModal');
-    if (modal) {
-        modal.setAttribute('aria-hidden', 'true');
-        modal.classList.remove('open');
-        document.removeEventListener('keydown', handleModalKeydown);
-    }
+    // ... (This function is already correct, no changes needed) ...
+    const modal = document.getElementById('requestFormModal');
+    if (modal) {
+        modal.setAttribute('aria-hidden', 'true');
+           modal.classList.remove('open');
+        document.removeEventListener('keydown', handleModalKeydown);
+
+        // --- NEW: Reset the event context when closing ---
+        document.getElementById('eventRequestContext').style.display = 'none';
+        document.getElementById('eventRequestTitle').textContent = '';
+        document.getElementById('relatedAnnouncementId').value = '';
+        // --- END OF NEW CODE ---
+    }
 }
 function openSessionsModal() {
-    // ... (This function is already correct, no changes needed) ...
-    const modal = document.getElementById('sessionsModal');
-    if (modal) {
-        modal.setAttribute('aria-hidden', 'false');
-        modal.classList.add('open');
-        document.addEventListener('keydown', handleModalKeydown);
-        fetchAndRenderSessions(); 
-    }
+    // ... (This function is already correct, no changes needed) ...
+    const modal = document.getElementById('sessionsModal');
+    if (modal) {
+        modal.setAttribute('aria-hidden', 'false');
+        modal.classList.add('open');
+        document.addEventListener('keydown', handleModalKeydown);
+        fetchAndRenderSessions(); 
+    }
 }
 function closeSessionsModal() {
-    // ... (This function is already correct, no changes needed) ...
-    const modal = document.getElementById('sessionsModal');
-    if (modal) {
-        modal.setAttribute('aria-hidden', 'true');
-        modal.classList.remove('open');
-        document.removeEventListener('keydown', handleModalKeydown);
-    }
+    // ... (This function is already correct, no changes needed) ...
+    const modal = document.getElementById('sessionsModal');
+    if (modal) {
+        modal.setAttribute('aria-hidden', 'true');
+        modal.classList.remove('open');
+        document.removeEventListener('keydown', handleModalKeydown);
+    }
 }
 function openFAQsModal() {
-    // ... (This function is already correct, no changes needed) ...
-    const modal = document.getElementById('faqsModal');
-    if (modal) {
-        modal.setAttribute('aria-hidden', 'false');
-        modal.classList.add('open');
-        document.addEventListener('keydown', handleModalKeydown);
-        fetchAndRenderFAQs(); 
-    }
+    // ... (This function is already correct, no changes needed) ...
+    const modal = document.getElementById('faqsModal');
+    if (modal) {
+        modal.setAttribute('aria-hidden', 'false');
+        modal.classList.add('open');
+        document.addEventListener('keydown', handleModalKeydown);
+        fetchAndRenderFAQs(); 
+    }
 }
 function closeFAQsModal() {
-    // ... (This function is already correct, no changes needed) ...
-    const modal = document.getElementById('faqsModal');
-    if (modal) {
-        modal.setAttribute('aria-hidden', 'true');
-        modal.classList.remove('open');
-        document.removeEventListener('keydown', handleModalKeydown);
-    }
+    // ... (This function is already correct, no changes needed) ...
+    const modal = document.getElementById('faqsModal');
+    if (modal) {
+        modal.setAttribute('aria-hidden', 'true');
+        modal.classList.remove('open');
+        document.removeEventListener('keydown', handleModalKeydown);
+    }
 }
 
 // This is the global modal closer (now includes new modal)
 function handleModalKeydown(e) {
     if (e.key === 'Escape' || e.key === 'Esc') {
         closeLearnMoreModal();
-        closeRequestFormModal();
-        closeSessionsModal();
-        closeFAQsModal();
-        closeAnnouncementDetailModal(); // <-- ADD THIS
-    }
+        closeRequestFormModal();
+        closeSessionsModal();
+        closeFAQsModal();
+        closeAnnouncementDetailModal(); // <-- ADD THIS
+ind   }
 }
 
+
+// --- 8. (NEW CODE) ATTACH EVENT LISTENERS ---
+// We need to wait for the page to be fully loaded before attaching listeners
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // Attach listener for the Request Form
+    const requestForm = document.getElementById('requestForm');
+    if (requestForm) {
+        requestForm.addEventListener('submit', handleRequestFormSubmit);
+    }
+
+    // Call the function to load announcements as soon as the page loads
+    // This makes sure they appear right away.
+    fetchAndRenderAnnouncements();
+});
 /* ============================================
    EVENT PAGE FUNCTIONS (DYNAMIC VERSION)
    ============================================ */

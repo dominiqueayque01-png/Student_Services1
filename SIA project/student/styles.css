@@ -424,6 +424,24 @@ body {
     box-shadow: 0 4px 12px rgba(44, 62, 127, 0.2);
 }
 
+/* === ADD THIS NEW BUTTON STYLE === */
+.request-event-btn {
+    background-color: #e0e6f3;
+    color: #2c3e7f;
+    border: 1px solid #c8d3ec;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-top: 10px;
+}
+.request-event-btn:hover {
+    background-color: #c8d3ec;
+}
+/* === END OF NEW STYLE === */
+
 /* Content Grid */
 .content-grid {
     display: grid;

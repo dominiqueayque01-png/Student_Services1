@@ -40,7 +40,7 @@ const clubRoutes = require('./routes/club.routes.js');
 const eventRoutes = require('./routes/event.routes.js');
 const ojtRoutes = require('./routes/ojt.routes.js');
 const counselingRoutes = require('./routes/counseling.routes.js');
-const adminCounselingRoutes = require('./routes/adminCounseling.routes.js');
+const adminCounselingRoutes = require('./routes/adminCounseling.routes');
 const clubApplicationRoutes = require('./routes/clubApplication.routes.js'); 
 const eventRegistrationRoutes = require('./routes/eventRegistration.routes.js'); 
 const announcementRoutes = require('./routes/announcement.routes.js'); 
@@ -62,11 +62,19 @@ app.use('/api/faqs', faqRoutes);
 
 
 
+
+
 // --- 6. START THE SERVER ---
 // We choose a port for our server to run on
 const PORT = 3001; // 3000 is common, but React often uses it. 3001 is a safe choice.
 
 app.listen(PORT, () => {
-  // This message will print when the server starts successfully
-  console.log(`Backend server is running on http://localhost:${PORT}`);
+    console.log(`Backend server is running on http://localhost:${PORT}`);
+    console.log('---');
+    console.log('Available routes:');
+    console.log(`  [GET] http://localhost:${PORT}/api/announcements`);
+    console.log(`  [GET] http://localhost:${PORT}/api/faqs`);
+    console.log(`  [POST] http://localhost:${PORT}/api/admin/counseling/appointments`);
+    console.log(`  [GET] http://localhost:${PORT}/api/counseling/my-appointments/:studentId`);
+    console.log('---');
 });
