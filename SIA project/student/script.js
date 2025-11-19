@@ -101,8 +101,7 @@ function markAllAsRead(event) {
 }
 
 // --- 2. DYNAMIC ANNOUNCEMENTS (FIXED) ---
-async function fetchAndRenderAnnouncements() {
-    // ... (keep existing setup code) ...
+    async function fetchAndRenderAnnouncements() {
     const listEl = document.getElementById('announcementsList');
     const noAnnouncementsMessageEl = document.getElementById('noAnnouncementsMessage'); 
     const readIds = getReadAnnouncements();
@@ -122,30 +121,13 @@ async function fetchAndRenderAnnouncements() {
 
         allAnnouncements.forEach(item => {
             const isRead = readIds.includes(item._id);
-            
-            // === NEW LOGIC: CHECK IF ALREADY REQUESTED ===
-            // We look for a session where the relatedAnnouncement ID matches this item._id
-            const alreadyRequested = allStudentSessions.some(session => 
-                session.relatedAnnouncement === item._id || 
-                (session.relatedAnnouncement && session.relatedAnnouncement._id === item._id)
-            );
-
+                
             const announcementItem = document.createElement('div');
             announcementItem.className = 'announcement-item';
             announcementItem.setAttribute('data-id', item._id);
             announcementItem.setAttribute('data-read', isRead);
             
-            // Determine which button to show
-            let buttonHtml = '';
-            if (alreadyRequested) {
-                buttonHtml = `<div class="btn-already-requested">Already Requested</div>`;
-            } else {
-                buttonHtml = `
-                    <button class="request-event-btn" data-id="${item._id}" data-title="${item.title}">
-                        Sign Up for this Event
-                    </button>`;
-            }
-
+            // NO BUTTONS. Just Title, Date, and Content.
             announcementItem.innerHTML = `
                 <h3 class="announcement-title">${item.title}</h3>
                 <div class="announcement-meta">
@@ -155,39 +137,23 @@ async function fetchAndRenderAnnouncements() {
                     </span>
                 </div>
                 <p class="announcement-description">${item.content}</p>
-                
-                ${buttonHtml}
-            `;
+                        `;
             
-            // Add click listener for Modal (Details)
-            announcementItem.addEventListener('click', (e) => {
-                // Don't open details if clicking the signup button
-                if (e.target.classList.contains('request-event-btn')) {
-                    e.stopPropagation();
-                    return;
-                }
+            // Click to open the "Read More" modal (View Only)
+            announcementItem.addEventListener('click', () => {
                 openAnnouncementDetailModal(item._id);
             });
             
             listEl.appendChild(announcementItem);
-
-            // Add click listener for Sign Up Button (Only if it exists)
-            const requestBtn = announcementItem.querySelector('.request-event-btn');
-            if (requestBtn) {
-                requestBtn.addEventListener('click', () => {
-                    document.getElementById('relatedAnnouncementId').value = item._id;
-                    document.getElementById('eventRequestTitle').textContent = item.title;
-                    document.getElementById('eventRequestContext').style.display = 'block';
-                    openRequestFormModal();
-                });
-            }
-        });
+            });
         
         updateUnreadCount();
         filterAnnouncements('unread');
 
     } catch (error) {
         console.error('Error fetching announcements:', error);
+        noAnnouncementsMessageEl.textContent = 'Could not load announcements.';
+        noAnnouncementsMessageEl.style.display = 'block';
     }
 }
 
@@ -248,103 +214,76 @@ function updateUnreadCount() {
 }
 
 // --- 4. DYNAMIC FAQs ---
-async function fetchAndRenderFAQs() {
-    // ... (This function is already correct, no changes needed) ...
-    const listEl = document.getElementById('faqsList');
-    if (!listEl) return;
-    try {
-        const response = await fetch('http://localhost:3001/api/faqs');
-        const faqs = await response.json();
-        listEl.innerHTML = ''; 
-        faqs.forEach((item, idx) => {
-         const wrapper = document.createElement('div');
-            wrapper.style.cssText = 'background:#fff; border:1px solid #e8e8e8; border-radius:8px; padding:10px;';
-            const qBtn = document.createElement('button');
-            qBtn.style.cssText = 'display:flex; justify-content:space-between; align-items:center; width:100%; border:0; background:transparent; cursor:pointer; text-align:left; padding:6px 0;';
-            const qText = document.createElement('span');
-            qText.style.cssText = 'font-weight:600; color:#2c3e7f;';
-            qText.textContent = item.question;
-            const icon = document.createElement('span');
-            icon.style.cssText = 'font-size:18px; color:#666; font-weight:600;';
-            icon.textContent = '+';
-            qBtn.appendChild(qText);
-            qBtn.appendChild(icon);
-            const answer = document.createElement('div');
-            answer.style.cssText = 'display:none; margin-top:8px; color:#444; line-height:1.5; font-size:13px;';
-            answer.textContent = item.answer;
-            qBtn.addEventListener('click', function (e) {
-                e.preventDefault();
-                const expanded = answer.style.display === 'block';
-                if (!expanded) {
-                    answer.style.display = 'block';
-                    icon.textContent = '-';
-                } else {
-                    answer.style.display = 'none';
-                    icon.textContent = '+';
-                }
-            });
-            wrapper.appendChild(qBtn);
-            wrapper.appendChild(answer);
-            listEl.appendChild(wrapper);
-        });
-    } catch (error) {
-        console.error('Error fetching FAQs:', error);
-        listEl.innerHTML = '<p>Could not load FAQs.</p>';
-    }
-}
-
-// --- 5. DYNAMIC REQUEST FORM ---
 async function handleRequestFormSubmit(e) {
-    // ... (This function is already correct, no changes needed) ...
-    e.preventDefault();
-    const form = e.target;
-    if (!form.checkValidity()) { form.reportValidity(); return; }
-    const formData = new FormData(form);
-    const payload = {
-        studentId: formData.get('studentId'),
-        studentFullName: formData.get('fullName'),
-        studentPhone: formData.get('phone'),
-        studentEmail: formData.get('email'),
-        referenceContact: {
-            name: formData.get('refName'),
-            relationship: formData.get('relationship'),
-            phone: formData.get('refPhone'),
-            email: formData.get('refEmail')
-        },
-        // --- NEW: Get the announcement ID from the hidden field ---
-        relatedAnnouncementId: formData.get('relatedAnnouncementId') || null
-    };
-    try {
-        const response = await fetch('http://localhost:3001/api/admin/counseling/appointments', {
-           method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        if (!response.ok) throw new Error('Server error');
-        alert('Request submitted successfully!');
-        
-        // --- NEW DYNAMIC CODE ---
-        // Save the student ID to the browser's memory
+    if (e && e.preventDefault) e.preventDefault(); 
+    console.log("Checkpoint 1: Function started");
+
+    const form = document.getElementById('requestForm');
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+    
+    const formData = new FormData(form);
+    const payload = {
+        studentId: formData.get('studentId'),
+        studentFullName: formData.get('fullName'),
+        studentPhone: formData.get('phone'),
+        studentEmail: formData.get('email'),
+        referenceContact: {
+            name: formData.get('refName'),
+            relationship: formData.get('relationship'),
+            phone: formData.get('refPhone'),
+            email: formData.get('refEmail')
+        }
+    };
+
+    try {
+        console.log("Checkpoint 2: Sending to backend...");
+        const response = await fetch('http://localhost:3001/api/admin/counseling/appointments', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        console.log("Checkpoint 3: Response received", response);
+
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
+        }
+
+        // Try to parse JSON (This sometimes causes crashes if server returns text)
+        const data = await response.json(); 
+        console.log("Checkpoint 4: Data parsed", data);
+
+        // Save ID
         localStorage.setItem('currentStudentId', payload.studentId);
-        // --- END OF NEW CODE ---
 
-        form.reset();
-        closeRequestFormModal();
-        fetchAndRenderSessions(); 
+        // Close modal
+        form.reset();
+        // Check if this function exists before calling
+        if (typeof closeRequestFormModal === 'function') {
+            closeRequestFormModal();
+        } else {
+            console.warn("closeRequestFormModal function is missing!");
+        }
 
-// === ADD THESE TWO LINES ===
-        // 1. Update the sessions list (so the variable has the new request)
-        await fetchAndRenderSessions(); 
-        // 2. Re-render announcements (so the button updates to "Already Requested")
-        fetchAndRenderAnnouncements();
-        // ===========================
-        
-    } catch (error) {
-        console.error('Error submitting request:', error);
-        alert('There was a problem submitting your request.');
-    }
-}
+        // SUCCESS ALERT
+        alert('Request submitted successfully!');
+        console.log("Checkpoint 5: Success Alert shown");
 
+        // --- DANGEROUS PART (UI REFRESH) ---
+        // We will comment this out for ONE TEST to see if the error stops.
+        /* try {
+            await fetchAndRenderSessions();
+        } catch (innerErr) {
+            console.warn("List refresh failed", innerErr);
+        }
+        */
+       // ------------------------------------
+
+    } catch (error) {
+        console.error("CRASH REPORT:", error); // This will show us the real error
+        alert('There was a problem submitting your request.\nCheck Console for details.');
+    }
+    }
 // --- 6. DYNAMIC "MY SESSIONS" LIST ---
 async function fetchAndRenderSessions() {
     // ... (This function is already correct, no changes needed) ...
@@ -566,11 +505,7 @@ function closeRequestFormModal() {
            modal.classList.remove('open');
         document.removeEventListener('keydown', handleModalKeydown);
 
-        // --- NEW: Reset the event context when closing ---
-        document.getElementById('eventRequestContext').style.display = 'none';
-        document.getElementById('eventRequestTitle').textContent = '';
-        document.getElementById('relatedAnnouncementId').value = '';
-        // --- END OF NEW CODE ---
+
     }
 }
 function openSessionsModal() {

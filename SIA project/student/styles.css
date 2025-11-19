@@ -527,6 +527,26 @@ body {
     text-decoration: underline;
 }
 
+/* Makes the ID go Left and the Badge go Right */
+.session-header {
+    display: flex;
+    justify-content: space-between; /* <--- This pushes them apart */
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+/* Makes the Badge look like a pill (Colored background) */
+.status-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 12px;
+}
+
+/* Ensure these colors are present */
+.badge-pending { background-color: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
+.badge-scheduled { background-color: #eff6ff; color: #1d4ed8; border: 1px solid #dbeafe; }
+.badge-completed { background-color: #ecfdf5; color: #047857; border: 1px solid #d1fae5; }
 
 
 /* ============================================
