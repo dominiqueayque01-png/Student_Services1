@@ -102,90 +102,93 @@ function markAllAsRead(event) {
 
 // --- 2. DYNAMIC ANNOUNCEMENTS (FIXED) ---
 async function fetchAndRenderAnnouncements() {
-    const listEl = document.getElementById('announcementsList');
-    if (!listEl) return;
-    
-    // Get the dedicated message element
+    // ... (keep existing setup code) ...
+    const listEl = document.getElementById('announcementsList');
     const noAnnouncementsMessageEl = document.getElementById('noAnnouncementsMessage'); 
-    const readIds = getReadAnnouncements();
+    const readIds = getReadAnnouncements();
 
-    try {
-        const response = await fetch('http://localhost:3001/api/announcements');
-        allAnnouncements = await response.json(); // Save to global variable
+    try {
+        const response = await fetch('http://localhost:3001/api/announcements');
+        allAnnouncements = await response.json();
 
-        listEl.innerHTML = ''; // Clear the list
-        noAnnouncementsMessageEl.style.display = 'none'; // Hide the message
+        listEl.innerHTML = '';
+        noAnnouncementsMessageEl.style.display = 'none';
 
-        if (allAnnouncements.length === 0) {
-            // Use the dedicated message element instead of replacing list HTML
-            noAnnouncementsMessageEl.textContent = 'No announcements at this time.';
+        if (allAnnouncements.length === 0) {
+            noAnnouncementsMessageEl.textContent = 'No announcements at this time.';
             noAnnouncementsMessageEl.style.display = 'block';
-            return; // Stop here
-        }
+            return;
+        }
 
-        allAnnouncements.forEach(item => {
-            const isRead = readIds.includes(item._id);
-            const announcementItem = document.createElement('div');
-            announcementItem.className = 'announcement-item';
-            announcementItem.setAttribute('data-id', item._id);
-            announcementItem.setAttribute('data-read', isRead);
-            
-            announcementItem.innerHTML = `
-                <h3 class="announcement-title">${item.title}</h3>
-                <div class="announcement-meta">
-                    <span class="meta-item" style="line-height: 1.4;">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="2" width="12" height="12" rx="1"/><path d="M2 6h12"/></svg>
-                        Posted on: ${new Date(item.createdAt).toLocaleDateString()}
-                    </span>
-                </div>
-                <p class="announcement-description">${item.content.substring(0, 100)}...</p>
+        allAnnouncements.forEach(item => {
+            const isRead = readIds.includes(item._id);
+            
+            // === NEW LOGIC: CHECK IF ALREADY REQUESTED ===
+            // We look for a session where the relatedAnnouncement ID matches this item._id
+            const alreadyRequested = allStudentSessions.some(session => 
+                session.relatedAnnouncement === item._id || 
+                (session.relatedAnnouncement && session.relatedAnnouncement._id === item._id)
+            );
 
-                <!-- === ADD THIS NEW BUTTON === -->
-                <button class="request-event-btn" data-id="${item._id}" data-title="${item.title}">
-                    Sign Up for this Event
-                </button>
-                <!-- === END OF NEW BUTTON === -->
-            `;
-            
-           // Add click listener to open the modal
-            announcementItem.addEventListener('click', (e) => {
-                // --- NEW LOGIC: Stop click if it's on the button ---
+            const announcementItem = document.createElement('div');
+            announcementItem.className = 'announcement-item';
+            announcementItem.setAttribute('data-id', item._id);
+            announcementItem.setAttribute('data-read', isRead);
+            
+            // Determine which button to show
+            let buttonHtml = '';
+            if (alreadyRequested) {
+                buttonHtml = `<div class="btn-already-requested">Already Requested</div>`;
+            } else {
+                buttonHtml = `
+                    <button class="request-event-btn" data-id="${item._id}" data-title="${item.title}">
+                        Sign Up for this Event
+                    </button>`;
+            }
+
+            announcementItem.innerHTML = `
+                <h3 class="announcement-title">${item.title}</h3>
+                <div class="announcement-meta">
+                    <span class="meta-item">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="2" width="12" height="12" rx="1"/><path d="M2 6h12"/></svg>
+                        Posted on: ${new Date(item.createdAt).toLocaleDateString()}
+                    </span>
+                </div>
+                <p class="announcement-description">${item.content}</p>
+                
+                ${buttonHtml}
+            `;
+            
+            // Add click listener for Modal (Details)
+            announcementItem.addEventListener('click', (e) => {
+                // Don't open details if clicking the signup button
                 if (e.target.classList.contains('request-event-btn')) {
-                    e.stopPropagation(); // Stop the event from bubbling up
+                    e.stopPropagation();
                     return;
                 }
-                // --- END OF NEW LOGIC ---
                 openAnnouncementDetailModal(item._id);
             });
-            
-            listEl.appendChild(announcementItem);
+            
+            listEl.appendChild(announcementItem);
 
-            // --- NEW: Add click listener for the new button ---
+            // Add click listener for Sign Up Button (Only if it exists)
             const requestBtn = announcementItem.querySelector('.request-event-btn');
             if (requestBtn) {
                 requestBtn.addEventListener('click', () => {
-                    // 1. Pre-fill the form with event details
                     document.getElementById('relatedAnnouncementId').value = item._id;
                     document.getElementById('eventRequestTitle').textContent = item.title;
                     document.getElementById('eventRequestContext').style.display = 'block';
-
-                    // 2. Open the request form modal
                     openRequestFormModal();
                 });
             }
-            // --- END OF NEW LISTENER ---
-        });
-        
-        updateUnreadCount();
-        filterAnnouncements('unread'); // Start on the "Unread" tab
+        });
+        
+        updateUnreadCount();
+        filterAnnouncements('unread');
 
-    } catch (error) {
-        console.error('Error fetching announcements:', error);
-        listEl.innerHTML = ''; // Clear loading message
-        // Use the dedicated message element for errors
-        noAnnouncementsMessageEl.textContent = 'Could not load announcements.';
-        noAnnouncementsMessageEl.style.display = 'block';
-    }
+    } catch (error) {
+        console.error('Error fetching announcements:', error);
+    }
 }
 
 // --- 3. FILTER & COUNT FUNCTIONS (FIXED) ---
@@ -328,6 +331,14 @@ async function handleRequestFormSubmit(e) {
         form.reset();
         closeRequestFormModal();
         fetchAndRenderSessions(); 
+
+// === ADD THESE TWO LINES ===
+        // 1. Update the sessions list (so the variable has the new request)
+        await fetchAndRenderSessions(); 
+        // 2. Re-render announcements (so the button updates to "Already Requested")
+        fetchAndRenderAnnouncements();
+        // ===========================
+        
     } catch (error) {
         console.error('Error submitting request:', error);
         alert('There was a problem submitting your request.');
@@ -368,44 +379,103 @@ async function fetchAndRenderSessions() {
 }
 
 function renderSessionsList(filterTab = 'pending') {
-    // ... (This function is already correct, no changes needed) ...
-    const listEl = document.getElementById('sessionsList');
-    if (!listEl) return;
-    const filtered = allStudentSessions.filter(s => s.status.toLowerCase() === filterTab.toLowerCase());
-    listEl.innerHTML = '';
-    if (filtered.length === 0) {
-        listEl.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">No sessions found.</p>';
-        return;
-    }
-    filtered.forEach(session => {
-        const card = document.createElement('div');
-        card.style.cssText = 'border: 1px solid #e8e8e8; border-radius: 8px; padding: 14px; background: #fff; cursor: pointer;';
-        const submittedDate = new Date(session.createdAt).toLocaleDateString();
-        const counselorName = session.assignedCounselor ? session.assignedCounselor.name : 'N/A';
-        const schedule = session.scheduledDateTime ? new Date(session.scheduledDateTime).toLocaleString() : 'Not Scheduled';
-        card.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                    <div style="font-weight:700;">Case #${session._id.slice(-6)}</div>
-                    <div style="font-size:12px; color:#999;">Submitted on ${submittedDate}</div>
-                </div>
-                <span style="background:#fff3cd; color:#333; padding:6px 10px; border-radius:14px; font-size:13px;">${session.status}</span>
-            </div>
-            <div style="display:grid; grid-template-columns:1fr auto; gap:12px; margin-top:12px;">
-                <div>
-                    <div style="font-size:13px; color:#666;">Name:</div>
-                    <div style="font-weight:600; color:#222;">${session.studentFullName}</div>
-                    <div style="font-size:13px; color:#666; margin-top:8px;">Assigned Counselor:</div>
-                    <div style="font-weight:600; color:#222;">${counselorName}</div>
-                 </div>
-                 <div style="text-align:right;">
-                    <div style="font-size:13px; color:#666;">Schedule:</div>
-                    <div style="font-weight:600; color:#222;">${schedule}</div>
-                </div>
-            </div>
-        `;
-        listEl.appendChild(card);
-    });
+    const listEl = document.getElementById('sessionsList');
+    if (!listEl) return;
+
+    const filtered = allStudentSessions.filter(s => s.status.toLowerCase() === filterTab.toLowerCase());
+    
+    listEl.innerHTML = '';
+
+    if (filtered.length === 0) {
+        listEl.innerHTML = '<p style="padding: 20px; text-align: center; color: #666; font-size: 13px;">No sessions found in this category.</p>';
+        return;
+    }
+
+    filtered.forEach(session => {
+        const card = document.createElement('div');
+        const statusClass = `status-${session.status.toLowerCase()}`; 
+        const badgeClass = `badge-${session.status.toLowerCase()}`;
+        
+        card.className = `session-card ${statusClass}`;
+        
+        const submittedDate = new Date(session.createdAt).toLocaleDateString();
+        const counselorName = session.assignedCounselor ? session.assignedCounselor.name : 'Waiting for assignment...';
+        
+        let scheduleDisplay = 'Not Scheduled';
+        if (session.scheduledDateTime) {
+            const dateObj = new Date(session.scheduledDateTime);
+            scheduleDisplay = `${dateObj.toLocaleDateString()} • ${dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+        }
+
+        // === LOGIC FOR CANCEL BUTTON ===
+        // Only show button if status is 'Pending'
+        let actionButtons = '';
+        if (session.status === 'Pending') {
+            actionButtons = `
+                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed #e2e8f0; text-align: right;">
+                    <button class="btn-cancel-request" onclick="cancelSession(event, '${session._id}')">
+                        Cancel Request
+                    </button>
+                </div>
+            `;
+        }
+
+        card.innerHTML = `
+            <div class="session-header">
+                <span class="session-id">Case #${session._id.slice(-6).toUpperCase()}</span>
+                <span class="status-badge ${badgeClass}">${session.status}</span>
+            </div>
+            <div class="session-date">Requested on: ${submittedDate}</div>
+
+            <div class="session-details-grid">
+                <div class="detail-item">
+                    <span class="detail-label">Student Name</span>
+                    <span class="detail-value">${session.studentFullName}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Counselor</span>
+                    <span class="detail-value">${counselorName}</span>
+                </div>
+                <div class="detail-item" style="grid-column: 1 / -1; margin-top: 6px;">
+                    <span class="detail-label">Schedule</span>
+                    <span class="detail-value" style="color: #2c3e7f;">${scheduleDisplay}</span>
+                </div>
+            </div>
+            
+            ${actionButtons} `;
+
+        // Click card to open details (optional, currently just logs)
+        card.addEventListener('click', (e) => {
+            // Prevent card click if we clicked the button
+            if(e.target.tagName === 'BUTTON') return;
+            console.log("Clicked session:", session._id);
+        });
+        
+        listEl.appendChild(card);
+    });
+}
+
+// === ADD THIS NEW FUNCTION TO HANDLE THE CLICK ===
+async function cancelSession(event, sessionId) {
+    event.stopPropagation(); // Stop the card from opening details
+    
+    if (!confirm("Are you sure you want to cancel this request?")) return;
+
+    try {
+        const response = await fetch(`http://localhost:3001/api/counseling/cancel/${sessionId}`, {
+            method: 'PATCH' // We use PATCH because we are updating part of the record
+        });
+
+        if (response.ok) {
+            alert("Request cancelled successfully.");
+            fetchAndRenderSessions(); // Refresh the list to see the change
+        } else {
+            alert("Failed to cancel request.");
+        }
+    } catch (error) {
+        console.error("Error cancelling:", error);
+        alert("An error occurred.");
+    }
 }
 
 function updateTabCounts() {
@@ -556,16 +626,32 @@ ind   }
 
 // --- 8. (NEW CODE) ATTACH EVENT LISTENERS ---
 // We need to wait for the page to be fully loaded before attaching listeners
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     
-    // Attach listener for the Request Form
+    // 1. Attach listener for the Request Form
     const requestForm = document.getElementById('requestForm');
     if (requestForm) {
+        // Use the manual submission wrapper we made earlier, 
+        // or the direct handler if you fixed the 'novalidate' issue.
         requestForm.addEventListener('submit', handleRequestFormSubmit);
     }
 
-    // Call the function to load announcements as soon as the page loads
-    // This makes sure they appear right away.
+    // 2. Check if we have a student ID saved
+    const studentId = localStorage.getItem('currentStudentId');
+
+    // 3. IF we have a student ID, fetch their sessions silently FIRST
+    if (studentId) {
+        try {
+            console.log("Fetching sessions for checking...");
+            const response = await fetch(`http://localhost:3001/api/counseling/my-appointments/${studentId}`);
+            allStudentSessions = await response.json();
+            updateTabCounts(); // Update the badges while we're at it
+        } catch (error) {
+            console.error("Silent session fetch failed", error);
+        }
+    }
+
+    // 4. NOW fetch and render announcements (knowing which ones are requested)
     fetchAndRenderAnnouncements();
 });
 /* ============================================

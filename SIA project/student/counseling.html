@@ -314,41 +314,41 @@
         <div class="modal-overlay" onclick="closeSessionsModal()"></div>
         <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="sessionsTitle">
             <button class="modal-close" aria-label="Close" onclick="closeSessionsModal()">×</button>
-            <div class="modal-body">
-                <h2 id="sessionsTitle">My Sessions</h2>
-                <p class="muted">Monitor and manage ongoing counseling cases and scheduled follow-up sessions.</p>
+<div class="modal-body">
+    <h2 id="sessionsTitle">My Sessions</h2>
+    <p class="muted">Monitor and manage ongoing counseling cases and scheduled follow-up sessions.</p>
 
-                <div style="display:flex;gap:8px;margin-top:12px;border-radius:8px;overflow:hidden;background:#f2f4f7;padding:6px;">
-                    <button id="tabPending" class="tab-btn active" type="button" onclick="switchSessionTab('pending')" style="background:none;border:0;padding:8px 12px;">Pending <span id="countPending" style="background:#fff;border-radius:6px;padding:2px 8px;margin-left:8px;font-size:12px;color:#2c3e7f;"></span></button>
-                    <button id="tabScheduled" class="tab-btn" type="button" onclick="switchSessionTab('scheduled')" style="background:none;border:0;padding:8px 12px;">Scheduled <span id="countScheduled" style="background:#fff;border-radius:6px;padding:2px 8px;margin-left:8px;font-size:12px;color:#2c3e7f;"></span></button>
-                    <button id="tabCompleted" class="tab-btn" type="button" onclick="switchSessionTab('completed')" style="background:none;border:0;padding:8px 12px;">Completed <span id="countCompleted" style="background:#fff;border-radius:6px;padding:2px 8px;margin-left:8px;font-size:12px;color:#2c3e7f;"></span></button>
-                </div>
+    <div class="sessions-tabs">
+        <button id="tabPending" class="tab-btn active" type="button" onclick="switchSessionTab('pending')">
+            Pending <span id="countPending" class="tab-badge">0</span>
+        </button>
+        <button id="tabScheduled" class="tab-btn" type="button" onclick="switchSessionTab('scheduled')">
+            Scheduled <span id="countScheduled" class="tab-badge">0</span>
+        </button>
+        <button id="tabCompleted" class="tab-btn" type="button" onclick="switchSessionTab('completed')">
+            Completed <span id="countCompleted" class="tab-badge">0</span>
+        </button>
+    </div>
 
-                <div style="margin-top:16px;">
-                    <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
-                        <input type="search" id="sessionsSearch" placeholder="Search for a request.." style="flex:1;padding:8px;border:1px solid #e8e8e8;border-radius:6px;">
-                        <button id="sessionsFilter" style="background:#fff;border:1px solid #e8e8e8;padding:8px 10px;border-radius:6px;">Filter</button>
-                    </div>
+    <div class="sessions-toolbar">
+        <input type="search" id="sessionsSearch" class="search-input" placeholder="Search for a request...">
+        <button id="sessionsFilter" class="filter-icon-btn">Filter</button>
+    </div>
 
-                    <!-- List container -->
-                    <div id="sessionsListContainer">
-                        <div id="sessionsList" style="display:flex;flex-direction:column;gap:12px;max-height:60vh;overflow:auto;">
-                            <!-- Session items will be rendered here -->
-                        </div>
-                    </div>
-
-                    <!-- Details container (hidden by default) -->
-                    <div id="sessionDetailsContainer" style="display:none;max-height:70vh;overflow:auto;padding-top:6px;">
-                        <!-- Details will be rendered here by JS -->
-                        <div id="sessionDetails" style="background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:18px;">
-                        </div>
-                        <div style="display:flex;justify-content:flex-end;margin-top:12px;">
-                            <button type="button" onclick="backToSessionsList()" style="background:#fff;color:#333;border:1px solid #e8e8e8;padding:8px 12px;border-radius:6px;margin-right:8px;">Back</button>
-                            <button id="detailsCancelBtn" type="button" style="background:#2c3e7f;color:#fff;padding:8px 12px;border-radius:6px;border:0;">Cancel</button>
-                        </div>
-                    </div>
-                </div>
+    <div id="sessionsListContainer">
+        <div id="sessionsList" class="sessions-grid">
             </div>
+    </div>
+
+    <div id="sessionDetailsContainer" class="session-details-view" style="display:none;">
+        <div id="sessionDetails" class="details-card">
+            </div>
+        <div class="details-actions">
+            <button type="button" onclick="backToSessionsList()" class="btn-secondary">Back</button>
+            <button id="detailsCancelBtn" type="button" class="btn-primary">Cancel Request</button>
+        </div>
+    </div>
+</div>
         </div>
     </div>
 
