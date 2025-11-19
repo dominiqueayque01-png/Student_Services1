@@ -227,11 +227,14 @@ async function handleRequestFormSubmit(e) {
         studentFullName: formData.get('fullName'),
         studentPhone: formData.get('phone'),
         studentEmail: formData.get('email'),
+        preferredMode: formData.get('preferredMode'),
         referenceContact: {
             name: formData.get('refName'),
             relationship: formData.get('relationship'),
             phone: formData.get('refPhone'),
             email: formData.get('refEmail')
+
+            
         }
     };
 
@@ -346,6 +349,24 @@ function renderSessionsList(filterTab = 'pending') {
             scheduleDisplay = `${dateObj.toLocaleDateString()} • ${dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
         }
 
+        let modeBadge = '';
+                if (session.preferredMode === 'Virtual') {
+                    modeBadge = `<span style="font-size:10px; background:#e0f2fe; color:#0284c7; padding:2px 6px; border-radius:4px; border:1px solid #bae6fd;">📹 Virtual</span>`;
+                } else {
+                    modeBadge = `<span style="font-size:10px; background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; border:1px solid #cbd5e1;">🏫 In-Person</span>`;
+                }
+
+// Add it to your HTML string, maybe next to the Case ID or Date
+card.innerHTML = `
+    <div class="session-header">
+        <div>
+            <span class="session-id">Case #${session._id.slice(-6).toUpperCase()}</span>
+            ${modeBadge} </div>
+        <span class="status-badge ${badgeClass}">${session.status}</span>
+    </div>
+    ...
+`;
+        
         // === LOGIC FOR CANCEL BUTTON ===
         // Only show button if status is 'Pending'
         let actionButtons = '';
