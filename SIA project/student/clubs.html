@@ -105,6 +105,7 @@
                         <button onclick="filterByCategory('Arts')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #e8e8e8;">Arts</button>
                         <button onclick="filterByCategory('Environment')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #e8e8e8;">Environment</button>
                         <button onclick="filterByCategory('Sports')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;">Sports</button>
+                        <button onclick="filterByCategory('Hood')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;">Hood</button>
                     </div>
                     <button class="clubs-sort-btn" id="sortMenuBtn" onclick="toggleSortMenu()" title="Sort options">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -117,7 +118,7 @@
 
             <!-- Clubs Count and Sort -->
             <section class="clubs-toolbar">
-                <p class="clubs-count" id="clubsCount">2 clubs found</p>
+                <p class="clubs-count" id="clubsCount"> clubs found</p>
                 <div class="sort-container" id="sortContainer" style="display:none;position:absolute;background:#fff;border:1px solid #e8e8e8;border-radius:6px;padding:10px;z-index:10;min-width:200px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
                     <button onclick="sortClubs('newest')" class="sort-option active" style="display:block;width:100%;padding:8px;margin:4px 0;border:0;background:none;text-align:left;cursor:pointer;">Newest</button>
                     <button onclick="sortClubs('most-members')" class="sort-option" style="display:block;width:100%;padding:8px;margin:4px 0;border:0;background:none;text-align:left;cursor:pointer;">Most Members</button>
@@ -194,9 +195,29 @@
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
                         <div>
                             <label for="appProgram">Program <span style="color:#d00">*</span></label>
-                            <input id="appProgram" name="program" type="text" placeholder="e.g., BS Computer Science" required style="width:100%;padding:10px;border:1px solid #e8e8e8;border-radius:6px;margin-top:6px;box-sizing:border-box;">
-                        </div>
-                        <div>
+                            <select id="appProgram" name="program" required style="width:100%;padding:10px;border:1px solid #e8e8e8;border-radius:6px;margin-top:6px;box-sizing:border-box;background-color: #fff;">
+                                <option value="" disabled selected>Select your program</option>
+                                <optgroup label="College of Computer Studies">
+                                    <option value="BSIT">BS Information Technology</option>
+                                    <option value="BSCS">BS Computer Science</option>
+                                    <option value="BSIS">BS Information Systems</option>
+                                </optgroup>
+                                <optgroup label="College of Business & Accountancy">
+                                    <option value="BSA">BS Accountancy</option>
+                                    <option value="BSEntrep">BS Entrepreneurship</option>
+                                    <option value="BSMA">BS Management Accounting</option>
+                                </optgroup>
+                                <optgroup label="College of Engineering">
+                                    <option value="BSECE">BS Electronics Engineering</option>
+                                    <option value="BSIE">BS Industrial Engineering</option>
+                                </optgroup>
+                                <optgroup label="College of Education">
+                                    <option value="BSEd">Bachelor of Secondary Education</option>
+                                    <option value="BEEd">Bachelor of Elementary Education</option>
+                                </optgroup> 
+                            </select>
+                                                    </div>
+                                                    <div>
                             <label for="appEmail">Email <span style="color:#d00">*</span></label>
                             <input id="appEmail" name="email" type="email" placeholder="your.email@gmail.com" required style="width:100%;padding:10px;border:1px solid #e8e8e8;border-radius:6px;margin-top:6px;box-sizing:border-box;">
                         </div>

@@ -1420,6 +1420,8 @@ if (tabName === 'upcoming') {
 // that will be filled by the backend.
 let allClubsData = [];
 let filteredClubs = [];
+let myClubApplications = [];
+
 
 // Your other global variables are perfect
 let currentClubId = null;
@@ -1502,6 +1504,25 @@ function openClubInfoModal(clubId) {
     const club = getClubById(clubId);
     if (!club) return;
 
+    // === NEW LOGIC: CHECK STATUS ===
+    const isApplied = myClubApplications.includes(clubId);
+    
+    let actionButton = '';
+    if (isApplied) {
+        // Green "Applied" Button
+        actionButton = `
+            <button type="button" disabled style="background:#ecfdf5; color:#047857; border:1px solid #10b981; padding:10px 18px; border-radius:6px; cursor:default; font-weight:600;">
+                ✓ Application Submitted
+            </button>`;
+    } else {
+        // Normal Blue "Application" Button
+        actionButton = `
+            <button type="button" class="learn-more-btn" style="background:#2c3e7f;color:#fff;padding:10px 18px;border-radius:6px;border:0;cursor:pointer;" onclick="openClubApplicationModal('${clubId}')">
+                Application
+            </button>`;
+    }
+    // ===============================
+
     const container = document.getElementById('clubInfoContent');
     container.innerHTML = `
         <h2 style="color:#2c3e7f;margin-bottom:8px;">${club.name}</h2>
@@ -1527,15 +1548,13 @@ function openClubInfoModal(clubId) {
         </div>
         <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
             <button type="button" class="learn-more-btn" style="background:#fff;color:#333;border:1px solid #e8e8e8;padding:10px 18px;border-radius:6px;" onclick="closeClubInfoModal()">Cancel</button>
-            <button type="button" class="learn-more-btn" style="background:#2c3e7f;color:#fff;padding:10px 18px;border-radius:6px;border:0;cursor:pointer;" onclick="openClubApplicationModal('${clubId}')">Application</button>
-        </div>
+            ${actionButton} </div>
     `;
 
     const modal = document.getElementById('clubInfoModal');
     modal.setAttribute('aria-hidden', 'false');
     modal.classList.add('open');
-    // ... (rest of your modal focus/keydown code is fine) ...
-}
+    }
 
 function closeClubInfoModal() {
     const modal = document.getElementById('clubInfoModal');
@@ -1571,12 +1590,21 @@ function toggleCategoryDropdown() {
 
 function toggleSortMenu() {
     const sortMenu = document.getElementById('sortContainer');
-    // We'll also position it relative to the button
-    const sortBtn = document.getElementById('sortDisplay');
-    sortMenu.style.left = sortBtn.offsetLeft + 'px';
-    sortMenu.style.top = (sortBtn.offsetTop + sortBtn.offsetHeight + 5) + 'px';
+    const sortBtn = document.getElementById('sortDisplay'); // The text button
     
-    sortMenu.style.display = sortMenu.style.display === 'none' ? 'block' : 'none';
+    // Toggle visibility
+    const isHidden = sortMenu.style.display === 'none';
+    sortMenu.style.display = isHidden ? 'block' : 'none';
+
+    if (isHidden) {
+        // === FIX: Align to the RIGHT instead of the Left ===
+        sortMenu.style.left = 'auto'; 
+        sortMenu.style.right = '0px'; // Flush with the right edge of the container
+        
+        // Position it just below the button
+        // (You can adjust the +5 if you want more/less gap)
+        sortMenu.style.top = (sortBtn.offsetTop + sortBtn.offsetHeight + 8) + 'px';
+    }
 }
 // --- THIS IS THE MOST IMPORTANT CHANGE ---
 // We modify your form submit listener to send data to the
@@ -1584,9 +1612,18 @@ function toggleSortMenu() {
 async function handleApplicationSubmit(e) {
     e.preventDefault();
 
-    // Get form data (your code was perfect)
+    // 1. Get the Student ID
+    const currentStudentId = localStorage.getItem('currentStudentId');
+
+    if (!currentStudentId) {
+        alert("Please submit a counseling form first to set your Student ID (Simulation Mode).");
+        return;
+    }
+
+    // 2. Collect Form Data
     const formData = {
         clubId: currentClubId,
+        studentId: currentStudentId,
         fullName: document.getElementById('appFullName').value,
         year: document.getElementById('appYear').value,
         motive: document.getElementById('appMotive').value,
@@ -1596,29 +1633,42 @@ async function handleApplicationSubmit(e) {
     };
 
     try {
-        // --- NEW FETCH CALL ---
-        // Send this data to our NEW backend endpoint
+        // 3. Send to Backend
         const response = await fetch('http://localhost:3001/api/applications', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData)
         });
 
+        // === THIS IS THE CRITICAL PART: READ ONCE ===
+        const result = await response.json(); 
+        // ============================================
+
+        // 4. Handle Errors (using the data we just read)
         if (!response.ok) {
-            throw new Error('Server error');
+            throw new Error(result.message || 'Server error');
         }
 
-        const newApplication = await response.json();
-        console.log('Application submitted:', newApplication);
+        // 5. Update "My Applications" List (So the button turns Green)
+        if (!myClubApplications.includes(currentClubId)) {
+            myClubApplications.push(currentClubId);
+        }
 
+        // 6. Success UI Updates
         alert('Application submitted successfully!');
+        
         closeClubApplicationModal();
+        
+        // Refresh the Info Modal to show "Application Submitted" status
+        openClubInfoModal(currentClubId);
+        
+        // Update the club card stats on the main grid (increment applicants)
+        // (Optional: Ideally we re-fetch all clubs to get the official count from DB)
+        fetchAndInitializeClubs();
 
     } catch (error) {
         console.error('Error submitting application:', error);
-        alert('There was a problem submitting your application. Please try again.');
+        alert(error.message); // Show the specific error (e.g. "Already applied")
     }
 }
 
@@ -1626,39 +1676,44 @@ async function handleApplicationSubmit(e) {
 // Your search/filter/sort logic was good, but it was tied to the
 // DOM. This new version is "data-first".
 // --- REPLACE your main searchAndFilterClubs function with this ---
+// --- UPDATED SEARCH LOGIC (Includes Category) ---
 function searchAndFilterClubs() {
     const searchQuery = document.getElementById('clubsSearchInput').value.toLowerCase();
 
-    // 1. Filter by Category
+    // 1. Filter by Dropdown Category (The button menu)
     let clubsToFilter = allClubsData;
     if (currentCategory !== 'All') {
         clubsToFilter = allClubsData.filter(club => club.category === currentCategory);
     }
 
-    // 2. Filter by Search Query
+    // 2. Filter by Search Bar (The typing input)
     if (searchQuery) {
         clubsToFilter = clubsToFilter.filter(club =>
+            // Check Name
             club.name.toLowerCase().includes(searchQuery) ||
-            club.description.toLowerCase().includes(searchQuery)
+            // Check Description
+            club.description.toLowerCase().includes(searchQuery) ||
+            // === NEW: Check Category ===
+            club.category.toLowerCase().includes(searchQuery)
         );
     }
     
-    // 3. Sort the results (with "oldest" added!)
+    // 3. Sort the results
     if (currentSortBy === 'newest') {
-        // Sort by the date they were created, newest first
         clubsToFilter.sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate));
     } else if (currentSortBy === 'oldest') {
-        // Sort by the date, oldest first
         clubsToFilter.sort((a, b) => new Date(a.createdDate) - new Date(b.createdDate));
     } else if (currentSortBy === 'alphabetical') {
-        // Sort by the name
         clubsToFilter.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (currentSortBy === 'most-members') {
+        clubsToFilter.sort((a, b) => b.members - a.members);
+    } else if (currentSortBy === 'fewest-members') {
+        clubsToFilter.sort((a, b) => a.members - b.members);
     }
-    // (You can add more `else if` blocks for 'most-members', etc.)
 
-    // 4. Save to global state and render
+    // 4. Save and Render
     filteredClubs = clubsToFilter;
-    renderClubs(); // This is our helper function that builds the HTML
+    renderClubs();
 }
 
 // --- MODIFIED ---
@@ -1703,13 +1758,25 @@ function sortClubs(sortBy) {
 // This is the main "waiter" function that starts everything.
 async function fetchAndInitializeClubs() {
     try {
+        // 1. Fetch Clubs
         const response = await fetch('http://localhost:3001/api/clubs');
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
+        if (!response.ok) throw new Error('Network response was not ok');
         allClubsData = await response.json();
+
+        // 2. Fetch My Applications (If logged in)
+        const studentId = localStorage.getItem('currentStudentId');
+        if (studentId) {
+            try {
+                const appResponse = await fetch(`http://localhost:3001/api/applications/my-applications/${studentId}`);
+                const appData = await appResponse.json();
+                // Save just the Club IDs to our list
+                myClubApplications = appData.map(app => app.clubId);
+            } catch (err) {
+                console.warn("Could not fetch applications", err);
+            }
+        }
         
-        // Initialize the page state
+        // 3. Render
         searchAndFilterClubs();
 
     } catch (error) {

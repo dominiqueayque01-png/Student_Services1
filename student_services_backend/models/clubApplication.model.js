@@ -1,12 +1,13 @@
-// models/clubApplication.model.js
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+    const mongoose = require('mongoose');
+    const Schema = mongoose.Schema;
 
-const applicationSchema = new Schema({
-    // This links to the specific club they applied for
+    const applicationSchema = new Schema({
     clubId: { type: Schema.Types.ObjectId, ref: 'Club', required: true },
     
-    // This is all the form data
+    // === ADD THIS FIELD ===
+    studentId: { type: String, required: true },
+    // =====================
+
     fullName: { type: String, required: true },
     year: { type: String, required: true },
     motive: { type: String, required: true },
@@ -14,9 +15,8 @@ const applicationSchema = new Schema({
     email: { type: String, required: true },
     experience: { type: String },
     
-    // Admin-side tracking
-    status: { type: String, default: 'Pending' }, // e.g., 'Pending', 'Approved', 'Rejected'
+    status: { type: String, default: 'Pending' },
     appliedAt: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('ClubApplication', applicationSchema);
+module.exports = mongoose.model('ClubApplication', applicationSchema);  

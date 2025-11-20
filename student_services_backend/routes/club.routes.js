@@ -19,11 +19,8 @@ router.get('/', async (req, res) => {
 
 // --- 2. CREATE A NEW CLUB ---
 router.post('/', async (req, res) => {
-  const club = new Club({
-    name: req.body.name,
-    description: req.body.description,
-    president: req.body.president
-  });
+  // We use req.body directly so ALL fields (location, meetingTime, etc.) are saved
+  const club = new Club(req.body);
 
   try {
     const newClub = await club.save();
