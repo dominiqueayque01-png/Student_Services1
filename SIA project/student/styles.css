@@ -1239,7 +1239,9 @@ body {
 .calendar-days {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 8px;
+    gap: 10px;
+    /* Remove 'height' or 'max-height' if you have it here */
+    /* Use min-height if you want stability */
 }
 
 .calendar-day {
@@ -1850,6 +1852,17 @@ body {
     background-color: #3b82f6; 
     border: 1px solid #2563eb;
 }
+
+/* 5. CULTURE & ARTS (Pink) */
+.calendar-day.culture {
+    background-color: #e91e63; 
+    border: 1px solid #c2185b;
+}
+
+.calendar-day.culture:hover { 
+    background-color: #c2185b; 
+}
+
 .calendar-day.recreation:hover { background-color: #2563eb; }
 
 /* Responsive - Events Page */

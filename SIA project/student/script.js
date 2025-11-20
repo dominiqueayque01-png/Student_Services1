@@ -801,6 +801,7 @@ const categoryColors = {
     community: '#9b59b6',    // Purple
     institutional: '#64748b',// Grey
     recreation: '#3b82f6',   // Blue
+    culture: '#e91e63',      // <--- NEW: Pink for Culture & Arts
     default: '#2c3e7f'       // Fallback Blue
 };
 
@@ -830,24 +831,23 @@ function renderCalendar(events) {const calendarDays = document.querySelector('.c
         calendarDays.innerHTML += `<div class="calendar-day empty"></div>`;
     }
 
-    // Days
+  // Days
     for (let i = 1; i <= lastDay; i++) {
         const dayDiv = document.createElement('div');
         dayDiv.className = 'calendar-day';
         dayDiv.textContent = i;
 
-        // Find ALL events for this specific day
+        // === ROBUST DATE COMPARISON ===
         const daysEvents = events.filter(event => {
-            const eDate = new Date(event.date);
-            return eDate.getDate() === i && 
-                   eDate.getMonth() === month && 
-                   eDate.getFullYear() === year;
+            const eventDate = new Date(event.date);
+            
+            // We compare using local calendar values to match what is drawn
+            return eventDate.getDate() === i && 
+                   eventDate.getMonth() === month && 
+                   eventDate.getFullYear() === year;
         });
 
         if (daysEvents.length > 0) {
-            // Add to our monthly collection
-            eventsInThisMonth.push(...daysEvents);
-
             dayDiv.style.cursor = 'pointer';
             dayDiv.classList.add('has-event');
 
@@ -863,33 +863,27 @@ function renderCalendar(events) {const calendarDays = document.querySelector('.c
                     const gradient = `linear-gradient(135deg, ${uniqueColors.join(', ')})`;
                     dayDiv.style.background = gradient;
                 }
+                dayDiv.title = `${daysEvents.length} Events`;
             }
             
-            // Smart Click Logic
+            // Click Listener
             dayDiv.addEventListener('click', () => {
                 if (daysEvents.length === 1) {
                     openEventDetail_DYNAMIC(daysEvents[0]._id);
                 } else {
-                    // Highlight visually
                     document.querySelectorAll('.calendar-day').forEach(d => d.style.border = 'none');
                     dayDiv.style.border = '2px solid #2c3e7f';
-                    // Filter list
                     renderUpcomingEvents(daysEvents);
-                    // Update tab text
                     const upcomingTab = document.querySelector('.tab-btn.active');
                     if (upcomingTab) upcomingTab.innerText = `Events on ${monthNames[month]} ${i}`;
                     document.getElementById('upcoming').classList.add('active');
                     document.getElementById('saved').classList.remove('active');
+                    document.getElementById('history').classList.remove('active');
                 }
             });
         }
-
-        // Highlight Today
-        const today = new Date();
-        if (i === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
-            dayDiv.classList.add('today'); 
-            if (daysEvents.length === 0) dayDiv.style.border = "2px solid #2c3e7f";
-        }
+        
+        // ... (today highlight logic) ...
 
         calendarDays.appendChild(dayDiv);
     }
