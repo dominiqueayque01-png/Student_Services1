@@ -350,11 +350,11 @@ function renderSessionsList(filterTab = 'pending') {
         }
 
         let modeBadge = '';
-                if (session.preferredMode === 'Virtual') {
-                    modeBadge = `<span style="font-size:10px; background:#e0f2fe; color:#0284c7; padding:2px 6px; border-radius:4px; border:1px solid #bae6fd;">📹 Virtual</span>`;
-                } else {
-                    modeBadge = `<span style="font-size:10px; background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; border:1px solid #cbd5e1;">🏫 In-Person</span>`;
-                }
+            if (session.preferredMode === 'Virtual') {
+                modeBadge = `<span style="font-size:10px; background:#e0f2fe; color:#0284c7; padding:2px 6px; border-radius:4px; border:1px solid #bae6fd;">📹 Virtual</span>`;
+            } else {
+                modeBadge = `<span style="font-size:10px; background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; border:1px solid #cbd5e1;">🏫 In-Person</span>`;
+            }
 
 // Add it to your HTML string, maybe next to the Case ID or Date
 card.innerHTML = `
@@ -583,6 +583,10 @@ ind   }
 // --- 8. (NEW CODE) ATTACH EVENT LISTENERS ---
 // We need to wait for the page to be fully loaded before attaching listeners
 document.addEventListener('DOMContentLoaded', async () => {
+
+    fetchAndInitializeEvents();
+    fetchAndInitializeRegistrations();
+    
     
     // 1. Attach listener for the Request Form
     const requestForm = document.getElementById('requestForm');
@@ -610,92 +614,387 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 4. NOW fetch and render announcements (knowing which ones are requested)
     fetchAndRenderAnnouncements();
 });
+
 /* ============================================
-   EVENT PAGE FUNCTIONS (DYNAMIC VERSION)
+   EVENT PAGE LOGIC - SAVED EVENTS FOCUS
    ============================================ */
 
-// This will hold our data from the database
-let allEventsData = [];
-let currentEventId = null; // Used for the modal
+        let allEventsData = [];
+        let mySavedEventIds = []; // Stores just the IDs of saved events [ "id1", "id2" ]
+        let myRegistrations = []; // <--- THIS WAS MISSING causing the modal crash
+        let currentEventId = null;
 
-// --- Helper function to get data ---
-function getEventById_DYNAMIC(id) {
-    // We search our global array, using the MongoDB _id
-    return allEventsData.find(e => e._id === id);
+        let calendarDate = new Date();
+
+document.addEventListener('DOMContentLoaded', () => {
+    fetchAndInitializeEvents();
+    if (document.getElementById('upcoming')) {
+        // We are on the Event Page
+        fetchAndInitializeEvents(); 
+    }
+
+    if (studentId) {
+    fetchNotifications(studentId); // <--- Add this line
 }
+});
 
-// --- Main function to fetch and render everything ---
-async function fetchAndInitializeEvents() {
+/* ============================================
+   NOTIFICATION LOGIC
+   ============================================ */
+async function fetchNotifications(studentId) {
     try {
-        const response = await fetch('http://localhost:3001/api/events');
-        if (!response.ok) { throw new Error('Network error'); }
-
-        allEventsData = await response.json(); 
-
-        if (allEventsData.length > 0) {
-            renderUpcomingEvents(allEventsData);
-            renderFeaturedEvent(allEventsData[0]);
-
-            // --- THIS IS THE INTEGRATION ---
-            renderCalendar(allEventsData); 
-            // -------------------------------
-
-        } else {
-            renderUpcomingEvents([]);
-            renderCalendar([]); // Also integrates an "empty" list
-        }
+        const response = await fetch(`http://localhost:3001/api/notifications/${studentId}`);
+        const notifications = await response.json();
+        renderNotifications(notifications);
     } catch (error) {
-        console.error('Error fetching events:', error);
+        console.error("Error loading notifications:", error);
     }
 }
 
-// --- Renderer for the "Upcoming Events" list ---
-function renderUpcomingEvents(events) {
-    const upcomingList = document.getElementById('upcoming');
-    if (!upcomingList) return; 
+function renderNotifications(notifications) {
+    const container = document.getElementById('latestItems');
+    if (!container) return;
 
-    upcomingList.innerHTML = ''; // Clear the list
+    container.innerHTML = '';
 
-    events.forEach(event => {
-        const eventDate = new Date(event.date);
-        const dateString = eventDate.toLocaleDateString('en-US', {
-            weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' 
-        });
-        const category = event.category || 'academic';
+    if (notifications.length === 0) {
+        container.innerHTML = '<p style="font-size:12px; color:#999; padding:10px;">No new notifications.</p>';
+        return;
+    }
 
-        const eventCard = document.createElement('div');
-        eventCard.className = `event-list-item ${category}`;
-        eventCard.setAttribute('role', 'button');
-        eventCard.setAttribute('tabindex', '0');
+    notifications.forEach(notif => {
+        const item = document.createElement('div');
+        
+        // Apply 'read' class if it's read
+        const readClass = notif.isRead ? 'read' : '';
+        item.className = `latest-item ${readClass}`;
 
-        eventCard.innerHTML = `
-            <div class="event-color-indicator ${category}"></div>
-            <div class="event-item-content">
-                <h4 class="event-item-title">${event.title}</h4>
-                <p class="event-item-date">${dateString}</p>
-                <p class="event-item-time">${event.time} · ${event.location}</p>
-            </div>
-            <button class="save-event-btn">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M4 2v16l8-5 8 5V2H4z"/>
+        // 1. The Star Icon (Yellow)
+        const icon = `
+            <div class="notif-icon">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#f59e0b" stroke-width="1.5">
+                    <path d="M10 2l2.4 4.8h5.2l-4.2 3.2 1.6 4.8-4-3.2-4 3.2 1.6-4.8-4.2-3.2h5.2z"/>
                 </svg>
-            </button>
+            </div>
         `;
 
-        eventCard.addEventListener('click', () => openEventDetail_DYNAMIC(event._id));
-        eventCard.querySelector('.save-event-btn').addEventListener('click', (e) => {
-            e.stopPropagation(); 
-            console.log("Save event clicked:", event._id);
-        });
+        // 2. The Red Dot (Only if NOT read)
+        const dotHTML = !notif.isRead ? `<div class="unread-dot"></div>` : '';
 
-        upcomingList.appendChild(eventCard);
+        // 3. The Time Formatting
+        const timeString = timeAgo(notif.createdAt); // Uses our new helper
+        // Optional: Tooltip with full date
+        const fullDate = new Date(notif.createdAt).toLocaleString();
+
+        item.innerHTML = `
+            ${icon}
+            <div class="notif-content">
+                <span class="notif-message">${notif.message}</span>
+                <span class="notif-time" title="${fullDate}">${timeString}</span>
+            </div>
+            ${dotHTML}
+        `;
+        
+        container.appendChild(item);
     });
 }
 
-// --- Renderer for the "Featured Event" banner ---
+async function markAllEventsAsRead(e) {
+    if(e) e.preventDefault();
+    const studentId = localStorage.getItem('currentStudentId');
+    if(!studentId) return;
+
+    try {
+        await fetch(`http://localhost:3001/api/notifications/mark-read/${studentId}`, { method: 'PATCH' });
+        // Refresh the list visually
+        fetchNotifications(studentId);
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+/* --- Helper: Format Date like Facebook/Twitter --- */
+function timeAgo(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const seconds = Math.floor((now - date) / 1000);
+
+    let interval = Math.floor(seconds / 31536000);
+    if (interval > 1) return interval + " years ago";
+    
+    interval = Math.floor(seconds / 2592000);
+    if (interval > 1) return interval + " months ago";
+    
+    interval = Math.floor(seconds / 86400);
+    if (interval > 1) return interval + " days ago";
+    
+    interval = Math.floor(seconds / 3600);
+    if (interval >= 1) return interval + " hours ago";
+    
+    interval = Math.floor(seconds / 60);
+    if (interval >= 1) return interval + " mins ago";
+    
+    return "Just now";
+}
+
+
+// --- RENDER HISTORY (PAST EVENTS) ---
+function renderHistoryEvents() {
+    const historyList = document.getElementById('history');
+    if (!historyList) return;
+    
+    historyList.innerHTML = '';
+
+    const now = new Date(); // Current time
+
+    // Filter: Registered AND Date is in the past
+    const pastEvents = allEventsData.filter(event => {
+        const eventDate = new Date(event.date);
+        return myRegistrations.includes(event._id) && eventDate < now;
+    });
+
+    if (pastEvents.length === 0) {
+        historyList.innerHTML = '<p style="text-align: center; color: #999; padding: 30px 20px;">No past events attended.</p>';
+        return;
+    }
+
+    pastEvents.forEach(event => {
+        const dateString = new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        
+        const card = document.createElement('div');
+        card.className = `event-list-item ${event.category || 'academic'}`;
+        
+        // We fade it out slightly to show it's "done"
+        card.style.opacity = '0.8'; 
+        card.style.backgroundColor = '#f8fafc';
+        card.style.cursor = 'pointer';
+
+        card.innerHTML = `
+             <div class="event-color-indicator ${event.category || 'academic'}" style="background-color:#94a3b8;"></div>
+             
+             <div class="event-item-content">
+                <h4 class="event-item-title" style="color:#64748b; text-decoration: line-through;">${event.title}</h4>
+                <p class="event-item-date">Completed • ${dateString}</p>
+             </div>
+             
+             <div style="background:#e2e8f0; color:#475569; font-size:11px; font-weight:600; padding:4px 8px; border-radius:4px;">
+                Done
+             </div>
+        `;
+
+        // Still allow clicking to see details (for reference)
+        card.addEventListener('click', () => {
+            openEventDetail_DYNAMIC(event._id);
+        });
+
+        historyList.appendChild(card);
+    });
+}
+
+/* ============================================
+   ADVANCED CALENDAR (Multi-Event Support)
+   ============================================ */
+
+// Define your category colors here (Must match your CSS)
+const categoryColors = {
+    academic: '#f59e0b',     // Orange
+    community: '#9b59b6',    // Purple
+    institutional: '#64748b',// Grey
+    recreation: '#3b82f6',   // Blue
+    default: '#2c3e7f'       // Fallback Blue
+};
+
+function renderCalendar(events) {const calendarDays = document.querySelector('.calendar-days');
+    const calendarTitle = document.querySelector('.calendar-title');
+
+    if (!calendarDays || !calendarTitle) return; 
+
+    const year = calendarDate.getFullYear();
+    const month = calendarDate.getMonth();
+    
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    calendarTitle.textContent = `${monthNames[month]} ${year}`;
+
+    const firstDayIndex = new Date(year, month, 1).getDay(); 
+    const adjustedFirstDay = (firstDayIndex === 0 ? 6 : firstDayIndex - 1);
+    const lastDay = new Date(year, month + 1, 0).getDate(); 
+
+    calendarDays.innerHTML = ''; 
+
+    // --- NEW: COLLECT EVENTS FOR THIS MONTH ---
+    const eventsInThisMonth = [];
+    // ------------------------------------------
+
+    // Empty slots
+    for (let i = 0; i < adjustedFirstDay; i++) {
+        calendarDays.innerHTML += `<div class="calendar-day empty"></div>`;
+    }
+
+    // Days
+    for (let i = 1; i <= lastDay; i++) {
+        const dayDiv = document.createElement('div');
+        dayDiv.className = 'calendar-day';
+        dayDiv.textContent = i;
+
+        // Find ALL events for this specific day
+        const daysEvents = events.filter(event => {
+            const eDate = new Date(event.date);
+            return eDate.getDate() === i && 
+                   eDate.getMonth() === month && 
+                   eDate.getFullYear() === year;
+        });
+
+        if (daysEvents.length > 0) {
+            // Add to our monthly collection
+            eventsInThisMonth.push(...daysEvents);
+
+            dayDiv.style.cursor = 'pointer';
+            dayDiv.classList.add('has-event');
+
+            if (daysEvents.length === 1) {
+                const cat = daysEvents[0].category || 'academic';
+                dayDiv.classList.add(cat);
+            } else {
+                const colors = daysEvents.map(e => categoryColors[e.category] || categoryColors.default);
+                const uniqueColors = [...new Set(colors)];
+                if (uniqueColors.length === 1) {
+                    dayDiv.style.backgroundColor = uniqueColors[0];
+                } else {
+                    const gradient = `linear-gradient(135deg, ${uniqueColors.join(', ')})`;
+                    dayDiv.style.background = gradient;
+                }
+            }
+            
+            // Smart Click Logic
+            dayDiv.addEventListener('click', () => {
+                if (daysEvents.length === 1) {
+                    openEventDetail_DYNAMIC(daysEvents[0]._id);
+                } else {
+                    // Highlight visually
+                    document.querySelectorAll('.calendar-day').forEach(d => d.style.border = 'none');
+                    dayDiv.style.border = '2px solid #2c3e7f';
+                    // Filter list
+                    renderUpcomingEvents(daysEvents);
+                    // Update tab text
+                    const upcomingTab = document.querySelector('.tab-btn.active');
+                    if (upcomingTab) upcomingTab.innerText = `Events on ${monthNames[month]} ${i}`;
+                    document.getElementById('upcoming').classList.add('active');
+                    document.getElementById('saved').classList.remove('active');
+                }
+            });
+        }
+
+        // Highlight Today
+        const today = new Date();
+        if (i === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+            dayDiv.classList.add('today'); 
+            if (daysEvents.length === 0) dayDiv.style.border = "2px solid #2c3e7f";
+        }
+
+        calendarDays.appendChild(dayDiv);
+    }
+
+    // --- NEW: UPDATE THE FEATURED BANNER ---
+    updateFeaturedBannerForMonth(eventsInThisMonth);
+    // ---------------------------------------
+}
+
+// === ADD THIS NEW HELPER FUNCTION ===
+function updateFeaturedBannerForMonth(monthEvents) {
+    const bannerSection = document.querySelector('.featured-event-banner');
+    
+    if (monthEvents.length === 0) {
+        // Option A: Hide banner if no events
+        // bannerSection.style.display = 'none';
+        
+        // Option B: Show generic message
+        renderFeaturedEvent({
+            title: "No Featured Events",
+            date: calendarDate, // Use current calendar view date
+            location: "Campus Wide",
+            imageUrl: "", // Or a default background
+            _id: null // No ID means button won't do anything
+        });
+        
+        // Disable the button if it's a placeholder
+        const btn = document.querySelector('.view-details-btn');
+        if(btn) {
+            btn.style.display = 'none';
+        }
+        return;
+    }
+
+    // Show banner
+    bannerSection.style.display = 'flex';
+    const btn = document.querySelector('.view-details-btn');
+    if(btn) btn.style.display = 'block';
+
+    // Sort by date to find the earliest one in the month
+    monthEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    // Pick the first one
+    renderFeaturedEvent(monthEvents[0]);
+}
+function previousMonth() {
+    calendarDate.setMonth(calendarDate.getMonth() - 1);
+    renderCalendar(allEventsData);
+}
+
+function nextMonth() {
+    calendarDate.setMonth(calendarDate.getMonth() + 1);
+    renderCalendar(allEventsData);
+}
+
+/* ============================================
+   SEARCH FUNCTION
+   ============================================ */
+/* ============================================
+   SEARCH FUNCTION (FIXED: Future Events Only)
+   ============================================ */
+function searchEvents(query) {
+    const lowerQuery = query.toLowerCase().trim();
+
+    // 1. IF EMPTY: Reset to showing ONLY FUTURE events (Default View)
+    if (!lowerQuery) {
+        // Reset Tab Name
+        document.querySelector('.events-tabs .tab-btn:first-child').textContent = 'Upcoming Events';
+        
+        const now = new Date();
+        now.setHours(0,0,0,0);
+        const futureEvents = allEventsData.filter(e => new Date(e.date) >= now);
+        
+        renderUpcomingEvents(futureEvents);
+        return;
+    }
+
+    // 2. IF SEARCHING: Look through ALL data (Past & Future)
+    const filteredEvents = allEventsData.filter(event => {
+        const matchesTitle = event.title.toLowerCase().includes(lowerQuery);
+        const matchesLoc = event.location.toLowerCase().includes(lowerQuery);
+        return matchesTitle || matchesLoc;
+    });
+
+    // 3. Switch to the main list view to show results
+    document.getElementById('upcoming').classList.add('active');
+    document.getElementById('saved').classList.remove('active');
+    document.getElementById('history').classList.remove('active');
+    
+    // Update buttons
+    document.querySelectorAll('.events-tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
+    const firstBtn = document.querySelector('.events-tabs .tab-btn:first-child');
+    firstBtn.classList.add('active');
+    
+    // UX: Change Tab text to indicate these are Search Results
+    firstBtn.textContent = `Search Results (${filteredEvents.length})`;
+
+    // 4. Render Mixed Results
+    renderUpcomingEvents(filteredEvents);
+}
+
 function renderFeaturedEvent(event) {
     const featuredTitle = document.querySelector('.featured-title');
     const featuredDetails = document.querySelector('.featured-details');
+    
     if (!featuredTitle || !featuredDetails) return;
 
     const eventDate = new Date(event.date);
@@ -708,127 +1007,166 @@ function renderFeaturedEvent(event) {
 
     const viewDetailsBtn = document.querySelector('.view-details-btn');
     if (viewDetailsBtn) {
+        // Use the DYNAMIC open function
         viewDetailsBtn.onclick = () => openEventDetail_DYNAMIC(event._id);
     }
 }
 
-// --- This is the new "Calendar Brain" function ---
-function renderCalendar(events) {
-    const calendarDays = document.querySelector('.calendar-days');
-    const calendarTitle = document.querySelector('.calendar-title');
+async function fetchAndInitializeEvents() {
+    try {
+        const studentId = localStorage.getItem('currentStudentId');
 
-    if (!calendarDays || !calendarTitle) return; 
+        // 1. Fetch All Events
+        const eventsResponse = await fetch('http://localhost:3001/api/events');
+        allEventsData = await eventsResponse.json();
 
-    // For this demo, we'll force it to show SEPTEMBER 2025 to match your data
-    const month = 8; // 0=Jan, 8=Sep
-    const year = 2025;
-    const today = new Date(); // We still need today's date
-
-    calendarTitle.textContent = "September 2025"; // Hard-code title for now
-
-    const firstDayOfMonth = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-    // Create a "lookup" for our event days
-    const eventDays = new Map();
-    for (const event of events) {
-        const eventDate = new Date(event.date);
-        if (eventDate.getFullYear() === year && eventDate.getMonth() === month) {
-            const day = eventDate.getDate();
-            eventDays.set(day, event._id); 
-        }
-    }
-
-    calendarDays.innerHTML = ''; // Clear the div
-
-    // Create the "empty" filler days
-    const startOffset = (firstDayOfMonth === 0) ? 6 : firstDayOfMonth - 1;
-    for (let i = 0; i < startOffset; i++) {
-        calendarDays.innerHTML += `<div class="calendar-day empty"></div>`;
-    }
-
-    // Create the "real" days
-    for (let day = 1; day <= daysInMonth; day++) {
-        const dayCell = document.createElement('div');
-        dayCell.className = 'calendar-day';
-        dayCell.textContent = day;
-
-        // Make "4" active just like your static design
-        if (day === 4) { 
-            dayCell.classList.add('active');
+        // 2. Fetch My Registrations (If logged in)
+        if (studentId) {
+            // Get Registrations (For the "Already Registered" button check)
+            try {
+                const regResponse = await fetch(`http://localhost:3001/api/registrations/my-registrations/${studentId}`);
+                const regData = await regResponse.json();
+                // Save JUST the IDs to the global variable
+                myRegistrations = regData.map(r => r.eventId); 
+            } catch (err) {
+                console.warn("Could not fetch registrations", err);
+                myRegistrations = [];
+            }
+                fetchNotifications(studentId);
+            // Get Saved/Bookmarked Events (For the Yellow Star)
+            try {
+                const saveResponse = await fetch(`http://localhost:3001/api/saved-events/${studentId}`);
+                mySavedEventIds = await saveResponse.json();
+            } catch (err) {
+                console.warn("Could not fetch saved events", err);
+                mySavedEventIds = [];
+            }
         }
 
-        // --- THIS IS THE "SHADING" LOGIC ---
-        if (eventDays.has(day)) {
-            dayCell.classList.add('has-event'); // Your blue shaded style
-            dayCell.setAttribute('role', 'button');
-            dayCell.style.cursor = 'pointer';
-            const eventId = eventDays.get(day);
-            dayCell.addEventListener('click', () => openEventDetail(eventId));
+        // 3. Render Everything
+        renderUpcomingEvents(allEventsData);
+
+        const now = new Date();
+        now.setHours(0, 0, 0, 0); // Reset time so "Today" events still show up
+        
+        const futureEvents = allEventsData.filter(event => new Date(event.date) >= now);
+        renderUpcomingEvents(futureEvents);
+        renderSavedEvents();
+        renderHistoryEvents();
+
+        // 4. Initialize Calendar and Featured Event
+        
+        if (allEventsData.length > 0) {
+            renderFeaturedEvent(allEventsData[0]);
+            renderCalendar(allEventsData); 
         }
 
-        calendarDays.appendChild(dayCell);
+    } catch (error) {
+        console.error('Error initializing events:', error);
     }
 }
 
-// --- This replaces your OLD openEventDetail function ---
+/* ============================================
+   MISSING MODAL FUNCTIONS
+   ============================================ */
+
 function openEventDetail_DYNAMIC(eventId) {
-    const event = getEventById_DYNAMIC(eventId); 
-    if (!event) return;
+    const event = allEventsData.find(e => e._id === eventId); 
+    if (!event) {
+        console.error("Event not found:", eventId);
+        return;
+    }
 
     currentEventId = eventId; 
     const container = document.getElementById('eventDetailContent');
     if (!container) return;
 
+    // Format Date
     const eventDate = new Date(event.date);
     const dateString = eventDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 
-    // This HTML is pulled from your photos and script.js
-    container.innerHTML = `
-        <div style="margin-bottom:30px;">
-            <div style="background: url('${event.imageUrl}') no-repeat center center; background-size: cover; height:300px;border-radius:8px;margin-bottom:20px;"></div>
-            <h2 style="color:#2c3e7f;margin-bottom:8px;" id="eventDetailTitle">${event.title}</h2>
-            <p style="color:#666;margin-bottom:16px;">Organized by ${event.organizer}</p>
-        </div>
+    // Check if already registered
+    const isRegistered = myRegistrations.includes(eventId);
+    
+    // Determine Button State
+    let registerBtnHTML = '';
+    if (isRegistered) {
+        registerBtnHTML = `<button type="button" disabled style="background:#ecfdf5; color:#10b981; border:1px solid #10b981; padding:12px 20px; border-radius:6px; cursor:default; font-weight:600;">✓ Already Registered</button>`;
+    } else {
+        // Note: We pass the ID and Title to the registration modal
+        registerBtnHTML = `<button type="button" class="learn-more-btn" style="background:#2c3e7f;color:#fff;padding:12px 20px;border-radius:6px;border:0;cursor:pointer;" onclick="openRegistrationModal('${event._id}', '${event.title}')">Register Now</button>`;
+    }
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:30px;padding:20px;background:#f9f9f9;border-radius:8px;">
-            <div><div style="font-weight:600;color:#2c3e7f;">Date</div><div style="color:#666;font-size:14px;">${dateString}</div></div>
-            <div><div style="font-weight:600;color:#2c3e7f;">Time</div><div style="color:#666;font-size:14px;">${event.time}</div></div>
-            <div><div style="font-weight:600;color:#2c3e7f;">Location</div><div style="color:#666;font-size:14px;">${event.location}</div></div>
-            <div><div style="font-weight:600;color:#2c3e7f;">Availability</div><div style="color:#666;font-size:14px;">${event.availability || 'N/A'}</div></div>
-        </div>
-
-        <h3 style="color:#2c3e7f;margin-bottom:12px;margin-top:24px;">About this Event</h3>
-        <p style="color:#666;line-height:1.6;margin-bottom:24px;">${event.description}</p>
-
-        <h3 style="color:#2c3e7f;margin-bottom:12px;margin-top:24px;">Event Agenda</h3>
-        <div style="background:#f9f9f9;border-radius:8px;padding:16px;margin-bottom:24px;">
-            ${event.agenda.map((item, idx) => `
-                <div style="display:flex;gap:12px;margin-bottom:12px;">
-                    <div style="background:#2c3e7f;color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align:center;justify-content:center;flex-shrink:0;font-weight:600;">${idx + 1}</div>
-                    <div><div style="font-weight:600;color:#2c3e7f;">${item.time}</div><div style="color:#666;font-size:14px;">${item.title}</div></div>
+    // Safe checks for Arrays (Agenda/Expectations)
+    const agendaHTML = (event.agenda && event.agenda.length > 0) 
+        ? event.agenda.map((item, idx) => `
+            <div style="display:flex;gap:12px;margin-bottom:12px; align-items: center;">
+                <div style="background:#2c3e7f;color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:600;font-size:12px;">${idx + 1}</div>
+                <div>
+                    <div style="font-weight:700;color:#2c3e7f;font-size:13px;">${item.time}</div>
+                    <div style="color:#666;font-size:13px;">${item.title}</div>
                 </div>
-            `).join('')}
+            </div>`).join('') 
+        : '<p style="color:#999;font-style:italic;">No detailed agenda provided.</p>';
+
+    const expectationsHTML = (event.expectations && event.expectations.length > 0)
+        ? event.expectations.map(exp => `
+            <li style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+                <span style="color:#2c3e7f;font-weight:bold;">✓</span>
+                <span style="color:#555;font-size:14px;">${exp}</span>
+            </li>`).join('')
+        : '<li style="color:#999;font-style:italic;">No specific expectations listed.</li>';
+
+    const requirementsHTML = event.requirements 
+        ? `<p style="color:#4b5563; font-size:13px; line-height:1.5; background:#eff6ff; padding:12px 16px; border-radius:6px; border-left:4px solid #3b82f6; margin-top:4px;">
+                <strong style="color:#1e40af;">⚠️ Requirement:</strong> ${event.requirements}
+           </p>`
+        : '';
+
+    // Inject Content
+    container.innerHTML = `
+        ${event.imageUrl ? `<div style="background: url('${event.imageUrl}') no-repeat center center; background-size: cover; height:200px; border-radius:8px; margin-bottom:20px;"></div>` : ''}
+
+        <p style="color:#666; font-size:13px; margin-bottom:16px;">Organized by ${event.organizer || 'QCU Student Services'}</p>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px 40px; background:#f8fafc; padding:20px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:24px;">
+            <div>
+                <div style="color:#2c3e7f; font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:0.5px;">Date</div>
+                <div style="color:#334155; font-size:13px; font-weight:500; margin-top:2px;">${dateString}</div>
+            </div>
+            <div>
+                <div style="color:#2c3e7f; font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:0.5px;">Time</div>
+                <div style="color:#334155; font-size:13px; font-weight:500; margin-top:2px;">${event.time}</div>
+            </div>
+            <div>
+                <div style="color:#2c3e7f; font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:0.5px;">Location</div>
+                <div style="color:#334155; font-size:13px; font-weight:500; margin-top:2px;">${event.location}</div>
+            </div>
+            <div>
+                <div style="color:#2c3e7f; font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:0.5px;">Availability</div>
+                <div style="color:#334155; font-size:13px; font-weight:500; margin-top:2px;">${event.availability || 'Open to all'}</div>
+            </div>
         </div>
 
-        <h3 style="color:#2c3e7f;margin-bottom:12px;margin-top:24px;">What to Expect?</h3>
-        <ul style="list-style:none;padding:0;margin:0;margin-bottom:24px;">
-            ${event.expectations.map(exp => `
-                <li style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#2c3e7f" stroke-width="2" style="flex-shrink:0;margin-top:2px;"><path d="M3 10l4 4 10-10"/></svg>
-                    <span style="color:#666;">${exp}</span>
-                </li>
-            `).join('')}
+        <h3 style="color:#1e293b; font-size:16px; font-weight:700; margin-bottom:10px;">About this Event</h3>
+        <p style="color:#64748b; font-size:14px; line-height:1.6; margin-bottom:24px;">${event.description}</p>
+
+        <h3 style="color:#1e293b; font-size:16px; font-weight:700; margin-bottom:12px;">Event Agenda</h3>
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:16px; margin-bottom:24px;">
+            ${agendaHTML}
+        </div>
+
+        <h3 style="color:#1e293b; font-size:16px; font-weight:700; margin-bottom:12px;">What to Expect?</h3>
+        <ul style="list-style:none; padding:0; margin:0 0 24px 0;">
+            ${expectationsHTML}
         </ul>
 
-        <h3 style="color:#2c3e7f;margin-bottom:12px;margin-top:24px;">Requirements</h3>
-        <p style="color:#666;line-height:1.6;background:#e8f0ff;padding:12px;border-radius:6px;border-left:4px solid #2c3e7f;">
-            <strong>⚠️</strong> ${event.requirements}
-        </p>
+        ${event.requirements ? `<h3 style="color:#1e293b; font-size:16px; font-weight:700; margin-bottom:12px;">Requirements</h3>` : ''}
+        ${requirementsHTML}
 
-        <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:30px;">
-            <button type="button" class.="learn-more-btn" style="background:#fff;color:#333;border:1px solid #e8e8e8;padding:12px 20px;border-radius:6px;" onclick="closeEventDetailModal()">Back to Calendar</button>
-            <button type="button" class="learn-more-btn" style="background:#2c3e7f;color:#fff;padding:12px 20px;border-radius:6px;border:0;cursor:pointer;" onclick="openRegistrationModal('${event._id}', '${event.title}')">Register Now</button>
+        <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:30px; border-top:1px solid #e2e8f0; padding-top:20px;">
+            <button type="button" style="background:#fff; color:#64748b; border:1px solid #cbd5e1; padding:12px 20px; border-radius:6px; cursor:pointer; font-weight:500;" onclick="closeEventDetailModal()">Back to Calendar</button>
+            ${registerBtnHTML}
         </div>
     `;
 
@@ -837,46 +1175,247 @@ function openEventDetail_DYNAMIC(eventId) {
     modal.classList.add('open');
 }
 
-// --- This replaces your OLD confirmRegistration function ---
-async function confirmRegistration() {
-    const modal = document.getElementById('registrationModal');
-    const eventId = modal.dataset.eventId;
-    const event = getEventById_DYNAMIC(eventId);
+function closeEventDetailModal() {
+    const modal = document.getElementById('eventDetailModal');
+    modal.setAttribute('aria-hidden', 'true');
+    modal.classList.remove('open');
+}
 
-    if (!event) return;
+// --- RENDER LIST (Handles Future & Past Logic) ---
+function renderUpcomingEvents(events) {
+    const upcomingList = document.getElementById('upcoming');
+    if (!upcomingList) return; 
 
-    try {
-        const response = await fetch('http://localhost:3001/api/registrations', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                eventId: event._id,
-                eventTitle: event.title,
-                studentId: "student-123" // Placeholder
-            })
+    upcomingList.innerHTML = ''; 
+
+    if (events.length === 0) {
+        upcomingList.innerHTML = `
+            <div style="text-align: center; padding: 40px 20px; color: #64748b;">
+                <p>No events found.</p>
+            </div>
+        `;
+        return;
+    }
+
+    const now = new Date();
+    // Reset hours to ensure accurate day comparison
+    now.setHours(0,0,0,0); 
+
+    events.forEach(event => {
+        const eventDate = new Date(event.date);
+        const dateString = eventDate.toLocaleDateString('en-US', {
+            weekday: 'long', month: 'short', day: 'numeric'
+        });
+        const category = event.category || 'academic';
+        
+        // === CHECK: IS IT PAST OR FUTURE? ===
+        const isPast = eventDate < now;
+
+        const eventCard = document.createElement('div');
+        eventCard.className = `event-list-item ${category}`;
+        
+        // Common styles
+        eventCard.style.cursor = 'pointer';
+        eventCard.style.position = 'relative';
+
+        if (isPast) {
+            // === RENDER AS HISTORY STYLE (Gray) ===
+            eventCard.style.opacity = '0.8'; 
+            eventCard.style.backgroundColor = '#f8fafc';
+            
+            eventCard.innerHTML = `
+                <div class="event-color-indicator ${category}" style="background-color:#94a3b8;"></div>
+                <div class="event-item-content">
+                    <h4 class="event-item-title" style="color:#64748b; text-decoration: line-through;">${event.title}</h4>
+                    <p class="event-item-date">Ended • ${dateString}</p>
+                    <p class="event-item-time">${event.time}</p>
+                </div>
+                <div style="background:#e2e8f0; color:#475569; font-size:11px; font-weight:600; padding:4px 8px; border-radius:4px; height:fit-content;">
+                    Done
+                </div>
+            `;
+        } else {
+            // === RENDER AS UPCOMING STYLE (Colorful) ===
+            const isSaved = mySavedEventIds.includes(event._id);
+            const activeClass = isSaved ? 'active' : ''; 
+
+            eventCard.innerHTML = `
+                <div class="event-color-indicator ${category}"></div>
+                <div class="event-item-content">
+                    <h4 class="event-item-title">${event.title}</h4>
+                    <p class="event-item-date">${dateString}</p>
+                    <p class="event-item-time">${event.time} · ${event.location}</p>
+                </div>
+                <button class="save-event-btn ${activeClass}" style="position: relative; z-index: 10;">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M4 2v16l8-5 8 5V2H4z"/>
+                    </svg>
+                </button>
+            `;
+
+            // Attach Save Button Listener (Only for future events)
+            const saveBtn = eventCard.querySelector('.save-event-btn');
+            saveBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); 
+                toggleSaveEvent(e, event._id);
+            });
+        }
+
+        // === GLOBAL CLICK: OPEN MODAL ===
+        // (Works for both Past and Future)
+        eventCard.addEventListener('click', () => {
+            openEventDetail_DYNAMIC(event._id);
         });
 
-        if (!response.ok) { throw new Error('Server error'); }
+        upcomingList.appendChild(eventCard);
+    });
+}
 
-        alert('Registration successful! Your registration has been confirmed.');
-        closeRegistrationModal();
-        closeEventDetailModal();
 
+// --- TOGGLE SAVE LOGIC ---
+async function toggleSaveEvent(e, eventId) {
+    if (e) e.stopPropagation(); 
+    
+    const studentId = localStorage.getItem('currentStudentId');
+    if (!studentId) {
+        alert("Please submit a counseling form first to set your Student ID.");
+        return;
+    }
+
+    // 1. Update Local Data
+    const index = mySavedEventIds.indexOf(eventId);
+    if (index > -1) {
+        mySavedEventIds.splice(index, 1); // Remove ID
+    } else {
+        mySavedEventIds.push(eventId); // Add ID
+    }
+
+    // 2. REFRESH LISTS (WITH FIXES)
+    
+    // FIX A: Filter for Future Events before rendering "Upcoming"
+    // This prevents "Past Events" from suddenly appearing when you click save
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const futureEvents = allEventsData.filter(event => new Date(event.date) >= now);
+    
+    renderUpcomingEvents(futureEvents); // <--- Render ONLY future events
+    renderSavedEvents(); // Refresh the Saved tab
+
+    // 3. Send to Backend
+    try {
+        await fetch('http://localhost:3001/api/saved-events/toggle', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ studentId, eventId })
+        });
     } catch (error) {
-        console.error('Error submitting registration:', error);
-        alert('There was a problem registering for this event.');
+        console.error("Error toggling save:", error);
+        // Revert on error
+        if (index > -1) mySavedEventIds.push(eventId);
+        else mySavedEventIds.splice(mySavedEventIds.indexOf(eventId), 1);
+        renderUpcomingEvents(futureEvents);
+        renderSavedEvents();
     }
 }
 
-// --- We still need your other functions ---
-// (We just rename the ones we replaced to avoid conflicts)
-function openEventDetail_OLD(eventId) { console.log("Old function called"); }
-function confirmRegistration_OLD() { console.log("Old function called"); }
-// (Your `switchTab`, `previousMonth`, `nextMonth`, etc. are all fine!)
+// --- RENDER SAVED EVENTS TAB ---
+// --- 3. RENDER SAVED EVENTS (FIXED CLICK) ---
+function renderSavedEvents() {
+    const savedList = document.getElementById('saved');
+    if (!savedList) return;
+    
+    savedList.innerHTML = '';
 
-// end of EVENTS PAGE FUNCTIONS
+    // Filter Future & Saved
+    const now = new Date();
+    now.setHours(0,0,0,0);
+    const savedEvents = allEventsData.filter(event => 
+        mySavedEventIds.includes(event._id) && new Date(event.date) >= now
+    );
 
+    if (savedEvents.length === 0) {
+        savedList.innerHTML = '<p style="text-align: center; color: #999; padding: 30px 20px;">No saved events.</p>';
+        return;
+    }
 
+    savedEvents.forEach(event => {
+        const dateString = new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        
+        const card = document.createElement('div');
+        card.className = `event-list-item ${event.category || 'academic'}`;
+        
+        card.innerHTML = `
+             <div class="event-color-indicator ${event.category || 'academic'}"></div>
+             <div class="event-item-content" style="cursor:pointer;">
+                <h4 class="event-item-title">${event.title}</h4>
+                <p class="event-item-date">Saved • ${dateString}</p>
+             </div>
+             <button class="save-event-btn active">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M4 2v16l8-5 8 5V2H4z"/>
+                </svg>
+            </button>
+        `;
+
+        card.querySelector('.event-item-content').addEventListener('click', () => {
+            openEventDetail_DYNAMIC(event._id);
+        });
+
+        // === CONFIRMATION LOGIC ===
+        const unsaveBtn = card.querySelector('.save-event-btn');
+        unsaveBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // Ask before removing from the list
+            if(confirm("Remove this event from your saved list?")) {
+                toggleSaveEvent(e, event._id);
+            }
+        });
+
+        savedList.appendChild(card);
+    });
+}
+
+// --- TABS SWITCHER (Keep this) ---
+function switchTab(tabName) {
+    // Reset Buttons
+    document.querySelectorAll('.events-tabs .tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        // Reset text if we changed it via calendar click
+        if (btn.textContent.includes('Events on')) btn.textContent = 'Upcoming Events';
+    });
+    
+    if (event && event.target) {
+        event.target.classList.add('active');
+    }
+
+    // Reset Lists
+    document.getElementById('upcoming').classList.remove('active');
+    document.getElementById('saved').classList.remove('active');
+    document.getElementById('history').classList.remove('active');
+    
+    document.getElementById(tabName).classList.add('active');
+
+    // === FIX: IF SWITCHING TO UPCOMING, FILTER AGAIN ===
+if (tabName === 'upcoming') {
+        // === RESET SEARCH TEXT ===
+        const upcomingBtn = document.querySelector('.events-tabs .tab-btn:first-child');
+        upcomingBtn.textContent = 'Upcoming Events';
+        
+        // Clear Search Input
+        const searchInput = document.getElementById('eventSearchInput');
+        if(searchInput) searchInput.value = '';
+
+        // Show Future Only
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        const futureEvents = allEventsData.filter(e => new Date(e.date) >= now);
+        
+        renderUpcomingEvents(futureEvents);
+        
+        document.querySelectorAll('.calendar-day').forEach(d => d.style.border = 'none');
+    }
+    // ===================================================
+}
 /* ============================================
    CLUBS PAGE FUNCTIONS (DYNAMIC VERSION)
    Handles club filtering, searching, sorting, and applications
@@ -1267,23 +1806,74 @@ function closeEventDetailModal() {
 }
 
 // This is the function your "Register Now" button calls
-function openRegistrationModal(eventId, eventTitle) {
-    const modal = document.getElementById('registrationModal');
-    if (!modal) return;
-    
-    const eventNameEl = document.getElementById('registrationEventName');
-    
-    eventNameEl.textContent = `Are you sure you want to register for "${eventTitle}"? Once confirmed, your registration cannot be cancelled.`;
-    
-    // Store event ID for confirmation
-    modal.dataset.eventId = eventId;
-    
-    modal.setAttribute('aria-hidden', 'false');
-    modal.classList.add('open');
+function openRegistrationModal(id, title) {
+    // If triggered from a button event, stop it from bubbling up
+    if (event) event.stopPropagation(); 
 
-    // This handles focus and keyboard for accessibility
-    window._previousActiveElement = document.activeElement;
-    document.addEventListener('keydown', handleModalKeydown);
+    const modal = document.getElementById('registrationModal');
+    const messageEl = document.getElementById('registrationEventName');
+    
+    if (modal && messageEl) {
+        messageEl.innerHTML = `Are you sure you want to register for <strong>${title}</strong>?`;
+        
+        // Store ID on the modal itself to retrieve later
+        modal.dataset.eventId = id;
+        modal.dataset.eventTitle = title;
+        
+        modal.setAttribute('aria-hidden', 'false');
+        modal.classList.add('open');
+    } else {
+        console.error("Registration modal elements not found in HTML");
+    }
+}
+
+async function confirmRegistration() {
+    const modal = document.getElementById('registrationModal');
+    const eventId = modal.dataset.eventId;
+    const eventTitle = modal.dataset.eventTitle;
+    
+    // Get Real Student ID
+    const studentId = localStorage.getItem('currentStudentId');
+
+    if (!studentId) {
+        alert("You must fill out a counseling form first to set your Student ID (Simulation Mode).");
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost:3001/api/registrations', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                eventId: eventId,
+                eventTitle: eventTitle,
+                studentId: studentId
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) { 
+            throw new Error(data.message || 'Server error'); 
+        }
+
+        alert('Registration successful! Your registration has been confirmed.');
+        
+        closeRegistrationModal();
+        
+        // If the "Event Detail Modal" is open, close it too
+        const detailModal = document.getElementById('eventDetailModal');
+        if (detailModal && detailModal.classList.contains('open')) {
+            closeEventDetailModal();
+        }
+        
+        // REFRESH THE PAGE DATA so the button turns green immediately
+        fetchAndInitializeEvents(); 
+
+    } catch (error) {
+        console.error('Error submitting registration:', error);
+        alert(error.message); 
+    }
 }
 
 // This is the function your "Cancel" button (in the 2nd modal) calls

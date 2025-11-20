@@ -45,6 +45,8 @@ const clubApplicationRoutes = require('./routes/clubApplication.routes.js');
 const eventRegistrationRoutes = require('./routes/eventRegistration.routes.js'); 
 const announcementRoutes = require('./routes/announcement.routes.js'); 
 const faqRoutes = require('./routes/faq.routes.js');
+const savedEventRoutes = require('./routes/savedEvent.routes.js');
+const notificationRoutes = require('./routes/notification.routes.js');
 
 
 
@@ -58,6 +60,8 @@ app.use('/api/applications', clubApplicationRoutes);
 app.use('/api/registrations', eventRegistrationRoutes);
 app.use('/api/announcements', announcementRoutes); // <-- ADD THIS
 app.use('/api/faqs', faqRoutes);
+app.use('/api/saved-events', savedEventRoutes);
+app.use('/api/notifications', require('./routes/notification.routes.js'));
 
 
 

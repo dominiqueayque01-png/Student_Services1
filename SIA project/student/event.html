@@ -172,18 +172,7 @@
                         </div>
 
                         <div class="latest-items" id="latestItems">
-                            <div class="latest-item" data-latest-id="1">
-                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-                                    <path d="M10 2l2.4 4.8h5.2l-4.2 3.2 1.6 4.8-4-3.2-4 3.2 1.6-4.8-4.2-3.2h5.2z"/>
-                                </svg>
-                                <span>Tech Talk: IT Summit added to calendar</span>
-                            </div>
-                            <div class="latest-item" data-latest-id="2">
-                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-                                    <path d="M10 2l2.4 4.8h5.2l-4.2 3.2 1.6 4.8-4-3.2-4 3.2 1.6-4.8-4.2-3.2h5.2z"/>
-                                </svg>
-                                <span>Your enrollment has been confirmed</span>
-                            </div>
+                            <p style="font-size:12px; color:#999; padding:10px;">Loading notifications...</p>
                         </div>
                     </div>
 
@@ -200,6 +189,7 @@
                     <div class="events-tabs">
                         <button class="tab-btn active" onclick="switchTab('upcoming')">Upcoming Events</button>
                         <button class="tab-btn" onclick="switchTab('saved')">Saved Events</button>
+                        <button class="tab-btn" onclick="switchTab('history')">History</button>
                     </div>
 
                     <!-- Events List -->
@@ -210,6 +200,10 @@
 
                         <div id="saved" class="events-list-tab">
                             <p style="text-align: center; color: #999; padding: 30px 20px;">No saved events yet.</p>
+                        </div>
+
+                        <div id="history" class="events-list-tab">
+                            <p style="text-align: center; color: #999; padding: 30px 20px;">No past events attended.</p>
                         </div>
                     </div>
                 </aside>

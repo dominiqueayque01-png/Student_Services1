@@ -1554,11 +1554,62 @@ body {
 
 .latest-item {
     display: flex;
-    align-items: flex-start;
+    align-items: flex-start; /* Align to top so icon stays up if text is long */
     gap: 12px;
-    font-size: 12px;
-    color: #666;
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f5f9;
+    transition: all 0.2s ease;
+}
+
+.latest-item:last-child {
+    border-bottom: none;
+}
+
+/* The Icon Container */
+.notif-icon {
+    flex-shrink: 0;
+    margin-top: 2px; /* Align with first line of text */
+}
+
+/* The Text Content Wrapper */
+.notif-content {
+    flex: 1; /* Takes up remaining space */
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* The Main Message */
+.notif-message {
+    font-size: 13px;
+    color: #334155;
     line-height: 1.4;
+}
+
+/* The Timestamp (New Feature) */
+.notif-time {
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+/* The Red Dot (New Feature) */
+.unread-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #ef4444; /* Bright Red */
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 6px;
+    box-shadow: 0 0 4px rgba(239, 68, 68, 0.4); /* Subtle glow */
+}
+
+/* If read, fade it out slightly */
+.latest-item.read .notif-message {
+    color: #64748b;
+}
+.latest-item.read .notif-icon {
+    opacity: 0.5;
 }
 
 .latest-item svg {
@@ -1634,12 +1685,29 @@ body {
 
 /* Events List Container */
 .events-list-container {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
-    max-height: 400px;
-    overflow-y: auto;
+    /* 1. Make it taller to match the calendar on the left */
+    height: 600px; /* You can adjust this number (e.g. 500px or 700px) */
+    
+    /* 2. Enable scrolling if it gets too long */
+    overflow-y: auto; 
+    
+    /* 3. Add spacing so content isn't cut off at the edges */
+    padding-right: 10px; 
+    padding-bottom: 20px;
+    margin-top: 10px;
+}
+
+.events-list-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.events-list-container::-webkit-scrollbar-thumb {
+    background-color: #979899;
+    border-radius: 3px;
+}
+
+.events-list-container::-webkit-scrollbar-thumb:hover {
+    background-color: #94a3b8; /* Darker on hover */
 }
 
 .events-list-tab {
@@ -1734,6 +1802,55 @@ body {
 .save-event-btn:hover {
     color: #2c3e7f;
 }
+
+/* THE ACTIVE (YELLOW) STATE */
+.save-event-btn.active {
+    color: #fbbf24; /* Yellow/Gold Color */
+}
+
+.save-event-btn.active svg {
+    fill: #fbbf24; /* Fills the icon with yellow */
+    stroke: #fbbf24;
+}
+
+/* ============================================
+   CALENDAR CATEGORY COLORS
+   ============================================ */
+
+/* Base style for any day with an event */
+.calendar-day.has-event {
+    color: white; /* Text becomes white for better contrast */
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+/* 1. ACADEMIC (Orange/Yellow) */
+.calendar-day.academic {
+    background-color: #f59e0b; 
+    border: 1px solid #d97706;
+}
+.calendar-day.academic:hover { background-color: #d97706; }
+
+/* 2. COMMUNITY (Purple) - Matches your "New Event" */
+.calendar-day.community {
+    background-color: #9b59b6; /* The purple you wanted */
+    border: 1px solid #8e44ad;
+}
+.calendar-day.community:hover { background-color: #8e44ad; }
+
+/* 3. INSTITUTIONAL (Grey) */
+.calendar-day.institutional {
+    background-color: #64748b; 
+    border: 1px solid #475569;
+}
+.calendar-day.institutional:hover { background-color: #475569; }
+
+/* 4. RECREATION (Blue) */
+.calendar-day.recreation {
+    background-color: #3b82f6; 
+    border: 1px solid #2563eb;
+}
+.calendar-day.recreation:hover { background-color: #2563eb; }
 
 /* Responsive - Events Page */
 @media (max-width: 1024px) {
