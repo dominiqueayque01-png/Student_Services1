@@ -1,5 +1,5 @@
 /* ============================================
-   OJT LISTING MODULE (FINAL COMPLETE VERSION)
+   OJT LISTING MODULE (FINAL)
    ============================================ */
 
 let allOjtData = [];
@@ -7,7 +7,7 @@ let myOjtApplications = [];
 let currentOJTCategory = 'All';
 let currentOJTSortBy = 'newest';
 
-// --- 1. RECOMMENDATION ENGINE CONFIG ---
+// --- RECOMMENDATION ENGINE CONFIG ---
 const jobRelationships = {
     'Web Development': ['Design', 'Marketing', 'IT Operations'],
     'Software Engineering': ['Data Science', 'Project Management', 'Web Development'],
@@ -21,9 +21,8 @@ const jobRelationships = {
     'Education': ['Psychology', 'Training']
 };
 
-// --- 2. INITIALIZATION ---
+// --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Only run if we are on the OJT page
     if (document.getElementById('ojtGrid')) {
         fetchAndInitializeOJT();
         
@@ -34,12 +33,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function fetchAndInitializeOJT() {
     try {
-        // A. Fetch Listings
+        // 1. Fetch Listings
         const response = await fetch('http://localhost:3001/api/ojt');
         if (!response.ok) throw new Error("Failed to fetch listings");
         allOjtData = await response.json();
 
-        // B. Fetch My Applications (If logged in)
+        // 2. Fetch My Applications (If logged in)
         const studentId = localStorage.getItem('currentStudentId');
         if (studentId) {
             try {
@@ -51,13 +50,13 @@ async function fetchAndInitializeOJT() {
             }
         }
 
-        // C. Render
+        // 3. Render
         searchAndFilterOJT();
 
     } catch (error) {
         console.error("Error loading OJT data:", error);
         const grid = document.getElementById('ojtGrid');
-        if(grid) grid.innerHTML = '<p style="padding:20px; text-align:center;">Error loading listings. Is the server running?</p>';
+        if(grid) grid.innerHTML = '<p style="padding:20px; text-align:center;">Error loading listings.</p>';
     }
 }
 
@@ -65,7 +64,7 @@ function getOJTById(id) {
     return allOjtData.find(o => o._id === id);
 }
 
-// --- 3. SMART RENDERER (ALGORITHM INSIDE) ---
+// --- SMART RENDERER (ALGORITHM) ---
 function searchAndFilterOJT() {
     const searchInput = document.getElementById('ojtSearchInput');
     if (!searchInput) return;
@@ -74,19 +73,16 @@ function searchAndFilterOJT() {
     const ojtGrid = document.getElementById('ojtGrid');
     ojtGrid.innerHTML = ''; 
 
-    // --- A. CALCULATE USER INTERESTS ---
-    // Find jobs I applied to
+    // 1. Calculate User Interests
     const appliedJobs = allOjtData.filter(job => myOjtApplications.includes(job._id));
-    // Get their subcategories
     let myInterests = appliedJobs.map(j => j.subCategory);
-    // Add related categories from the map
     myInterests.forEach(interest => {
         if (jobRelationships[interest]) {
             myInterests.push(...jobRelationships[interest]);
         }
     });
 
-    // --- B. FILTER LIST ---
+    // 2. Filter List
     let visibleOJT = allOjtData.filter(ojt => {
         const matchesCategory = currentOJTCategory === 'All' || ojt.category === currentOJTCategory;
         const matchesSearch = !searchQuery || 
@@ -94,32 +90,26 @@ function searchAndFilterOJT() {
             ojt.company.toLowerCase().includes(searchQuery) ||
             (ojt.subCategory && ojt.subCategory.toLowerCase().includes(searchQuery));
         
-        // ALGORITHM: Mark if recommended
-        // Logic: Matches my interests AND I haven't applied yet
+        // Mark if recommended
         ojt.isRecommended = myInterests.includes(ojt.subCategory) && !myOjtApplications.includes(ojt._id);
 
         return matchesCategory && matchesSearch;
     });
 
-    // --- C. SORT LIST ---
+    // 3. Sort List
     visibleOJT.sort((a, b) => {
-        // Rule 1: Recommended on TOP
         if (a.isRecommended && !b.isRecommended) return -1;
         if (!a.isRecommended && b.isRecommended) return 1;
-
-        // Rule 2: User selected sort
         if (currentOJTSortBy === 'pay-high') return b.payPerHour - a.payPerHour;
         if (currentOJTSortBy === 'pay-low') return a.payPerHour - b.payPerHour;
         if (currentOJTSortBy === 'hours') return a.hoursPerWeek - b.hoursPerWeek;
-        
-        // Default: Newest
         return new Date(b.postedAt) - new Date(a.postedAt);
     });
 
-    // --- D. RENDER HTML ---
+    // 4. Render
     if (visibleOJT.length === 0) {
         ojtGrid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#666; margin-top:20px;">No training opportunities found.</p>';
-        document.getElementById('ojtCount').textContent = '0 jobs found';
+        document.getElementById('ojtCount').textContent = '0 found';
         return;
     }
 
@@ -127,14 +117,13 @@ function searchAndFilterOJT() {
         const daysAgo = Math.floor((new Date() - new Date(ojt.postedAt)) / (1000 * 60 * 60 * 24));
         const postedText = daysAgo === 0 ? "Today" : `${daysAgo} days ago`;
 
-        // Generate Badges
         const subCatHTML = ojt.subCategory ? `<span class="club-subcategory-badge">${ojt.subCategory}</span>` : '';
         const recommendedHTML = ojt.isRecommended ? `<div class="recommended-badge">Recommended</div>` : '';
         const highlightStyle = ojt.isRecommended ? 'border: 1px solid #8b5cf6; background-color: #fbfaff;' : '';
 
         const card = document.createElement('div');
         card.className = 'club-card';
-        card.style.cssText = highlightStyle; // Apply highlight if recommended
+        card.style.cssText = highlightStyle;
         
         card.innerHTML = `
             ${recommendedHTML}
@@ -172,11 +161,10 @@ function searchAndFilterOJT() {
         ojtGrid.appendChild(card);
     });
 
-    const countLabel = document.getElementById('ojtCount');
-    if(countLabel) countLabel.textContent = `${visibleOJT.length} training opportunities found`;
+    document.getElementById('ojtCount').textContent = `${visibleOJT.length} training opportunities found`;
 }
 
-// --- 4. MODAL LOGIC (With Related Jobs) ---
+// --- 4. MODAL & APPLY ---
 function openOJTCompanyModal(ojtId) {
     const ojt = getOJTById(ojtId);
     if (!ojt) return;
@@ -195,8 +183,7 @@ function openOJTCompanyModal(ojtId) {
         ? ojt.skills.map(s => `<span style="background:#e8f0ff;color:#2c3e7f;padding:6px 12px;border-radius:20px;font-size:12px;">${s}</span>`).join('')
         : '<span>No specific skills listed</span>';
 
-    // === RELATED JOBS LOGIC (Inside Modal) ===
-    // Show jobs with SAME SubCategory, excluding current one
+    // Related Jobs (Inside Modal)
     const relatedJobs = allOjtData.filter(item => 
         item.subCategory === ojt.subCategory && item._id !== ojt._id
     ).slice(0, 3);
@@ -266,7 +253,6 @@ function closeOJTCompanyModal() {
     }
 }
 
-// --- 5. ACTIONS ---
 async function applyToOJT(ojtId) {
     const studentId = localStorage.getItem('currentStudentId');
     if (!studentId) {
@@ -288,17 +274,14 @@ async function applyToOJT(ojtId) {
 
         alert("Application submitted successfully!");
         myOjtApplications.push(ojtId);
-        openOJTCompanyModal(ojtId); 
-        
-        // Re-render the main list to update Badges!
-        searchAndFilterOJT();
+        openOJTCompanyModal(ojtId); // Refresh modal to show "Applied"
+        searchAndFilterOJT(); // Refresh list to remove "Recommended" badge if applied
 
     } catch (error) {
         alert(error.message);
     }
 }
 
-// --- 6. HELPERS (Dropdown/Sort) ---
 function toggleOJTCategoryDropdown() {
     const d = document.getElementById('ojtCategoryDropdown');
     d.style.display = d.style.display === 'none' ? 'block' : 'none';

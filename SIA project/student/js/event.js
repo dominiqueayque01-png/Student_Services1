@@ -30,7 +30,10 @@ function renderHistoryEvents() {
         return;
     }
     pastEvents.forEach(event => {
-        const dateString = new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const dateString = new Date(event.date).toLocaleDateString('en-US', {
+             month: 'short', day: 'numeric', year: 'numeric' 
+            });
+
         const card = document.createElement('div');
         card.className = `event-list-item ${event.category || 'academic'}`;
         card.style.opacity = '0.8';
@@ -44,7 +47,8 @@ function renderHistoryEvents() {
              </div>
              <div style="background:#e2e8f0; color:#475569; font-size:11px; font-weight:600; padding:4px 8px; border-radius:4px;">Done</div>
         `;
-        card.addEventListener('click', () => openEventDetail_DYNAMIC(event._id));
+        card.addEventListener('click', 
+            () => openEventDetail_DYNAMIC(event._id));
         historyList.appendChild(card);
     });
 }
@@ -55,7 +59,20 @@ function renderCalendar(events) {
     if (!calendarDays || !calendarTitle) return;
     const year = calendarDate.getFullYear();
     const month = calendarDate.getMonth();
-    const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    const monthNames = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December"
+    ];
     calendarTitle.textContent = `${monthNames[month]} ${year}`;
     const firstDayIndex = new Date(year, month, 1).getDay();
     const adjustedFirstDay = (firstDayIndex === 0 ? 6 : firstDayIndex - 1);
@@ -170,7 +187,11 @@ async function fetchAndInitializeEvents() {
                 const regData = await regResponse.json();
                 myRegistrations = regData.map(r => r.eventId);
             } catch (err) { console.warn('Could not fetch registrations', err); myRegistrations = []; }
-            try { const saveResponse = await fetch(`http://localhost:3001/api/saved-events/${studentId}`); mySavedEventIds = await saveResponse.json(); } catch (err) { console.warn('Could not fetch saved events', err); mySavedEventIds = []; }
+            try { const saveResponse = await fetch(`http://localhost:3001/api/saved-events/${studentId}`);
+            mySavedEventIds = await saveResponse.json(); 
+        } catch (err) {
+             console.warn('Could not fetch saved events', err); mySavedEventIds = [];
+             }
             fetchNotifications(studentId);
         }
         renderUpcomingEvents(allEventsData);
@@ -185,11 +206,18 @@ async function fetchAndInitializeEvents() {
 
 function openEventDetail_DYNAMIC(eventId) {
     const event = allEventsData.find(e => e._id === eventId);
-    if (!event) { console.error('Event not found:', eventId); return; }
+    if (!event) { 
+        console.error('Event not found:', eventId); 
+        return; 
+    }
     currentEventId = eventId;
-    const container = document.getElementById('eventDetailContent'); if (!container) return;
+    const container = document.getElementById('eventDetailContent'); 
+    if (!container) 
+        return;
     const eventDate = new Date(event.date);
-    const dateString = eventDate.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+    const dateString = eventDate.toLocaleDateString('en-US', 
+        { weekday:'long', month:'long', day:'numeric', year:'numeric' }
+    );
     const isRegistered = myRegistrations.includes(eventId);
     let registerBtnHTML = '';
     if (isRegistered) registerBtnHTML = `<button type="button" disabled style="background:#ecfdf5; color:#10b981; border:1px solid #10b981; padding:12px 20px; border-radius:6px; cursor:default; font-weight:600;">✓ Already Registered</button>`;
@@ -243,16 +271,28 @@ function openEventDetail_DYNAMIC(eventId) {
 }
 
 function closeEventDetailModal() {
-    const modal = document.getElementById('eventDetailModal'); if (!modal) return; modal.setAttribute('aria-hidden','true'); modal.classList.remove('open');
+    const modal = document.getElementById('eventDetailModal'); 
+    if (!modal) return; modal.setAttribute('aria-hidden','true'); 
+    modal.classList.remove('open');
 }
 
 function renderUpcomingEvents(events) {
-    const upcomingList = document.getElementById('upcoming'); if (!upcomingList) return; upcomingList.innerHTML = '';
-    if (events.length === 0) { upcomingList.innerHTML = `<div style="text-align: center; padding: 40px 20px; color: #64748b;"> <p>No events found.</p> </div>`; return; }
-    const now = new Date(); now.setHours(0,0,0,0);
+    const upcomingList = document.getElementById('upcoming'); 
+    if (!upcomingList) 
+        return; 
+
+    upcomingList.innerHTML = '';
+    if (events.length === 0) { 
+        upcomingList.innerHTML = `<div style="text-align: center; padding: 40px 20px; color: #64748b;"> <p>No events found.</p> </div>`; 
+        return; 
+    }
+    const now = new Date(); 
+    now.setHours(0,0,0,0);
     events.forEach(event => {
         const eventDate = new Date(event.date);
-        const dateString = eventDate.toLocaleDateString('en-US', { weekday:'long', month:'short', day:'numeric' });
+        const dateString = eventDate.toLocaleDateString('en-US', 
+            { weekday:'long', month:'short', day:'numeric' }
+        );
         const category = event.category || 'academic';
         const isPast = eventDate < now;
         const eventCard = document.createElement('div');
@@ -284,7 +324,11 @@ function renderUpcomingEvents(events) {
                 </button>
             `;
             const saveBtn = eventCard.querySelector('.save-event-btn');
-            if (saveBtn) saveBtn.addEventListener('click', (e)=>{ e.stopPropagation(); toggleSaveEvent(e, event._id); });
+            if (saveBtn) 
+                saveBtn.addEventListener('click', 
+            (e)=>{ e.stopPropagation(); toggleSaveEvent(e, event._id); 
+
+            });
         }
         eventCard.addEventListener('click', () => openEventDetail_DYNAMIC(event._id));
         upcomingList.appendChild(eventCard);
@@ -301,85 +345,233 @@ async function toggleSaveEvent(e, eventId) {
     const futureEvents = allEventsData.filter(event => new Date(event.date) >= now);
     renderUpcomingEvents(futureEvents); renderSavedEvents();
     try {
-        await fetch('http://localhost:3001/api/saved-events/toggle', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ studentId, eventId }) });
-    } catch (error) { console.error('Error toggling save:', error); if (index > -1) mySavedEventIds.push(eventId); else mySavedEventIds.splice(mySavedEventIds.indexOf(eventId),1); renderUpcomingEvents(futureEvents); renderSavedEvents(); }
+        await fetch('http://localhost:3001/api/saved-events/toggle', 
+            { method:'POST', headers:{'Content-Type':'application/json'}, 
+            body: JSON.stringify({ studentId, eventId }) });
+    } catch (error) {
+         console.error('Error toggling save:', error); 
+        if (index > -1) mySavedEventIds.push(eventId); 
+        else mySavedEventIds.splice(mySavedEventIds.indexOf(eventId),1); 
+        renderUpcomingEvents(futureEvents); renderSavedEvents(); 
+    }
 }
 
 function renderSavedEvents() {
-    const savedList = document.getElementById('saved'); if (!savedList) return; savedList.innerHTML = '';
-    const now = new Date(); now.setHours(0,0,0,0);
-    const savedEvents = allEventsData.filter(event => mySavedEventIds.includes(event._id) && new Date(event.date) >= now);
-    if (savedEvents.length === 0) { savedList.innerHTML = '<p style="text-align: center; color: #999; padding: 30px 20px;">No saved events.</p>'; return; }
+    const savedList = document.getElementById('saved');
+    if (!savedList) return;
+
+    savedList.innerHTML = '';
+
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    const savedEvents = allEventsData.filter(event =>
+        mySavedEventIds.includes(event._id) && new Date(event.date) >= now
+    );
+
+    if (savedEvents.length === 0) {
+        savedList.innerHTML =
+            '<p style="text-align: center; color: #999; padding: 30px 20px;">No saved events.</p>';
+        return;
+    }
+
     savedEvents.forEach(event => {
-        const dateString = new Date(event.date).toLocaleDateString('en-US', { month:'short', day:'numeric' });
-        const card = document.createElement('div'); card.className = `event-list-item ${event.category || 'academic'}`;
+        const dateString = new Date(event.date).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric'
+        });
+
+        const card = document.createElement('div');
+        card.className = `event-list-item ${event.category || 'academic'}`;
+
         card.innerHTML = `
-             <div class="event-color-indicator ${event.category || 'academic'}"></div>
-             <div class="event-item-content" style="cursor:pointer;"><h4 class="event-item-title">${event.title}</h4><p class="event-item-date">Saved • ${dateString}</p></div>
-             <button class="save-event-btn active"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 2v16l8-5 8 5V2H4z"/></svg></button>
+            <div class="event-color-indicator ${event.category || 'academic'}"></div>
+            <div class="event-item-content" style="cursor:pointer;">
+                <h4 class="event-item-title">${event.title}</h4>
+                <p class="event-item-date">Saved • ${dateString}</p>
+            </div>
+            <button class="save-event-btn active">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M4 2v16l8-5 8 5V2H4z"/>
+                </svg>
+            </button>
         `;
-        card.querySelector('.event-item-content').addEventListener('click', ()=> openEventDetail_DYNAMIC(event._id));
-        const unsaveBtn = card.querySelector('.save-event-btn'); unsaveBtn.addEventListener('click',(e)=>{ e.stopPropagation(); if (confirm('Remove this event from your saved list?')) toggleSaveEvent(e, event._id); });
+
+        card.querySelector('.event-item-content').addEventListener('click', () =>
+            openEventDetail_DYNAMIC(event._id)
+        );
+
+        const unsaveBtn = card.querySelector('.save-event-btn');
+        unsaveBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (confirm('Are you sure you want to remove this event from your saved list?')) {
+                toggleSaveEvent(e, event._id);
+            }
+        });
+
         savedList.appendChild(card);
     });
 }
 
 function switchTab(tabName) {
-    document.querySelectorAll('.events-tabs .tab-btn').forEach(btn => { btn.classList.remove('active'); if (btn.textContent.includes('Events on')) btn.textContent = 'Upcoming Events'; });
+    document.querySelectorAll('.events-tabs .tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.textContent.includes('Events on')) {
+            btn.textContent = 'Upcoming Events';
+        }
+    });
+
     if (event && event.target) event.target.classList.add('active');
-    document.getElementById('upcoming').classList.remove('active'); document.getElementById('saved').classList.remove('active'); document.getElementById('history').classList.remove('active');
+
+    document.getElementById('upcoming').classList.remove('active');
+    document.getElementById('saved').classList.remove('active');
+    document.getElementById('history').classList.remove('active');
+
     document.getElementById(tabName).classList.add('active');
+
     if (tabName === 'upcoming') {
-        const upcomingBtn = document.querySelector('.events-tabs .tab-btn:first-child'); upcomingBtn.textContent = 'Upcoming Events';
-        const searchInput = document.getElementById('eventSearchInput'); if (searchInput) searchInput.value = '';
-        const now = new Date(); now.setHours(0,0,0,0); const futureEvents = allEventsData.filter(e => new Date(e.date) >= now); renderUpcomingEvents(futureEvents); document.querySelectorAll('.calendar-day').forEach(d => d.style.border = 'none');
+        const upcomingBtn = document.querySelector('.events-tabs .tab-btn:first-child');
+        if (upcomingBtn) upcomingBtn.textContent = 'Upcoming Events';
+
+        const searchInput = document.getElementById('eventSearchInput');
+        if (searchInput) searchInput.value = '';
+
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        const futureEvents = allEventsData.filter(e => new Date(e.date) >= now);
+
+        renderUpcomingEvents(futureEvents);
+
+        document.querySelectorAll('.calendar-day').forEach(d => d.style.border = 'none');
     }
 }
 
-// Notifications & helper
+// Notifications & helpers
 async function fetchNotifications(studentId) {
     try {
         const response = await fetch(`http://localhost:3001/api/notifications/${studentId}`);
-        const notifications = await response.json(); renderNotifications(notifications);
-    } catch (error) { console.error('Error loading notifications:', error); }
+        const notifications = await response.json();
+        renderNotifications(notifications);
+    } catch (error) {
+        console.error('Error loading notifications:', error);
+    }
 }
 
 function renderNotifications(notifications) {
-    const container = document.getElementById('latestItems'); if (!container) return; container.innerHTML = '';
-    if (notifications.length === 0) { container.innerHTML = '<p style="font-size:12px; color:#999; padding:10px;">No new notifications.</p>'; return; }
+    const container = document.getElementById('latestItems');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    if (!notifications || notifications.length === 0) {
+        container.innerHTML =
+            '<p style="font-size:12px; color:#999; padding:10px;">No new notifications.</p>';
+        return;
+    }
+
     notifications.forEach(notif => {
-        const item = document.createElement('div'); const readClass = notif.isRead ? 'read' : ''; item.className = `latest-item ${readClass}`;
-        const icon = `<div class="notif-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#f59e0b" stroke-width="1.5"><path d="M10 2l2.4 4.8h5.2l-4.2 3.2 1.6 4.8-4-3.2-4 3.2 1.6-4.8-4.2-3.2h5.2z"/></svg></div>`;
+        const item = document.createElement('div');
+        const readClass = notif.isRead ? 'read' : '';
+        item.className = `latest-item ${readClass}`;
+
+        const icon = `
+            <div class="notif-icon">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#f59e0b" stroke-width="1.5">
+                    <path d="M10 2l2.4 4.8h5.2l-4.2 3.2 1.6 4.8-4-3.2-4 3.2 1.6-4.8-4.2-3.2h5.2z"/>
+                </svg>
+            </div>`;
+
         const dotHTML = !notif.isRead ? `<div class="unread-dot"></div>` : '';
+
         const timeString = timeAgo(notif.createdAt);
         const fullDate = new Date(notif.createdAt).toLocaleString();
-        item.innerHTML = `${icon}<div class="notif-content"><span class="notif-message">${notif.message}</span><span class="notif-time" title="${fullDate}">${timeString}</span></div>${dotHTML}`;
+
+        item.innerHTML = `
+            ${icon}
+            <div class="notif-content">
+                <span class="notif-message">${notif.message}</span>
+                <span class="notif-time" title="${fullDate}">${timeString}</span>
+            </div>
+            ${dotHTML}
+        `;
+
         container.appendChild(item);
     });
 }
 
 async function markAllEventsAsRead(e) {
-    if (e) e.preventDefault(); const studentId = localStorage.getItem('currentStudentId'); if(!studentId) return;
-    try { await fetch(`http://localhost:3001/api/notifications/mark-read/${studentId}`, { method: 'PATCH' }); fetchNotifications(studentId); } catch (err) { console.error(err); }
+    if (e) e.preventDefault();
+    const studentId = localStorage.getItem('currentStudentId');
+    if (!studentId) return;
+
+    try {
+        await fetch(`http://localhost:3001/api/notifications/mark-read/${studentId}`, {
+            method: 'PATCH'
+        });
+        fetchNotifications(studentId);
+    } catch (err) {
+        console.error(err);
+    }
 }
 
 // Registration modal logic
 function openRegistrationModal(id, title) {
-    if (event) event.stopPropagation(); const modal = document.getElementById('registrationModal'); const messageEl = document.getElementById('registrationEventName');
-    if (modal && messageEl) {
-        messageEl.innerHTML = `Are you sure you want to register for <strong>${title}</strong>?`;
-        modal.dataset.eventId = id; modal.dataset.eventTitle = title; modal.setAttribute('aria-hidden','false'); modal.classList.add('open');
-    }
+    if (event) event.stopPropagation();
+
+    const modal = document.getElementById('registrationModal');
+    const messageEl = document.getElementById('registrationEventName');
+
+    if (!modal || !messageEl) return;
+
+    messageEl.innerHTML = `Are you sure you want to register for <strong>${title}</strong>?`;
+    modal.dataset.eventId = id;
+    modal.dataset.eventTitle = title;
+    modal.setAttribute('aria-hidden', 'false');
+    modal.classList.add('open');
 }
 
 async function confirmRegistration() {
-    const modal = document.getElementById('registrationModal'); if (!modal) return; const eventId = modal.dataset.eventId; const eventTitle = modal.dataset.eventTitle; const studentId = localStorage.getItem('currentStudentId');
-    if (!studentId) { alert('You must fill out a counseling form first to set your Student ID.'); return; }
+    const modal = document.getElementById('registrationModal');
+    if (!modal) return;
+
+    const eventId = modal.dataset.eventId;
+    const eventTitle = modal.dataset.eventTitle;
+    const studentId = localStorage.getItem('currentStudentId');
+
+    if (!studentId) {
+        alert('Please complete the counseling form to set your Student ID.');
+        return;
+    }
+
     try {
-        const response = await fetch('http://localhost:3001/api/registrations', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ eventId, eventTitle, studentId }) });
-        const data = await response.json(); if (!response.ok) throw new Error(data.message || 'Server error');
-        alert('Registration successful! Your registration has been confirmed.'); closeRegistrationModal(); const detailModal = document.getElementById('eventDetailModal'); if (detailModal && detailModal.classList.contains('open')) closeEventDetailModal(); fetchAndInitializeEvents();
-    } catch (error) { console.error('Error submitting registration:', error); alert(error.message); }
+        const response = await fetch('http://localhost:3001/api/registrations', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ eventId, eventTitle, studentId })
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Server error');
+
+        alert('Registration successful. Your registration has been recorded.');
+        closeRegistrationModal();
+
+        const detailModal = document.getElementById('eventDetailModal');
+        if (detailModal && detailModal.classList.contains('open')) {
+            closeEventDetailModal();
+        }
+
+        fetchAndInitializeEvents();
+    } catch (error) {
+        console.error('Error submitting registration:', error);
+        alert(error.message);
+    }
 }
 
-function closeRegistrationModal() { const modal = document.getElementById('registrationModal'); if (modal) { modal.setAttribute('aria-hidden','true'); modal.classList.remove('open'); } }
+function closeRegistrationModal() {
+    const modal = document.getElementById('registrationModal');
+    if (!modal) return;
+
+    modal.setAttribute('aria-hidden', 'true');
+    modal.classList.remove('open');
+}
