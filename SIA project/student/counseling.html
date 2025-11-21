@@ -316,6 +316,32 @@
     </div>
 
     <script src="script.js"></script>
+
+    <div id="successModal" class="modal" aria-hidden="true">
+    <div class="modal-overlay"></div> <div class="modal-content success-content" role="dialog" aria-modal="true">
+        
+        <div class="success-icon-container">
+            <div class="success-icon">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            </div>
+        </div>
+
+        <h2 class="success-title">Request Submitted</h2>
+        <p class="success-case-id">CASE ID: <span id="successCaseId">C2025-001</span></p>
+        
+        <p class="success-message">
+            Please wait until completed before submitting another.<br>
+            You may track the status under <em>My Sessions</em>.
+        </p>
+
+        <div class="success-actions">
+            <button class="btn-outline" onclick="closeSuccessModal()">Done</button>
+            <button class="btn-primary-large" onclick="trackRequestStatus()">Track Request Status</button>
+        </div>
+    </div>
+</div>
     
     <!-- Sessions Modal -->
     <div id="sessionsModal" class="modal" aria-hidden="true">

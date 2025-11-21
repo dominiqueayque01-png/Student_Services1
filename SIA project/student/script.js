@@ -216,10 +216,14 @@ function updateUnreadCount() {
 // --- 4. DYNAMIC FAQs ---
 async function handleRequestFormSubmit(e) {
     if (e && e.preventDefault) e.preventDefault(); 
-    console.log("Checkpoint 1: Function started");
-
+    
     const form = document.getElementById('requestForm');
-    if (!form.checkValidity()) { form.reportValidity(); return; }
+    
+    // 1. Validation
+    if (!form.checkValidity()) { 
+        form.reportValidity(); 
+        return; 
+    }
     
     const formData = new FormData(form);
     const payload = {
@@ -233,60 +237,91 @@ async function handleRequestFormSubmit(e) {
             relationship: formData.get('relationship'),
             phone: formData.get('refPhone'),
             email: formData.get('refEmail')
-
-            
         }
     };
 
     try {
-        console.log("Checkpoint 2: Sending to backend...");
+        // 2. Send Data to Backend
         const response = await fetch('http://localhost:3001/api/admin/counseling/appointments', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
 
-        console.log("Checkpoint 3: Response received", response);
+        // 3. Parse Response (Read only ONCE)
+        const savedData = await response.json(); 
 
         if (!response.ok) {
-            throw new Error(`Server error: ${response.status}`);
+            throw new Error(savedData.message || `Server error: ${response.status}`);
         }
 
-        // Try to parse JSON (This sometimes causes crashes if server returns text)
-        const data = await response.json(); 
-        console.log("Checkpoint 4: Data parsed", data);
-
-        // Save ID
+        // 4. Success Logic
         localStorage.setItem('currentStudentId', payload.studentId);
-
-        // Close modal
+        
         form.reset();
-        // Check if this function exists before calling
+        
+        // Close the Input Form
         if (typeof closeRequestFormModal === 'function') {
             closeRequestFormModal();
+        }
+
+        // === 5. OPEN SUCCESS MODAL ===
+        // Check if the helper function exists before calling
+        if (typeof showSuccessModal === 'function') {
+            // Use the ID from the backend response
+            showSuccessModal(savedData._id); 
         } else {
-            console.warn("closeRequestFormModal function is missing!");
+            // Fallback if modal code is missing
+            alert('Request Submitted! ID: ' + savedData._id);
         }
 
-        // SUCCESS ALERT
-        alert('Request submitted successfully!');
-        console.log("Checkpoint 5: Success Alert shown");
-
-        // --- DANGEROUS PART (UI REFRESH) ---
-        // We will comment this out for ONE TEST to see if the error stops.
-        /* try {
-            await fetchAndRenderSessions();
-        } catch (innerErr) {
-            console.warn("List refresh failed", innerErr);
+        // 6. Safe UI Refresh
+        try {
+            if (typeof fetchAndRenderSessions === 'function') {
+                await fetchAndRenderSessions();
+            }
+        } catch (uiError) {
+            console.warn("List refresh failed (minor UI issue):", uiError);
         }
-        */
-       // ------------------------------------
 
     } catch (error) {
-        console.error("CRASH REPORT:", error); // This will show us the real error
-        alert('There was a problem submitting your request.\nCheck Console for details.');
+        console.error("Submission Error:", error);
+        alert('There was a problem submitting your request: ' + error.message);
     }
+}
+
+// --- SUCCESS MODAL FUNCTIONS ---
+
+function showSuccessModal(caseId) {
+    const modal = document.getElementById('successModal');
+    const caseIdSpan = document.getElementById('successCaseId');
+    
+    if (modal && caseIdSpan) {
+        // Format Case ID safely
+        const displayId = caseId ? caseId.slice(-6).toUpperCase() : 'PENDING';
+        caseIdSpan.textContent = `CASE #${displayId}`;
+        
+        modal.setAttribute('aria-hidden', 'false');
+        modal.classList.add('open');
+    } else {
+        console.error("Success Modal HTML is missing from counseling.html");
     }
+}
+
+function closeSuccessModal() {
+    const modal = document.getElementById('successModal');
+    if (modal) {
+        modal.setAttribute('aria-hidden', 'true');
+        modal.classList.remove('open');
+    }
+}
+
+function trackRequestStatus() {
+    closeSuccessModal();
+    openSessionsModal();
+    if (typeof switchSessionTab === 'function') switchSessionTab('pending');
+}
+
 // --- 6. DYNAMIC "MY SESSIONS" LIST ---
 async function fetchAndRenderSessions() {
     // ... (This function is already correct, no changes needed) ...
@@ -454,6 +489,75 @@ function switchSessionTab(tabName) {
         btn.classList.toggle('active', btn.getAttribute('onclick').includes(`'${tabName}'`));
     });
     renderSessionsList(tabName);
+}
+
+/* ============================================
+   FAQ LOGIC
+   ============================================ */
+async function fetchAndRenderFAQs() {
+    const listEl = document.getElementById('faqsList');
+    if (!listEl) return;
+
+    // Show loading state
+    listEl.innerHTML = '<p style="color:#999; padding:10px;">Loading questions...</p>';
+
+    try {
+        const response = await fetch('http://localhost:3001/api/faqs');
+        const faqs = await response.json();
+
+        listEl.innerHTML = ''; // Clear loading message
+
+        if (faqs.length === 0) {
+            listEl.innerHTML = '<p style="color:#666; padding:10px;">No FAQs available at the moment.</p>';
+            return;
+        }
+
+        faqs.forEach(item => {
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = 'background:#fff; border:1px solid #e8e8e8; border-radius:8px; padding:12px; margin-bottom:10px; transition:all 0.2s;';
+            
+            const qBtn = document.createElement('button');
+            qBtn.style.cssText = 'display:flex; justify-content:space-between; align-items:center; width:100%; border:0; background:transparent; cursor:pointer; text-align:left; padding:0; font-size:14px; font-weight:600; color:#2c3e7f;';
+            
+            const qText = document.createElement('span');
+            qText.textContent = item.question;
+            
+            const icon = document.createElement('span');
+            icon.style.cssText = 'font-size:18px; color:#666; font-weight:bold; margin-left:10px;';
+            icon.textContent = '+';
+            
+            qBtn.appendChild(qText);
+            qBtn.appendChild(icon);
+            
+            const answer = document.createElement('div');
+            answer.style.cssText = 'display:none; margin-top:10px; color:#444; line-height:1.5; font-size:13px; padding-top:10px; border-top:1px solid #f1f1f1;';
+            answer.textContent = item.answer;
+            
+            // Click Handler (Accordion Logic)
+            qBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const expanded = answer.style.display === 'block';
+                
+                if (!expanded) {
+                    answer.style.display = 'block';
+                    icon.textContent = '-';
+                    wrapper.style.backgroundColor = '#f8fafc'; // Highlight active
+                } else {
+                    answer.style.display = 'none';
+                    icon.textContent = '+';
+                    wrapper.style.backgroundColor = '#fff';
+                }
+            });
+            
+            wrapper.appendChild(qBtn);
+            wrapper.appendChild(answer);
+            listEl.appendChild(wrapper);
+        });
+
+    } catch (error) {
+        console.error('Error fetching FAQs:', error);
+        listEl.innerHTML = '<p style="color:red; padding:10px;">Could not load FAQs. Is the server running?</p>';
+    }
 }
 
 // --- 7. MODAL HELPER FUNCTIONS (With new Announcement Modal) ---
