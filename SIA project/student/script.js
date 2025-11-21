@@ -582,38 +582,7 @@ ind   }
 
 // --- 8. (NEW CODE) ATTACH EVENT LISTENERS ---
 // We need to wait for the page to be fully loaded before attaching listeners
-document.addEventListener('DOMContentLoaded', async () => {
 
-    fetchAndInitializeEvents();
-    fetchAndInitializeRegistrations();
-    
-    
-    // 1. Attach listener for the Request Form
-    const requestForm = document.getElementById('requestForm');
-    if (requestForm) {
-        // Use the manual submission wrapper we made earlier, 
-        // or the direct handler if you fixed the 'novalidate' issue.
-        requestForm.addEventListener('submit', handleRequestFormSubmit);
-    }
-
-    // 2. Check if we have a student ID saved
-    const studentId = localStorage.getItem('currentStudentId');
-
-    // 3. IF we have a student ID, fetch their sessions silently FIRST
-    if (studentId) {
-        try {
-            console.log("Fetching sessions for checking...");
-            const response = await fetch(`http://localhost:3001/api/counseling/my-appointments/${studentId}`);
-            allStudentSessions = await response.json();
-            updateTabCounts(); // Update the badges while we're at it
-        } catch (error) {
-            console.error("Silent session fetch failed", error);
-        }
-    }
-
-    // 4. NOW fetch and render announcements (knowing which ones are requested)
-    fetchAndRenderAnnouncements();
-});
 
 /* ============================================
    EVENT PAGE LOGIC - SAVED EVENTS FOCUS
@@ -626,17 +595,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         let calendarDate = new Date();
 
-document.addEventListener('DOMContentLoaded', () => {
-    fetchAndInitializeEvents();
-    if (document.getElementById('upcoming')) {
-        // We are on the Event Page
-        fetchAndInitializeEvents(); 
-    }
-
-    if (studentId) {
-    fetchNotifications(studentId); // <--- Add this line
-}
-});
 
 /* ============================================
    NOTIFICATION LOGIC
@@ -805,7 +763,8 @@ const categoryColors = {
     default: '#2c3e7f'       // Fallback Blue
 };
 
-function renderCalendar(events) {const calendarDays = document.querySelector('.calendar-days');
+function renderCalendar(events) {
+    const calendarDays = document.querySelector('.calendar-days');
     const calendarTitle = document.querySelector('.calendar-title');
 
     if (!calendarDays || !calendarTitle) return; 
@@ -822,35 +781,38 @@ function renderCalendar(events) {const calendarDays = document.querySelector('.c
 
     calendarDays.innerHTML = ''; 
 
-    // --- NEW: COLLECT EVENTS FOR THIS MONTH ---
-    const eventsInThisMonth = [];
-    // ------------------------------------------
+    // === FIX PART 1: Create a bucket to hold this month's events ===
+    const eventsInThisMonth = []; 
+    // ==============================================================
 
     // Empty slots
     for (let i = 0; i < adjustedFirstDay; i++) {
         calendarDays.innerHTML += `<div class="calendar-day empty"></div>`;
     }
 
-  // Days
+    // Days
     for (let i = 1; i <= lastDay; i++) {
         const dayDiv = document.createElement('div');
         dayDiv.className = 'calendar-day';
         dayDiv.textContent = i;
 
-        // === ROBUST DATE COMPARISON ===
+        // Find ALL events for this specific day
         const daysEvents = events.filter(event => {
-            const eventDate = new Date(event.date);
-            
-            // We compare using local calendar values to match what is drawn
-            return eventDate.getDate() === i && 
-                   eventDate.getMonth() === month && 
-                   eventDate.getFullYear() === year;
+            const eDate = new Date(event.date);
+            return eDate.getDate() === i && 
+                   eDate.getMonth() === month && 
+                   eDate.getFullYear() === year;
         });
 
         if (daysEvents.length > 0) {
+            // === FIX PART 2: Add found events to our bucket ===
+            eventsInThisMonth.push(...daysEvents);
+            // ==================================================
+
             dayDiv.style.cursor = 'pointer';
             dayDiv.classList.add('has-event');
 
+            // Color Logic
             if (daysEvents.length === 1) {
                 const cat = daysEvents[0].category || 'academic';
                 dayDiv.classList.add(cat);
@@ -863,10 +825,9 @@ function renderCalendar(events) {const calendarDays = document.querySelector('.c
                     const gradient = `linear-gradient(135deg, ${uniqueColors.join(', ')})`;
                     dayDiv.style.background = gradient;
                 }
-                dayDiv.title = `${daysEvents.length} Events`;
             }
             
-            // Click Listener
+            // Click Logic
             dayDiv.addEventListener('click', () => {
                 if (daysEvents.length === 1) {
                     openEventDetail_DYNAMIC(daysEvents[0]._id);
@@ -882,51 +843,46 @@ function renderCalendar(events) {const calendarDays = document.querySelector('.c
                 }
             });
         }
-        
-        // ... (today highlight logic) ...
+
+        // Highlight Today
+        const today = new Date();
+        if (i === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+            dayDiv.classList.add('today'); 
+            if (daysEvents.length === 0) dayDiv.style.border = "2px solid #2c3e7f";
+        }
 
         calendarDays.appendChild(dayDiv);
     }
 
-    // --- NEW: UPDATE THE FEATURED BANNER ---
+    // === FIX PART 3: Send the bucket to the banner function ===
     updateFeaturedBannerForMonth(eventsInThisMonth);
-    // ---------------------------------------
+    // ==========================================================
 }
 
 // === ADD THIS NEW HELPER FUNCTION ===
 function updateFeaturedBannerForMonth(monthEvents) {
     const bannerSection = document.querySelector('.featured-event-banner');
-    
+    const btn = document.querySelector('.view-details-btn');
+
     if (monthEvents.length === 0) {
-        // Option A: Hide banner if no events
-        // bannerSection.style.display = 'none';
-        
-        // Option B: Show generic message
+        // If no events, show placeholder
         renderFeaturedEvent({
             title: "No Featured Events",
-            date: calendarDate, // Use current calendar view date
+            date: calendarDate, 
             location: "Campus Wide",
-            imageUrl: "", // Or a default background
-            _id: null // No ID means button won't do anything
+            imageUrl: "", 
+            _id: null 
         });
-        
-        // Disable the button if it's a placeholder
-        const btn = document.querySelector('.view-details-btn');
-        if(btn) {
-            btn.style.display = 'none';
-        }
+        if(btn) btn.style.display = 'none'; // Hide button
         return;
     }
 
-    // Show banner
-    bannerSection.style.display = 'flex';
-    const btn = document.querySelector('.view-details-btn');
-    if(btn) btn.style.display = 'block';
+    // If events exist, show the first one
+    if(btn) btn.style.display = 'block'; // Show button
 
-    // Sort by date to find the earliest one in the month
+    // Sort by date to find the earliest one
     monthEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    // Pick the first one
     renderFeaturedEvent(monthEvents[0]);
 }
 function previousMonth() {
@@ -1787,71 +1743,7 @@ async function fetchAndInitializeClubs() {
 
 // --- MODIFIED ---
 // This is the "on switch" for the entire page.
-document.addEventListener('DOMContentLoaded', function() {
-    // 1. Fetch data and render the clubs
-    fetchAndInitializeClubs();
 
-        const reqForm = document.getElementById('requestForm');
-    if (reqForm) {
-        console.log("Counseling page detected. Initializing.");
-
-        // Fetch the announcements
-        fetchAndRenderAnnouncements(); 
-
-        // Attach the form submit handler
-        reqForm.addEventListener('submit', handleRequestFormSubmit);
-
-        // Attach validation listeners (from your old script)
-        document.getElementById('studentId').addEventListener('input', function(e) { e.target.value = e.target.value.replace(/[^0-9\-]/g, ''); });
-        document.getElementById('fullName').addEventListener('input', function(e) { e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, ''); });
-        document.getElementById('phone').addEventListener('input', function(e) { e.target.value = e.target.value.replace(/[^0-9\s\-\+]/g, ''); });
-        document.getElementById('refName').addEventListener('input', function(e) { e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, ''); });
-        document.getElementById('relationship').addEventListener('input', function(e) { e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, ''); });
-        document.getElementById('refPhone').addEventListener('input', function(e) { e.target.value = e.target.value.replace(/[^0-9\s\-\+]/g, ''); });
-    }
-    const sessionsSearch = document.getElementById('sessionsSearch');
-    if (sessionsSearch) {
-        sessionsSearch.addEventListener('input', function() {
-            const activeTabBtn = document.querySelector('#sessionsModal .tab-btn.active');
-            const activeTabName = activeTabBtn.getAttribute('onclick').match(/'([^']+)'/)[1] || 'pending';
-            renderSessionsList(activeTabName);
-        });
-    }
-
-    // --- CLUBS (clubs.html) SPECIFIC CODE ---
-    // 2. Attach our new form submit handler
-    const form = document.getElementById('clubApplicationForm');
-    if (form) {
-        form.addEventListener('submit', handleApplicationSubmit);
-    }
-
-    // 3. Attach your original search/filter/sort listeners
-    const searchInput = document.getElementById('clubsSearchInput');
-    if (searchInput) {
-        searchInput.addEventListener('keyup', searchAndFilterClubs);
-    }
-    
-// --- EVENTS (event.html) SPECIFIC CODE ---
-    if (document.getElementById('upcoming')) {
-        fetchAndInitializeEvents();
-    }
-
-    if (document.getElementById('faqsList')) {
-        renderFAQs();
-    }
-    if (document.getElementById('announcementsList')) { // Assuming you have this
-        initializeAnnouncements();
-    }
-const welcomeCard = document.querySelector('.welcome-card');
-    if (welcomeCard) {
-        console.log("Homepage detected.");
-        // (Your homepage code can go here)
-    }
-    // --- COUNSELING (counseling.html) SPECIFIC CODE ---
-
-    // (You can attach your toggleDropdown, toggleSortMenu listeners here too)
-    // For simplicity, your onclick="..." attributes in the HTML will still work.
-});
 
 /* ============================================
    MODAL HELPER FUNCTIONS
@@ -1959,124 +1851,415 @@ function handleModalKeydown(event) {
 
 
 /* ============================================
-   OJT PAGE FUNCTIONS
-   Handles OJT listings filtering, searching, sorting, and company details
+   OJT PAGE LOGIC (The Missing Piece)
    ============================================ */
 
-// OJT data structure
-const ojtData = [
-    {
-        id: 1,
-        position: 'Social Media Assistant',
-        company: 'ABC Company',
-        location: 'Sauyo, Quezon City',
-        category: 'Marketing',
-        payPerHour: 50,
-        workArrangement: 'Remote/Hybrid',
-        duration: 8,
-        hoursPerWeek: 10,
-        postedDays: 2,
-        description: 'Join our marketing team to learn social media strategy, content creation, and digital marketing analytics while working on real client campaigns.',
-        overview: 'This is an excellent opportunity to gain hands-on experience in social media marketing. You\'ll be working with our marketing team on real client campaigns, learning industry best practices and tools.',
-        trainingProgram: 'Digital Marketing Fundamentals - 3-month program with useful skills training',
-        skills: ['Social Media Management', 'Content Creation', 'Analytics', 'Digital Marketing']
-    },
-    {
-        id: 2,
-        position: 'Marketing Assistant',
-        company: 'XYZ Company',
-        location: 'Makati, Metro Manila',
-        category: 'Marketing',
-        payPerHour: 30,
-        workArrangement: 'On Site',
-        duration: 7,
-        hoursPerWeek: 10,
-        postedDays: 4,
-        description: 'Create engaging content across multiple channels while learning SEO, email marketing, and content strategy from marketing experts.',
-        overview: 'Work with our marketing team to create compelling content and learn SEO strategies. This role focuses on practical experience with email marketing and content optimization.',
-        trainingProgram: 'Content Marketing & SEO - 2.5 month intensive program',
-        skills: ['Content Writing', 'SEO', 'Email Marketing', 'Social Media']
-    }
-];
-
+// Global OJT Variables
+let allOjtData = [];
+let myOjtApplications = [];
 let currentOJTCategory = 'All';
 let currentOJTSortBy = 'newest';
 
-function getOJTById(id) {
-    return ojtData.find(o => o.id === id);
+// --- 1. MAIN FETCH FUNCTION ---
+async function fetchAndInitializeOJT() {
+    try {
+        // Fetch Listings
+        const response = await fetch('http://localhost:3001/api/ojt');
+        allOjtData = await response.json();
+
+        // Fetch My Applications (If logged in)
+        const studentId = localStorage.getItem('currentStudentId');
+        if (studentId) {
+            try {
+                const appRes = await fetch(`http://localhost:3001/api/ojt/my-applications/${studentId}`);
+                const appIds = await appRes.json();
+                myOjtApplications = appIds;
+            } catch (err) {
+                console.warn("Could not fetch OJT applications", err);
+            }
+        }
+
+        // Render
+        searchAndFilterOJT();
+        
+        
+    } catch (error) {
+        console.error("Error loading OJT data:", error);
+        const grid = document.getElementById('ojtGrid');
+        if(grid) grid.innerHTML = '<p style="padding:20px; text-align:center;">Error loading listings. Is the server running?</p>';
+    }
 }
 
+// --- 2. HELPER: GET OJT BY ID ---
+function getOJTById(id) {
+    return allOjtData.find(o => o._id === id);
+}
+
+// --- 3. RENDER & FILTER FUNCTION ---
+/* ============================================
+   ALGORITHM: CONTENT-BASED FILTERING
+   ============================================ */
+function searchAndFilterOJT() {
+    const searchQuery = document.getElementById('ojtSearchInput').value.toLowerCase();
+    const ojtGrid = document.getElementById('ojtGrid');
+    ojtGrid.innerHTML = ''; 
+
+    // 1. CALCULATE USER INTERESTS (For Recommendations)
+    // Find jobs I applied to
+    const appliedJobs = allOjtData.filter(job => myOjtApplications.includes(job._id));
+    // Get their subcategories
+    let myInterests = appliedJobs.map(j => j.subCategory);
+    // Add related categories from the map
+    myInterests.forEach(interest => {
+        if (jobRelationships[interest]) {
+            myInterests.push(...jobRelationships[interest]);
+        }
+    });
+
+    // 2. FILTER LIST (Standard Logic)
+    let visibleOJT = allOjtData.filter(ojt => {
+        const matchesCategory = currentOJTCategory === 'All' || ojt.category === currentOJTCategory;
+        const matchesSearch = !searchQuery || 
+            ojt.position.toLowerCase().includes(searchQuery) || 
+            ojt.company.toLowerCase().includes(searchQuery);
+        
+        // Mark if this specific job is recommended
+        // Logic: Matches my interests AND I haven't applied yet
+        ojt.isRecommended = myInterests.includes(ojt.subCategory) && !myOjtApplications.includes(ojt._id);
+
+        return matchesCategory && matchesSearch;
+    });
+
+    // 3. SORT LIST (Prioritize Recommendations)
+    visibleOJT.sort((a, b) => {
+        // Rule A: Recommended items go to the TOP
+        if (a.isRecommended && !b.isRecommended) return -1;
+        if (!a.isRecommended && b.isRecommended) return 1;
+
+        // Rule B: Then respect the user's chosen sort (Pay, Hours, etc)
+        if (currentOJTSortBy === 'pay-high') return b.payPerHour - a.payPerHour;
+        if (currentOJTSortBy === 'pay-low') return a.payPerHour - b.payPerHour;
+        if (currentOJTSortBy === 'hours') return a.hoursPerWeek - b.hoursPerWeek;
+        
+        // Default: Newest first
+        return new Date(b.postedAt) - new Date(a.postedAt);
+    });
+
+    // 4. RENDER HTML
+    if (visibleOJT.length === 0) {
+        ojtGrid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#666;">No training opportunities found.</p>';
+        return;
+    }
+
+    visibleOJT.forEach(ojt => {
+        const daysAgo = Math.floor((new Date() - new Date(ojt.postedAt)) / (1000 * 60 * 60 * 24));
+        const postedText = daysAgo === 0 ? "Today" : `${daysAgo} days ago`;
+
+        // Generate Badges
+        const subCatHTML = ojt.subCategory ? `<span class="club-subcategory-badge">${ojt.subCategory}</span>` : '';
+        
+        // === NEW: Generate Recommended Badge ===
+        const recommendedHTML = ojt.isRecommended 
+            ? `<div class="recommended-badge">Recommended</div>` 
+            : '';
+        
+        // Apply a subtle highlight style to the card container if recommended
+        const highlightStyle = ojt.isRecommended ? 'border: 1px solid #8b5cf6; background-color: #fbfaff;' : '';
+
+        const card = document.createElement('div');
+        card.className = 'club-card';
+        card.style.cssText = highlightStyle; // Apply highlight
+
+        card.innerHTML = `
+            ${recommendedHTML}
+
+            <div class="club-header">
+                <h2 class="club-name">${ojt.position}</h2>
+                <div class="club-badges">
+                    ${subCatHTML}
+                    <span class="club-category-badge">${ojt.category}</span>
+                </div>
+            </div>
+            
+            <p class="club-description">${ojt.description}</p>
+
+            <div class="club-info">
+                <div class="club-info-item">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#2c3e7f" stroke-width="1.5"><path d="M3 8h14v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8z"/></svg>
+                    <span>${ojt.company}</span>
+                </div>
+                <div class="club-info-item">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#2c3e7f" stroke-width="1.5"><circle cx="10" cy="10" r="8"/><path d="M10 6v4l3 2"/></svg>
+                    <span>Posted ${postedText}</span>
+                </div>
+            </div>
+
+            <div class="club-stats">
+                <div class="club-stat"><strong>₱</strong> ${ojt.payPerHour}/hour</div>
+                <div class="club-stat">${ojt.workArrangement}</div>
+                <div class="club-stat">${ojt.duration} weeks</div>
+                <div class="club-stat">${ojt.hoursPerWeek} hrs/week</div>
+            </div>
+
+            <button class="view-club-btn">View Company Info</button>
+        `;
+
+        card.querySelector('.view-club-btn').addEventListener('click', () => openOJTCompanyModal(ojt._id));
+        ojtGrid.appendChild(card);
+    });
+
+    // Update count
+    document.getElementById('ojtCount').textContent = `${visibleOJT.length} training opportunities found`;
+}
+
+/* ============================================
+   RECOMMENDATION ALGORITHM
+   ============================================ */
+
+// 1. THE RELATIONSHIP MAP
+// This defines what is related to what.
+// Key = The SubCategory the student applied to
+// Value = Array of related SubCategories they might like
+const jobRelationships = {
+    // Technology Connections
+    'Web Development': ['Design', 'Marketing', 'IT Operations'],
+    'Software Engineering': ['Data Science', 'Project Management', 'Web Development'],
+    'IT Operations': ['Telecommunications', 'Cyber Security', 'Web Development'],
+    'Cyber Security': ['IT Operations', 'Telecommunications'],
+    
+    // Business Connections
+    'Marketing': ['Design', 'Business Development', 'Web Development'],
+    'Business Development': ['Marketing', 'Finance'],
+    
+    // Engineering Connections
+    'Telecommunications': ['IT Operations', 'Electronics'],
+    
+    // Finance/Admin
+    'Financial Analysis': ['Audit & Tax', 'Data Science'],
+    'Audit & Tax': ['Financial Analysis']
+};
+
+// 2. THE ENGINE
+function updateRecommendations() {
+    const recSection = document.getElementById('recommendationSection');
+    const recGrid = document.getElementById('recommendedGrid');
+    
+    // A. Get the jobs the student has ALREADY applied to
+    // We look at 'allOjtData' and find items where the ID is in 'myOjtApplications'
+    const appliedJobs = allOjtData.filter(job => myOjtApplications.includes(job._id));
+
+    // If no applications, hide the section
+    if (appliedJobs.length === 0) {
+        recSection.style.display = 'none';
+        return;
+    }
+
+    // B. Determine user interests
+    // Extract all SubCategories from jobs they applied to
+    const userInterests = appliedJobs.map(job => job.subCategory);
+    
+    // C. Find Related Categories
+    let targetCategories = [];
+    userInterests.forEach(interest => {
+        // Add the interest itself (e.g., show more Web Dev)
+        targetCategories.push(interest);
+        
+        // Add related interests from our map (e.g., show Design)
+        if (jobRelationships[interest]) {
+            targetCategories.push(...jobRelationships[interest]);
+        }
+    });
+
+    // D. Filter the Database
+    const recommendedJobs = allOjtData.filter(job => {
+        // 1. Must match one of the target categories
+        const isRelated = targetCategories.includes(job.subCategory);
+        // 2. Must NOT be already applied to
+        const notApplied = !myOjtApplications.includes(job._id);
+        
+        return isRelated && notApplied;
+    }).slice(0, 3); // Limit to top 3 recommendations
+
+    // E. Render or Hide
+    if (recommendedJobs.length === 0) {
+        recSection.style.display = 'none';
+    } else {
+        recSection.style.display = 'block';
+        renderRecommendationCards(recommendedJobs, recGrid);
+    }
+}
+
+// 3. RENDERER (Mini Cards)
+function renderRecommendationCards(jobs, container) {
+    container.innerHTML = '';
+    
+    jobs.forEach(ojt => {
+        const card = document.createElement('div');
+        card.className = 'club-card';
+        card.style.marginBottom = '0'; // Reset margin for nested grid
+        card.style.background = '#fff'; 
+        
+        card.innerHTML = `
+            <div class="club-header">
+                <h2 class="club-name" style="font-size:16px;">${ojt.position}</h2>
+                <span class="club-subcategory-badge">${ojt.subCategory}</span>
+            </div>
+            <div class="club-info" style="margin-top:8px; margin-bottom:8px;">
+                <div class="club-info-item">
+                    <span style="font-size:12px; color:#64748b;">${ojt.company}</span>
+                </div>
+            </div>
+            <button class="view-club-btn" style="padding:8px; font-size:12px;">View Details</button>
+        `;
+        
+        card.querySelector('.view-club-btn').addEventListener('click', () => openOJTCompanyModal(ojt._id));
+        container.appendChild(card);
+    });
+}
+
+
+
+// --- 4. MODAL & APPLY LOGIC ---
 function openOJTCompanyModal(ojtId) {
     const ojt = getOJTById(ojtId);
     if (!ojt) return;
 
     const container = document.getElementById('ojtCompanyContent');
+    const isApplied = myOjtApplications.includes(ojt._id);
+
+    // Button Logic
+    let applyButton = '';
+    if (isApplied) {
+        applyButton = `<button disabled style="background:#ecfdf5; color:#047857; border:1px solid #10b981; padding:10px 18px; border-radius:6px; font-weight:600;">✓ Applied</button>`;
+    } else {
+        applyButton = `<button class="learn-more-btn" style="background:#2c3e7f;color:#fff;padding:10px 18px;border-radius:6px;border:0;cursor:pointer;" onclick="applyToOJT('${ojt._id}')">Apply Now</button>`;
+    }
+
+    // Skills logic
+    const skillsHTML = (ojt.skills && ojt.skills.length > 0) 
+        ? ojt.skills.map(s => `<span style="background:#e8f0ff;color:#2c3e7f;padding:6px 12px;border-radius:20px;font-size:12px;">${s}</span>`).join('')
+        : '<span>No specific skills listed</span>';
+
+    // ============================================================
+    // 🧠 THE RECOMMENDER ALGORITHM
+    // Logic: "Show me jobs with same SubCategory, excluding this one"
+    // ============================================================
     
+    // 1. Filter
+    const relatedJobs = allOjtData.filter(item => 
+        item.subCategory === ojt.subCategory && // Match Sub-Category (e.g., Web Dev)
+        item._id !== ojt._id // Don't recommend the job I'm currently looking at
+    ).slice(0, 3); // Show max 3 related jobs
+
+    // 2. Build HTML for Related Jobs
+    let relatedJobsHTML = '';
+    if (relatedJobs.length > 0) {
+        const relatedItems = relatedJobs.map(job => `
+            <div class="related-job-card" onclick="openOJTCompanyModal('${job._id}')">
+                <div>
+                    <div class="related-job-title">${job.position}</div>
+                    <div class="related-job-company">${job.company}</div>
+                </div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2c3e7f" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+            </div>
+        `).join('');
+
+        relatedJobsHTML = `
+            <div class="related-jobs-container">
+                <h3 style="color:#2c3e7f;font-size:14px;margin-bottom:10px;">
+                    More in ${ojt.subCategory}
+                </h3>
+                ${relatedItems}
+            </div>
+        `;
+    }
+    // ============================================================
+
+    // Render Main Modal
     container.innerHTML = `
         <h2 id="ojtCompanyTitle" style="color:#2c3e7f;margin-bottom:8px;">${ojt.position}</h2>
+        
+        <div style="margin-bottom:12px;">
+            <span style="background:#f1f5f9; color:#475569; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:600; text-transform:uppercase;">
+                ${ojt.subCategory || ojt.category}
+            </span>
+        </div>
+
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;color:#666;font-size:14px;">
-            <span>${ojt.company}</span>
-            <span>•</span>
-            <span>${ojt.location}</span>
+            <span>${ojt.company}</span> <span>•</span> <span>${ojt.location}</span>
         </div>
 
-        <h3 style="color:#2c3e7f;margin-top:20px;margin-bottom:12px;font-size:16px;">Job Overview</h3>
-        <p style="color:#666;line-height:1.6;margin-bottom:20px;">${ojt.overview}</p>
-
-        <h3 style="color:#2c3e7f;margin-top:20px;margin-bottom:12px;font-size:16px;">Training Program</h3>
-        <div style="background:#f9f9f9;padding:16px;border-radius:8px;margin-bottom:20px;">
-            <div style="color:#2c3e7f;font-weight:600;margin-bottom:4px;">${ojt.trainingProgram}</div>
-        </div>
-
-        <h3 style="color:#2c3e7f;margin-top:20px;margin-bottom:12px;font-size:16px;">Position Details</h3>
+        <h3 style="color:#2c3e7f;font-size:16px;margin-bottom:10px;">Overview</h3>
+        <p style="color:#666;margin-bottom:20px;">${ojt.overview}</p>
+        
+        <h3 style="color:#2c3e7f;font-size:16px;margin-bottom:10px;">Details</h3>
         <div style="background:#f9f9f9;padding:16px;border-radius:8px;margin-bottom:20px;">
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-                <div>
-                    <div style="font-weight:600;color:#2c3e7f;margin-bottom:4px;">💰 Pay</div>
-                    <div style="color:#666;">₱${ojt.payPerHour}/hour</div>
-                </div>
-                <div>
-                    <div style="font-weight:600;color:#2c3e7f;margin-bottom:4px;">📍 Work Arrangement</div>
-                    <div style="color:#666;">${ojt.workArrangement}</div>
-                </div>
-                <div>
-                    <div style="font-weight:600;color:#2c3e7f;margin-bottom:4px;">⏱️ Duration</div>
-                    <div style="color:#666;">${ojt.duration} weeks</div>
-                </div>
-                <div>
-                    <div style="font-weight:600;color:#2c3e7f;margin-bottom:4px;">🕐 Hours per Week</div>
-                    <div style="color:#666;">${ojt.hoursPerWeek} hours/week</div>
-                </div>
+                <div><div style="font-weight:600;color:#2c3e7f;margin-bottom:4px;">💰 Pay</div><div style="color:#666;">₱${ojt.payPerHour}/hour</div></div>
+                <div><div style="font-weight:600;color:#2c3e7f;margin-bottom:4px;">📍 Mode</div><div style="color:#666;">${ojt.workArrangement}</div></div>
+                <div><div style="font-weight:600;color:#2c3e7f;margin-bottom:4px;">⏱️ Duration</div><div style="color:#666;">${ojt.duration} weeks</div></div>
+                <div><div style="font-weight:600;color:#2c3e7f;margin-bottom:4px;">🕐 Schedule</div><div style="color:#666;">${ojt.hoursPerWeek} hrs/week</div></div>
             </div>
         </div>
 
-        <h3 style="color:#2c3e7f;margin-top:20px;margin-bottom:12px;font-size:16px;">Skills You'll Gain</h3>
+        <h3 style="color:#2c3e7f;font-size:16px;margin-bottom:10px;">Skills</h3>
         <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;">
-            ${ojt.skills.map(skill => `
-                <span style="background:#e8f0ff;color:#2c3e7f;padding:6px 12px;border-radius:20px;font-size:14px;">${skill}</span>
-            `).join('')}
+            ${skillsHTML}
         </div>
 
         <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
             <button type="button" class="learn-more-btn" style="background:#fff;color:#333;border:1px solid #e8e8e8;padding:10px 18px;border-radius:6px;" onclick="closeOJTCompanyModal()">Close</button>
-            <button type="button" class="learn-more-btn" style="background:#2c3e7f;color:#fff;padding:10px 18px;border-radius:6px;border:0;cursor:pointer;" onclick="alert('Application submitted! Check your email for confirmation.')">Apply Now</button>
+            ${applyButton}
         </div>
+
+        ${relatedJobsHTML}
     `;
 
     const modal = document.getElementById('ojtCompanyModal');
     modal.setAttribute('aria-hidden', 'false');
     modal.classList.add('open');
-
-    window._previousActiveElement = document.activeElement;
-    document.addEventListener('keydown', handleModalKeydown);
 }
 
 function closeOJTCompanyModal() {
     const modal = document.getElementById('ojtCompanyModal');
-    modal.setAttribute('aria-hidden', 'true');
-    modal.classList.remove('open');
+    if (modal) {
+        modal.setAttribute('aria-hidden', 'true');
+        modal.classList.remove('open');
+    }
 }
 
+// --- 5. APPLICATION ACTION ---
+async function applyToOJT(ojtId) {
+    const studentId = localStorage.getItem('currentStudentId');
+    if (!studentId) {
+        alert("Please submit a counseling form first to set your Student ID (Simulation Mode).");
+        return;
+    }
+
+    try {
+        const res = await fetch('http://localhost:3001/api/ojt/apply', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ojtId, studentId })
+        });
+
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.message);
+        }
+
+        alert("Application submitted successfully!");
+        myOjtApplications.push(ojtId); // Update local list
+        openOJTCompanyModal(ojtId); // Re-render modal to show "Applied"
+
+        updateRecommendations();
+
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+// --- 6. DROPDOWN & SORT HELPERS ---
 function toggleOJTCategoryDropdown() {
     const dropdown = document.getElementById('ojtCategoryDropdown');
     dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
@@ -2084,12 +2267,21 @@ function toggleOJTCategoryDropdown() {
 
 function toggleOJTSortMenu() {
     const sortMenu = document.getElementById('ojtSortContainer');
+    const sortBtn = document.getElementById('ojtSortDisplay'); // Make sure this ID exists in HTML
+    
+    // Fix position
+    if (sortBtn) {
+        sortMenu.style.left = 'auto';
+        sortMenu.style.right = '0px';
+        sortMenu.style.top = (sortBtn.offsetTop + sortBtn.offsetHeight + 8) + 'px';
+    }
+    
     sortMenu.style.display = sortMenu.style.display === 'none' ? 'block' : 'none';
 }
 
 function filterOJTByCategory(category) {
     currentOJTCategory = category;
-    document.getElementById('ojtCategoryFilterBtn').textContent = category + ' ';
+    document.getElementById('ojtCategoryFilterBtn').innerText = category + ' '; // Update button text
     document.getElementById('ojtCategoryDropdown').style.display = 'none';
     searchAndFilterOJT();
 }
@@ -2105,62 +2297,132 @@ function sortOJT(sortBy) {
         'hours': 'Hours per Week'
     };
     
-    sortDisplay.textContent = sortLabels[sortBy];
+    if(sortDisplay) sortDisplay.textContent = sortLabels[sortBy];
     document.getElementById('ojtSortContainer').style.display = 'none';
     searchAndFilterOJT();
 }
 
-function searchAndFilterOJT() {
-    const searchQuery = document.getElementById('ojtSearchInput').value.toLowerCase();
-    const ojtGrid = document.getElementById('ojtGrid');
-    const cards = ojtGrid.querySelectorAll('.club-card');
 
-    let visibleOJT = [];
+
+/* ============================================
+   MAIN INITIALIZATION (THE TRAFFIC CONTROLLER)
+   ============================================ */
+document.addEventListener('DOMContentLoaded', async () => {
     
-    cards.forEach(card => {
-        const ojtId = card.getAttribute('data-ojt-id');
-        const category = card.getAttribute('data-ojt-category');
-        const ojt = getOJTById(parseInt(ojtId));
+    const currentPage = window.location.pathname.split('/').pop(); // Get "ojt.html"
+    const navLinks = document.querySelectorAll('.sidebar-nav .nav-item');
 
-        if (!ojt) return;
-
-        // Check category filter
-        if (currentOJTCategory !== 'All' && category !== currentOJTCategory) {
-            card.style.display = 'none';
-            return;
-        }
-
-        // Check search query
-        const position = ojt.position.toLowerCase();
-        const company = ojt.company.toLowerCase();
-        const description = ojt.description.toLowerCase();
+    navLinks.forEach(link => {
+        // Remove 'active' from everyone first
+        link.classList.remove('active');
         
-        if (searchQuery && !position.includes(searchQuery) && !company.includes(searchQuery) && !description.includes(searchQuery)) {
-            card.style.display = 'none';
-            return;
+        // Check if this link matches the current page
+        if (link.getAttribute('href') === currentPage) {
+            link.classList.add('active');
         }
-
-        card.style.display = 'block';
-        visibleOJT.push(ojt);
     });
 
-    // Sort OJT
-    if (currentOJTSortBy === 'newest') {
-        visibleOJT.sort((a, b) => a.postedDays - b.postedDays);
-    } else if (currentOJTSortBy === 'pay-high') {
-        visibleOJT.sort((a, b) => b.payPerHour - a.payPerHour);
-    } else if (currentOJTSortBy === 'pay-low') {
-        visibleOJT.sort((a, b) => a.payPerHour - b.payPerHour);
-    } else if (currentOJTSortBy === 'hours') {
-        visibleOJT.sort((a, b) => b.hoursPerWeek - a.hoursPerWeek);
+    // --- 1. GLOBAL SETUP (Runs on every page) ---
+    const studentId = localStorage.getItem('currentStudentId');
+    if (!studentId) {
+        console.log("No Student ID found. Simulation mode active.");
     }
 
-    // Reorder DOM elements
-    visibleOJT.forEach(ojt => {
-        const card = ojtGrid.querySelector(`[data-ojt-id="${ojt.id}"]`);
-        if (card) ojtGrid.appendChild(card);
-    });
+    // --- 2. PAGE SPECIFIC LOGIC ---
 
-    // Update OJT count
-    document.getElementById('ojtCount').textContent = visibleOJT.length + ' training opportunities found';
-}
+    // === CASE A: OJT LISTING PAGE ===
+    if (document.getElementById('ojtGrid')) {
+        console.log("Page: OJT Listings");
+        fetchAndInitializeOJT();
+        
+        const ojtSearch = document.getElementById('ojtSearchInput');
+        if (ojtSearch) {
+            ojtSearch.addEventListener('keyup', searchAndFilterOJT);
+        }
+    }
+
+    // === CASE B: CLUB ORGANIZATION PAGE ===
+    else if (document.getElementById('clubsGrid')) {
+        console.log("Page: Club Organization");
+        fetchAndInitializeClubs();
+        
+        const clubSearch = document.getElementById('clubsSearchInput');
+        if (clubSearch) {
+            clubSearch.addEventListener('keyup', searchAndFilterClubs);
+        }
+        
+        const clubForm = document.getElementById('clubApplicationForm');
+        if (clubForm) {
+            clubForm.addEventListener('submit', handleApplicationSubmit);
+        }
+    }
+
+    // === CASE C: EVENT SERVICES PAGE ===
+    else if (document.getElementById('upcoming')) {
+        console.log("Page: Event Services");
+        fetchAndInitializeEvents(); // This handles events, calendar, and notifications
+    }
+
+    // === CASE D: COUNSELING PAGE ===
+    else if (document.getElementById('requestForm')) {
+        console.log("Page: Counseling Unit");
+        
+        // 1. Load Announcements
+        fetchAndRenderAnnouncements();
+
+        // 2. Form Submission Handler
+        const requestForm = document.getElementById('requestForm');
+        if (requestForm) {
+            requestForm.addEventListener('submit', handleRequestFormSubmit);
+        }
+
+        // 3. Input Validation Listeners (Regex for cleaner inputs)
+        const addInputListener = (id, regex) => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', (e) => { e.target.value = e.target.value.replace(regex, ''); });
+        };
+        addInputListener('studentId', /[^0-9\-]/g);
+        addInputListener('fullName', /[^a-zA-Z\s]/g);
+        addInputListener('phone', /[^0-9\s\-\+]/g);
+        addInputListener('refName', /[^a-zA-Z\s]/g);
+        addInputListener('relationship', /[^a-zA-Z\s]/g);
+        addInputListener('refPhone', /[^0-9\s\-\+]/g);
+
+        // 4. My Sessions Search Listener
+        const sessionsSearch = document.getElementById('sessionsSearch');
+        if (sessionsSearch) {
+            sessionsSearch.addEventListener('input', function() {
+                const activeTabBtn = document.querySelector('#sessionsModal .tab-btn.active');
+                const activeTabName = activeTabBtn ? activeTabBtn.getAttribute('onclick').match(/'([^']+)'/)[1] : 'pending';
+                renderSessionsList(activeTabName);
+            });
+        }
+
+        // 5. Silent Session Fetch (To update badges/counts)
+        if (studentId) {
+            try {
+                const response = await fetch(`http://localhost:3001/api/counseling/my-appointments/${studentId}`);
+                if (response.ok) {
+                    allStudentSessions = await response.json();
+                    if (typeof updateTabCounts === 'function') updateTabCounts();
+                }
+            } catch (error) {
+                console.warn("Silent session fetch failed (Backend might be offline):", error);
+            }
+        }
+    }
+
+    // === CASE E: HOMEPAGE ===
+    else if (document.querySelector('.welcome-card')) {
+        console.log("Page: Homepage");
+        // Add any homepage specific logic here
+    }
+
+    // === GLOBAL HELPERS ===
+    // Initialize global FAQ or Announcement lists if they appear on random pages
+    if (document.getElementById('faqsList')) {
+        if (typeof renderFAQs === 'function') renderFAQs();
+        // If you renamed it to fetchAndRenderFAQs, use that instead
+        if (typeof fetchAndRenderFAQs === 'function') fetchAndRenderFAQs(); 
+    }
+});

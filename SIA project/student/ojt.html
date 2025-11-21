@@ -81,6 +81,12 @@
                 </div>
             </section>
 
+            
+    <section id="recommendationSection" style="display: none; padding: 0 40px; margin-bottom: 20px;">
+    <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 20px;">
+
+    </div>
+</section>
             <!-- Search and Filter Section -->
             <section class="clubs-controls">
                 <div class="search-container-clubs">
@@ -97,14 +103,18 @@
                             <path d="M13 6l-5 5-5-5"/>
                         </svg>
                     </button>
-                    <div id="ojtCategoryDropdown" style="display:none;position:absolute;background:#fff;border:1px solid #e8e8e8;border-radius:6px;margin-top:8px;z-index:10;min-width:150px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
-                        <button onclick="filterOJTByCategory('All')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #e8e8e8;">All</button>
-                        <button onclick="filterOJTByCategory('Technology')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #e8e8e8;">Technology</button>
-                        <button onclick="filterOJTByCategory('Marketing')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #e8e8e8;">Marketing</button>
-                        <button onclick="filterOJTByCategory('Analytics')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #e8e8e8;">Analytics</button>
-                        <button onclick="filterOJTByCategory('Design')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #e8e8e8;">Design</button>
-                        <button onclick="filterOJTByCategory('Finance')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;">Finance</button>
-                    </div>
+                        <div id="ojtCategoryDropdown" style="display:none; position:absolute; background:#fff; border:1px solid #e8e8e8; border-radius:6px; margin-top:8px; z-index:10; min-width:180px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                            <button onclick="filterOJTByCategory('All')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #f1f1f1;">All</button>
+                            
+                            <button onclick="filterOJTByCategory('Technology')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #f1f1f1;">Technology</button>
+                            <button onclick="filterOJTByCategory('Accountancy')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #f1f1f1;">Accountancy</button>
+                            <button onclick="filterOJTByCategory('Business')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #f1f1f1;">Business</button>
+                            <button onclick="filterOJTByCategory('Engineering')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #f1f1f1;">Engineering</button>
+                            <button onclick="filterOJTByCategory('Analytics')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #f1f1f1;">Analytics</button>
+                            <button onclick="filterOJTByCategory('Design')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #f1f1f1;">Design</button>
+                            <button onclick="filterOJTByCategory('Education')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #f1f1f1;">Education</button>
+                            <button onclick="filterOJTByCategory('Finance')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;">Finance</button>
+                        </div>
                     <button class="clubs-sort-btn" id="ojtSortMenuBtn" onclick="toggleOJTSortMenu()" title="Sort options">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
                             <circle cx="10" cy="10" r="9"/>
@@ -116,7 +126,7 @@
 
             <!-- Count & Sort -->
             <section class="clubs-toolbar">
-                <p class="clubs-count" id="ojtCount">2 training opportunities found</p>
+                <p class="clubs-count" id="ojtCount"> training opportunities found</p>
                 <div class="sort-container" id="ojtSortContainer" style="display:none;position:absolute;background:#fff;border:1px solid #e8e8e8;border-radius:6px;padding:10px;z-index:10;min-width:200px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
                     <button onclick="sortOJT('newest')" class="sort-option active" style="display:block;width:100%;padding:8px;margin:4px 0;border:0;background:none;text-align:left;cursor:pointer;">Newest</button>
                     <button onclick="sortOJT('pay-high')" class="sort-option" style="display:block;width:100%;padding:8px;margin:4px 0;border:0;background:none;text-align:left;cursor:pointer;">Pay: High to Low</button>
@@ -137,73 +147,7 @@
 
             <!-- OJT Grid (reuse clubs grid styles) -->
             <section class="clubs-grid" id="ojtGrid">
-                <!-- OJT Card 1 -->
-                <div class="club-card" data-ojt-id="1" data-ojt-category="Marketing">
-                    <div class="club-header">
-                        <h2 class="club-name">Social Media Assistant</h2>
-                        <span class="club-category-badge">Marketing</span>
-                    </div>
-                    <p class="club-description">Join our marketing team to learn social media strategy, content creation, and digital marketing analytics while working on real client campaigns.</p>
 
-                    <div class="club-info">
-                        <div class="club-info-item">
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#2c3e7f" stroke-width="1.5">
-                                <path d="M3 8h14v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8z"/>
-                            </svg>
-                            <span>ABC Company</span>
-                        </div>
-                        <div class="club-info-item">
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#2c3e7f" stroke-width="1.5">
-                                <circle cx="10" cy="10" r="8"/>
-                                <path d="M10 6v4l3 2"/>
-                            </svg>
-                            <span>Posted 2 days ago</span>
-                        </div>
-                    </div>
-
-                    <div class="club-stats">
-                        <div class="club-stat"><strong>₱</strong> 50/hour</div>
-                        <div class="club-stat">Remote/Hybrid</div>
-                        <div class="club-stat">8 weeks</div>
-                        <div class="club-stat">10 hours/week</div>
-                    </div>
-
-                    <button class="view-club-btn" onclick="openOJTCompanyModal(1)">View Company Info</button>
-                </div>
-
-                <!-- OJT Card 2 -->
-                <div class="club-card" data-ojt-id="2" data-ojt-category="Marketing">
-                    <div class="club-header">
-                        <h2 class="club-name">Marketing Assistant</h2>
-                        <span class="club-category-badge">Marketing</span>
-                    </div>
-                    <p class="club-description">Create engaging content across multiple channels while learning SEO, email marketing, and content strategy from marketing experts.</p>
-
-                    <div class="club-info">
-                        <div class="club-info-item">
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#2c3e7f" stroke-width="1.5">
-                                <path d="M3 8h14v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8z"/>
-                            </svg>
-                            <span>XYZ Company</span>
-                        </div>
-                        <div class="club-info-item">
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#2c3e7f" stroke-width="1.5">
-                                <circle cx="10" cy="10" r="8"/>
-                                <path d="M10 6v4l3 2"/>
-                            </svg>
-                            <span>Posted 4 days ago</span>
-                        </div>
-                    </div>
-
-                    <div class="club-stats">
-                        <div class="club-stat"><strong>₱</strong> 30/hour</div>
-                        <div class="club-stat">On Site</div>
-                        <div class="club-stat">7 weeks</div>
-                        <div class="club-stat">10 hours/week</div>
-                    </div>
-
-                    <button class="view-club-btn" onclick="openOJTCompanyModal(2)">View Company Info</button>
-                </div>
             </section>
         </div>
     </div>
@@ -222,6 +166,7 @@
             </div>
         </div>
     </div>
+    
 
     <script src="script.js"></script>
 </body>

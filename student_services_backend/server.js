@@ -62,6 +62,7 @@ app.use('/api/announcements', announcementRoutes); // <-- ADD THIS
 app.use('/api/faqs', faqRoutes);
 app.use('/api/saved-events', savedEventRoutes);
 app.use('/api/notifications', require('./routes/notification.routes.js'));
+app.use('/api/ojt', require('./routes/ojt.routes.js'));
 
 
 
