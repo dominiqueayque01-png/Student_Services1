@@ -2,7 +2,7 @@ Done na student backend so bale need nalang ng backend sa admin
 
 BTW student folder lang ginalaw ko tsaka dinelete ko yung files na mga nakalabas sa folder or yung mga nakabungad lang.
 
-
+download din pala kayo ng GitHub Pull Request and GitHub Repositories para sa pag push and pull ng system
 
 FOR YOUR INFORMATION! Sa pagopen ng page:
 
@@ -48,7 +48,10 @@ INSTRUCTION:
 4. punta ka sa VS studio then punta ka sa student_services1/student_sesrvices_backend/ folder tapos add file ka na name ng ".env"
 
 
-sa loob ng .env file paste niyo naka pin sa gc ng SIA PROGRAMMERS
+sa loob ng .env file paste niyo:
+
+MONGO_URI=mongodb+srv://ayquejohndominiquegascon_db_user:DYUJGnCcz42xNtTw@studentservices.ecppxho.mongodb.net/?appName=StudentServices
+PORT=3001
 
 
 
