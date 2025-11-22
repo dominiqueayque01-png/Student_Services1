@@ -1,3 +1,5 @@
+PARA SA STUDENT SIDE LANG ITO!!
+
 Done na student backend so bale need nalang ng backend sa admin
 
 BTW student folder lang ginalaw ko tsaka dinelete ko yung files na mga nakalabas sa folder or yung mga nakabungad lang.
@@ -26,6 +28,10 @@ tapos y mo lang
 
 4. Then Type mo na yung "npx live-server" tapos automatic lalabas sa browser mo yung system.
 
+
+
+
+ITO SA DATABASE NG STUDENT SIDE
 
 Para sa database connection 
 
