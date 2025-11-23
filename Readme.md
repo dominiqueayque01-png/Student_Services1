@@ -55,9 +55,8 @@ INSTRUCTION:
 
 
 sa loob ng .env file paste niyo:
+(check ng naka pin sa SIA Programmer GC)
 
-MONGO_URI=mongodb+srv://ayquejohndominiquegascon_db_user:DYUJGnCcz42xNtTw@studentservices.ecppxho.mongodb.net/?appName=StudentServices
-PORT=3001
 
 
 
