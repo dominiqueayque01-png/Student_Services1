@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club Organization Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <div class="logo">🎓</div>
+                <div class="logo-text">
+                    <h3>QCU Student Services</h3>
+                    <p>Admin Portal - Club</p>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-item active" data-page="overview">
+                    <span class="nav-icon">📊</span>
+                    <span>Overview</span>
+                </div>
+                <div class="nav-item" data-page="listings">
+                    <span class="nav-icon">📋</span>
+                    <span>Club Listings</span>
+                </div>
+                <div class="nav-item" data-page="analytics">
+                    <span class="nav-icon">📈</span>
+                    <span>Analytics</span>
+                </div>
+                <div class="nav-item" data-page="accounts">
+                    <span class="nav-icon">👥</span>
+                    <span>Accounts</span>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">A</div>
+                    <div class="user-info">
+                        <h4>Admin User</h4>
+                        <p>admin@qcu.edu</p>
+                    </div>
+                </div>
+                <button class="logout-btn">
+                    <span>🚪</span>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1>Club Organization Dashboard</h1>
+                <p>Manage club listings, memberships, and organizational analytics</p>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <!-- Total Clubs Card -->
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <h3>Total Clubs</h3>
+                        <span class="stat-icon">👥</span>
+                    </div>
+                    <div class="stat-value">6</div>
+                    <div class="stat-meta">5 active clubs</div>
+                </div>
+
+                <!-- Total Members Card -->
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <h3>Total Members</h3>
+                        <span class="stat-icon">👤</span>
+                    </div>
+                    <div class="stat-value">1007</div>
+                    <div class="stat-meta">Unique students across programs</div>
+                </div>
+
+                <!-- Active Categories Card -->
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <h3>Active Categories</h3>
+                        <span class="stat-icon">📚</span>
+                    </div>
+                    <div class="stat-value">4</div>
+                    <div class="stat-meta">Club types represented</div>
+                </div>
+
+                <!-- Avg Club Size Card -->
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <h3>Avg. Club Size</h3>
+                        <span class="stat-icon">📈</span>
+                    </div>
+                    <div class="stat-value">53</div>
+                    <div class="stat-meta">Members per active club</div>
+                </div>
+            </div>
+
+            <!-- Recent Activity Section -->
+            <div class="recent-activity">
+                <h2>Recent Activity</h2>
+                <div class="activity-list">
+                    <div class="activity-item new">
+                        <div class="activity-badge">+</div>
+                        <div class="activity-content">
+                            <p class="activity-title">New club created: <strong>Data Science Collective</strong></p>
+                            <p class="activity-time">1 day ago</p>
+                        </div>
+                    </div>
+
+                    <div class="activity-item updated">
+                        <div class="activity-badge">✓</div>
+                        <div class="activity-content">
+                            <p class="activity-title"><strong>Tech Innovation Club</strong> reached <strong>142 members</strong></p>
+                            <p class="activity-time">2 days ago</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logout-modal" class="logout-modal">
+        <div class="logout-modal-content">
+            <div class="logout-modal-header">
+                <h2>Logout Confirmation</h2>
+                <button class="logout-modal-close">&times;</button>
+            </div>
+            <div class="logout-modal-body">
+                <p>Are you sure you want to log out?</p>
+            </div>
+            <div class="logout-modal-footer">
+                <button class="logout-modal-cancel">Cancel</button>
+                <button class="logout-modal-confirm">Yes, Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

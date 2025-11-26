@@ -1,0 +1,175 @@
+.registrations-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.registrations-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+}
+
+.registrations-header h2 {
+    margin: 0;
+    font-size: 20px;
+    color: #333;
+}
+
+.event-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    text-align: center;
+}
+
+.stat-card h3 {
+    font-size: 14px;
+    color: #666;
+    margin: 0 0 10px 0;
+    font-weight: 600;
+}
+
+.stat-card .number {
+    font-size: 32px;
+    font-weight: 700;
+    color: #2d5aa8;
+    margin: 0;
+}
+
+.stat-card .subtitle {
+    font-size: 12px;
+    color: #999;
+    margin-top: 8px;
+}
+
+.registrations-search {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.registrations-search input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.registrations-search select {
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.registrations-table-container {
+    background-color: white;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    overflow: hidden;
+}
+
+.registrations-info {
+    padding: 15px 20px;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 13px;
+    color: #666;
+}
+
+.registrations-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.registrations-table thead {
+    background-color: #f5f5f5;
+    border-bottom: 2px solid #ddd;
+}
+
+.registrations-table th {
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+}
+
+.registrations-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e0e0e0;
+    color: #555;
+}
+
+.registrations-table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.event-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.event-badge.academic {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.event-badge.community {
+    background-color: #f0e6ff;
+    color: #5a3e7b;
+}
+
+.event-badge.institutional {
+    background-color: #e8e8e8;
+    color: #555;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.action-buttons button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-view {
+    background-color: #e3f2fd;
+    color: #2d5aa8;
+}
+
+.btn-view:hover {
+    background-color: #bbdefb;
+}
+
+.btn-cancel-reg {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+.btn-cancel-reg:hover {
+    background-color: #ffcdd2;
+}

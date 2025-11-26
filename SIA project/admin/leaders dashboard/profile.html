@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club Profile</title>
+    <link rel="stylesheet" href="profile-styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <div class="logo">🎓</div>
+                <div class="logo-text">
+                    <h3>QCU Student Services</h3>
+                    <p>Admin Portal - Club Leaders</p>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-item" data-page="overview">
+                    <span class="nav-icon">📊</span>
+                    <span>Overview</span>
+                </div>
+                <div class="nav-item active" data-page="profile">
+                    <span class="nav-icon">📋</span>
+                    <span>Club Profile</span>
+                </div>
+                <div class="nav-item" data-page="members">
+                    <span class="nav-icon">👥</span>
+                    <span>Members</span>
+                </div>
+                <div class="nav-item" data-page="applications">
+                    <span class="nav-icon">📝</span>
+                    <span>Applications</span>
+                </div>
+                <div class="nav-item" data-page="analytics">
+                    <span class="nav-icon">📈</span>
+                    <span>Analytics</span>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">A</div>
+                    <div class="user-info">
+                        <h4>Admin User</h4>
+                        <p>admin@qcu.edu</p>
+                    </div>
+                </div>
+                <button class="logout-btn">
+                    <span>🚪</span>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h1>Club Organization Dashboard</h1>
+                    <p>Manage club listings, memberships, and organizational analytics</p>
+                </div>
+                <div class="page-header-actions">
+                    <button class="btn-save">Save Changes</button>
+                    <button class="btn-cancel">Cancel</button>
+                </div>
+            </div>
+
+            <!-- Form Container -->
+            <div class="form-container">
+                <!-- Club Information Section -->
+                <div class="form-section">
+                    <h2>Club Information</h2>
+                    <div class="form-grid full">
+                        <!-- Club Name -->
+                        <div class="form-group">
+                            <label>Club Name <span class="required">*</span></label>
+                            <input 
+                                type="text" 
+                                id="club-name" 
+                                placeholder="Enter club name"
+                            >
+                        </div>
+
+                        <!-- Description -->
+                        <div class="form-group">
+                            <label>Description <span class="required">*</span></label>
+                            <textarea 
+                                id="description" 
+                                placeholder="Enter club description"
+                            ></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Club Details Section -->
+                <div class="form-section">
+                    <div class="form-grid">
+                        <!-- Category -->
+                        <div class="form-group">
+                            <label>Category <span class="required">*</span></label>
+                            <select id="category">
+                                <option value="Technology">Technology</option>
+                                <option value="Business">Business</option>
+                                <option value="Arts">Arts</option>
+                                <option value="Sports">Sports</option>
+                                <option value="Academic">Academic</option>
+                                <option value="Cultural">Cultural</option>
+                            </select>
+                        </div>
+
+                        <!-- Contact Email -->
+                        <div class="form-group">
+                            <label>Contact Email <span class="required">*</span></label>
+                            <input 
+                                type="email" 
+                                id="contact-email" 
+                                placeholder="Enter contact email"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Meeting Schedule and Location -->
+                    <div class="form-grid">
+                        <!-- Meeting Schedule -->
+                        <div class="form-group">
+                            <label>Meeting Schedule <span class="required">*</span></label>
+                            <input 
+                                type="text" 
+                                id="meeting-schedule" 
+                                placeholder="e.g., Monday, 6:00 pm"
+                            >
+                        </div>
+
+                        <!-- Location -->
+                        <div class="form-group">
+                            <label>Location <span class="required">*</span></label>
+                            <input 
+                                type="text" 
+                                id="location" 
+                                placeholder="e.g., IK 604, Academic Building"
+                            >
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logout-modal" class="logout-modal">
+        <div class="logout-modal-content">
+            <div class="logout-modal-header">
+                <h2>Logout Confirmation</h2>
+                <button class="logout-modal-close">&times;</button>
+            </div>
+            <div class="logout-modal-body">
+                <p>Are you sure you want to log out?</p>
+            </div>
+            <div class="logout-modal-footer">
+                <button class="logout-modal-cancel">Cancel</button>
+                <button class="logout-modal-confirm">Yes, Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="profile-script.js"></script>
+</body>
+</html>

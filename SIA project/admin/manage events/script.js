@@ -463,11 +463,56 @@ if (sessionCards.length > 0) {
 const logoutBtn = document.querySelector('.logout-btn');
 if (logoutBtn) {
     logoutBtn.addEventListener('click', function() {
-        if (confirm('Are you sure you want to logout?')) {
-            window.location.href = 'index.html';
-        }
+        showLogoutModal();
     });
 }
+
+// Logout Modal Functions
+function showLogoutModal() {
+    const modal = document.getElementById('logout-modal');
+    if (modal) {
+        modal.classList.add('show');
+    }
+}
+
+function hideLogoutModal() {
+    const modal = document.getElementById('logout-modal');
+    if (modal) {
+        modal.classList.remove('show');
+    }
+}
+
+function confirmLogout() {
+    // Clear any session data if needed
+    sessionStorage.clear();
+    // Redirect to the main admin login page
+    window.location.href = '../../login admin/index.html';
+}
+
+// Logout modal event listeners - wrapped in setTimeout to ensure elements are loaded
+setTimeout(function() {
+    const logoutModalClose = document.querySelector('.logout-modal-close');
+    const logoutModalCancel = document.querySelector('.logout-modal-cancel');
+    const logoutModalConfirm = document.querySelector('.logout-modal-confirm');
+    const logoutModal = document.getElementById('logout-modal');
+
+    if (logoutModalClose) {
+        logoutModalClose.addEventListener('click', hideLogoutModal);
+    }
+    if (logoutModalCancel) {
+        logoutModalCancel.addEventListener('click', hideLogoutModal);
+    }
+    if (logoutModalConfirm) {
+        logoutModalConfirm.addEventListener('click', confirmLogout);
+    }
+    if (logoutModal) {
+        logoutModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideLogoutModal();
+            }
+        });
+    }
+}, 100);
 
 // Navigation items
 const navItems = document.querySelectorAll('.nav-item');
@@ -1049,6 +1094,8 @@ if (announcementsList) {
             announcementModal.style.display = 'none';
             deleteAnnouncementModal.style.display = 'none';
             currentEditingAnnouncementId = null;
+            
         }
     });
 }
+

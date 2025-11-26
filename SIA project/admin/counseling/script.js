@@ -460,14 +460,62 @@ if (sessionCards.length > 0) {
 }
 
 // Logout button (works on both pages)
-const logoutBtn = document.querySelector('.logout-btn');
-if (logoutBtn) {
-    logoutBtn.addEventListener('click', function() {
-        if (confirm('Are you sure you want to logout?')) {
-            window.location.href = 'index.html';
+document.addEventListener('DOMContentLoaded', function() {
+    const logoutBtn = document.querySelector('.logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            showLogoutModal();
+        });
+    }
+
+    // Logout Modal Functions
+    function showLogoutModal() {
+        const modal = document.getElementById('logout-modal');
+        if (modal) {
+            modal.classList.add('show');
+            modal.style.display = 'flex';
         }
-    });
-}
+    }
+
+    function hideLogoutModal() {
+        const modal = document.getElementById('logout-modal');
+        if (modal) {
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+        }
+    }
+
+    function confirmLogout() {
+        // Clear any session data if needed
+        sessionStorage.clear();
+        // Redirect to the main admin login page
+        window.location.href = '../../login admin/index.html';
+    }
+
+    // Logout modal event listeners
+    const logoutModalClose = document.querySelector('.logout-modal-close');
+    const logoutModalCancel = document.querySelector('.logout-modal-cancel');
+    const logoutModalConfirm = document.querySelector('.logout-modal-confirm');
+    const logoutModal = document.getElementById('logout-modal');
+
+    if (logoutModalClose) {
+        logoutModalClose.addEventListener('click', hideLogoutModal);
+    }
+    if (logoutModalCancel) {
+        logoutModalCancel.addEventListener('click', hideLogoutModal);
+    }
+    if (logoutModalConfirm) {
+        logoutModalConfirm.addEventListener('click', confirmLogout);
+    }
+    if (logoutModal) {
+        logoutModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideLogoutModal();
+            }
+        });
+    }
+});
 
 // Navigation items
 const navItems = document.querySelectorAll('.nav-item');
@@ -691,11 +739,18 @@ if (counselorsGrid) {
         deleteModal.style.display = 'flex';
     }
 
-    // Submit Counselor (Add or Edit) - Attached outside to ensure it always works
+    // Submit Counselor (Add or Edit)
     function attachSubmitListener() {
         const submitBtn = document.getElementById('counselor-submit-btn');
         if (submitBtn) {
-            submitBtn.addEventListener('click', function() {
+            // Remove old listener by cloning and replacing
+            const newSubmitBtn = submitBtn.cloneNode(true);
+            submitBtn.parentNode.replaceChild(newSubmitBtn, submitBtn);
+            
+            // Attach new listener to the fresh button
+            newSubmitBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
                 const name = document.getElementById('counselor-name').value.trim();
                 const title = document.getElementById('counselor-title').value.trim();
                 const email = document.getElementById('counselor-email').value.trim();
@@ -706,6 +761,20 @@ if (counselorsGrid) {
                 // Validation
                 if (!name || !title || !email || !phone || !days || !time) {
                     alert('Please fill in all fields');
+                    return;
+                }
+
+                // Validate email format
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    alert('Please enter a valid email address');
+                    return;
+                }
+
+                // Validate phone format (at least 10 digits)
+                const phoneDigits = phone.replace(/\D/g, '');
+                if (phoneDigits.length < 10) {
+                    alert('Please enter a valid phone number (at least 10 digits)');
                     return;
                 }
 
@@ -720,8 +789,11 @@ if (counselorsGrid) {
                         counselor.email = email;
                         counselor.phone = phone;
                         counselor.availability = availability;
+                        
+                        // Save to localStorage immediately
+                        saveCounselorsData();
+                        alert('Counselor updated successfully');
                     }
-                    showSuccessNotification('Counselor edited successfully');
                 } else {
                     // Add new counselor
                     const newCounselor = {
@@ -735,12 +807,13 @@ if (counselorsGrid) {
                         availability: availability
                     };
                     counselorsData.push(newCounselor);
-                    showSuccessNotification('Counselor added successfully');
+                    
+                    // Save to localStorage immediately
+                    saveCounselorsData();
+                    alert('Counselor added successfully');
                 }
 
-                // Save to localStorage
-                saveCounselorsData();
-
+                // Render updated counselors immediately
                 renderCounselors(counselorsData);
                 counselorModal.style.display = 'none';
                 currentEditingCounselorId = null;
@@ -748,8 +821,10 @@ if (counselorsGrid) {
         }
     }
     
-    // Attach the submit listener
-    attachSubmitListener();
+    // Attach the submit listener when modal is opened
+    document.addEventListener('DOMContentLoaded', function() {
+        attachSubmitListener();
+    });
 
     // Delete Counselor
     if (btnDelete) {
@@ -951,7 +1026,14 @@ if (announcementsList) {
     function attachAnnouncementSubmitListener() {
         const submitBtn = document.getElementById('announcement-submit-btn');
         if (submitBtn) {
-            submitBtn.addEventListener('click', function() {
+            // Remove old listener by cloning and replacing
+            const newSubmitBtn = submitBtn.cloneNode(true);
+            submitBtn.parentNode.replaceChild(newSubmitBtn, submitBtn);
+            
+            // Attach new listener to the fresh button
+            newSubmitBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
                 const title = document.getElementById('announcement-title').value.trim();
                 const content = document.getElementById('announcement-content').value.trim();
 
@@ -972,7 +1054,9 @@ if (announcementsList) {
                         announcement.title = title;
                         announcement.content = content;
                     }
-                    showSuccessNotification('Announcement edited successfully');
+                    // Save to localStorage
+                    saveAnnouncementsData();
+                    alert('Announcement edited successfully');
                 } else {
                     // Add new announcement
                     const newAnnouncement = {
@@ -983,11 +1067,10 @@ if (announcementsList) {
                         date: dateStr
                     };
                     announcementsData.push(newAnnouncement);
-                    showSuccessNotification('Announcement added successfully');
+                    // Save to localStorage
+                    saveAnnouncementsData();
+                    alert('Announcement added successfully');
                 }
-
-                // Save to localStorage
-                saveAnnouncementsData();
 
                 renderAnnouncements(announcementsData);
                 announcementModal.style.display = 'none';
@@ -1006,7 +1089,7 @@ if (announcementsList) {
             saveAnnouncementsData();
             renderAnnouncements(announcementsData);
             deleteAnnouncementModal.style.display = 'none';
-            showSuccessNotification('Announcement deleted successfully');
+            alert('Announcement deleted successfully');
             currentEditingAnnouncementId = null;
         });
     }

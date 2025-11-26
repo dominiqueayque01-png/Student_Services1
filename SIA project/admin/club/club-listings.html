@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club Listings</title>
+    <link rel="stylesheet" href="club-listings-styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <div class="logo">🎓</div>
+                <div class="logo-text">
+                    <h3>QCU Student Services</h3>
+                    <p>Admin Portal - Club</p>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-item" data-page="overview">
+                    <span class="nav-icon">📊</span>
+                    <span>Overview</span>
+                </div>
+                <div class="nav-item active" data-page="listings">
+                    <span class="nav-icon">📋</span>
+                    <span>Club Listings</span>
+                </div>
+                <div class="nav-item" data-page="analytics">
+                    <span class="nav-icon">📈</span>
+                    <span>Analytics</span>
+                </div>
+                <div class="nav-item" data-page="accounts">
+                    <span class="nav-icon">👥</span>
+                    <span>Accounts</span>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">A</div>
+                    <div class="user-info">
+                        <h4>Admin User</h4>
+                        <p>admin@qcu.edu</p>
+                    </div>
+                </div>
+                <button class="logout-btn">
+                    <span>🚪</span>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1>Club Listings</h1>
+                <p>Manage all student organizations.</p>
+            </div>
+
+            <!-- Club Management Section -->
+            <h2 class="section-title">Club Management</h2>
+
+            <!-- Search & Filter Bar -->
+            <div class="search-filter-bar">
+                <input 
+                    type="text" 
+                    id="search-club" 
+                    class="search-box" 
+                    placeholder="Search clubs by name, category..."
+                >
+                <select id="filter-status" class="filter-dropdown">
+                    <option value="">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+                <button class="btn-create">
+                    <span>➕</span>
+                    <span>Create Club</span>
+                </button>
+            </div>
+
+            <!-- Clubs Container -->
+            <div class="clubs-container">
+                <!-- Club cards will be rendered here by JavaScript -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logout-modal" class="logout-modal">
+        <div class="logout-modal-content">
+            <div class="logout-modal-header">
+                <h2>Logout Confirmation</h2>
+                <button class="logout-modal-close">&times;</button>
+            </div>
+            <div class="logout-modal-body">
+                <p>Are you sure you want to log out?</p>
+            </div>
+            <div class="logout-modal-footer">
+                <button class="logout-modal-cancel">Cancel</button>
+                <button class="logout-modal-confirm">Yes, Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="club-listings-script.js"></script>
+</body>
+</html>
