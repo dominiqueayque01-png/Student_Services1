@@ -75,10 +75,11 @@ let dashboardData = {
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeDashboard();
-    initializeNavigation();
     initializeLogout();
     loadDashboardData();
     renderDashboard();
+    // Set active nav item based on current page
+    setActiveNavItem();
 });
 
 // ============================================
@@ -225,36 +226,18 @@ function editStatMeta(element, index) {
 // Navigation
 // ============================================
 
-function initializeNavigation() {
+function setActiveNavItem() {
+    // Get current page filename
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
     const navItems = document.querySelectorAll('.nav-item');
     
     navItems.forEach(item => {
-        item.style.cursor = 'pointer';
-        item.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            
-            const page = this.getAttribute('data-page');
-            console.log('Navigating to:', page);
-            
-            if (page === 'overview') {
-                window.location.href = 'index.html';
-                return false;
-            } else if (page === 'profile') {
-                window.location.href = 'profile.html';
-                return false;
-            } else if (page === 'members') {
-                window.location.href = 'members.html';
-                return false;
-            } else if (page === 'applications') {
-                window.location.href = 'applications.html';
-                return false;
-            } else if (page === 'analytics') {
-                window.location.href = 'analytics.html';
-                return false;
-            }
-        });
+        const href = item.getAttribute('href');
+        if (href === currentPage || (currentPage === '' && href === 'index.html')) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
     });
 }
 

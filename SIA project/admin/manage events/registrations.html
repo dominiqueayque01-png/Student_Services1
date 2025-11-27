@@ -16,10 +16,7 @@
             <aside class="sidebar">
                 <div class="logo-section">
                     <div class="logo">
-                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                            <rect width="40" height="40" rx="8" fill="#8fa3d4"/>
-                            <path d="M20 8C15.6 8 12 11.6 12 16C12 19.2 13.8 21.9 16.5 23.1V28H23.5V23.1C26.2 21.9 28 19.2 28 16C28 11.6 24.4 8 20 8Z" fill="white"/>
-                        </svg>
+                    <img src="qculogo.png.png" class="logo-img">
                     </div>
                     <div class="logo-text">
                         <h3>QCU Student Services</h3>
@@ -29,15 +26,12 @@
 
                 <nav class="sidebar-nav">
                     <div class="nav-item" data-page="events">
-                        <span class="nav-icon">📅</span>
                         <span>Manage Events</span>
                     </div>
                     <div class="nav-item active" data-page="registrations">
-                        <span class="nav-icon">📋</span>
                         <span>Registrations</span>
                     </div>
                     <div class="nav-item" data-page="announcements">
-                        <span class="nav-icon">📢</span>
                         <span>Announcements</span>
                     </div>
                 </nav>
@@ -57,6 +51,18 @@
             <!-- Main Panel -->
             <main class="main-panel">
                 <div class="registrations-container">
+                    <!-- Search and Filter Header -->
+                    <div class="registrations-header">
+                        <input type="text" id="search-input" class="search-box" placeholder="Search by student name, ID, or event...">
+                        <select id="filter-event" class="filter-dropdown">
+                            <option value="">All Events</option>
+                            <option value="Tech Talk: IT Summit">Tech Talk: IT Summit</option>
+                            <option value="Schedule Adjustment">Schedule Adjustment</option>
+                            <option value="QCU Bayanihan Week">QCU Bayanihan Week</option>
+                            <option value="Career Fair 2025">Career Fair 2025</option>
+                        </select>
+                    </div>
+
                     <!-- Stats Cards -->
                     <div class="event-stats">
                         <div class="stat-card">
@@ -79,18 +85,6 @@
                             <p class="number">231</p>
                             <p class="subtitle">/350 confirmed</p>
                         </div>
-                    </div>
-
-                    <!-- Search and Filter -->
-                    <div class="registrations-search">
-                        <input type="text" id="search-input" placeholder="Search by student name, ID, or event...">
-                        <select id="filter-event">
-                            <option value="">All Events</option>
-                            <option value="Tech Talk: IT Summit">Tech Talk: IT Summit</option>
-                            <option value="Schedule Adjustment">Schedule Adjustment</option>
-                            <option value="QCU Bayanihan Week">QCU Bayanihan Week</option>
-                            <option value="Career Fair 2025">Career Fair 2025</option>
-                        </select>
                     </div>
 
                     <!-- Registrations Table -->
@@ -174,6 +168,104 @@
                     </div>
                 </div>
             </main>
+        </div>
+    </div>
+
+    <!-- View Registration Modal -->
+    <div class="modal" id="view-registration-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Registration Details</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="registration-details-grid">
+                    <div class="detail-item">
+                        <label class="detail-label">Student Name</label>
+                        <p class="detail-value" id="view-student-name">Juan Dela Cruz</p>
+                    </div>
+                    <div class="detail-item">
+                        <label class="detail-label">Student ID</label>
+                        <p class="detail-value" id="view-student-id">23-9995</p>
+                    </div>
+                    <div class="detail-item">
+                        <label class="detail-label">Email</label>
+                        <p class="detail-value" id="view-student-email">juan@example.com</p>
+                    </div>
+                    <div class="detail-item">
+                        <label class="detail-label">Phone</label>
+                        <p class="detail-value" id="view-student-phone">0912 345 6789</p>
+                    </div>
+                    <div class="detail-item">
+                        <label class="detail-label">Event</label>
+                        <p class="detail-value" id="view-registration-event">Tech Talk: IT Summit</p>
+                    </div>
+                    <div class="detail-item">
+                        <label class="detail-label">Registration Date</label>
+                        <p class="detail-value" id="view-registration-date">15/10/2025</p>
+                    </div>
+                    <div class="detail-item">
+                        <label class="detail-label">Status</label>
+                        <p class="detail-value" id="view-registration-status">
+                            <span class="status-badge confirmed">Confirmed</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="document.getElementById('view-registration-modal').style.display='none'">Close</button>
+                <button class="btn-submit" id="btn-edit-registration">Edit Registration</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Registration Modal -->
+    <div class="modal" id="edit-registration-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Registration</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="edit-student-name">Student Name <span class="required">*</span></label>
+                    <input type="text" id="edit-student-name" placeholder="Enter student name">
+                </div>
+                <div class="form-group">
+                    <label for="edit-student-id">Student ID <span class="required">*</span></label>
+                    <input type="text" id="edit-student-id" placeholder="Enter student ID">
+                </div>
+                <div class="form-group">
+                    <label for="edit-student-email">Email <span class="required">*</span></label>
+                    <input type="email" id="edit-student-email" placeholder="Enter email address">
+                </div>
+                <div class="form-group">
+                    <label for="edit-student-phone">Phone <span class="required">*</span></label>
+                    <input type="tel" id="edit-student-phone" placeholder="Enter phone number">
+                </div>
+                <div class="form-group">
+                    <label for="edit-registration-event">Event <span class="required">*</span></label>
+                    <select id="edit-registration-event">
+                        <option value="">Select an event</option>
+                        <option value="Tech Talk: IT Summit">Tech Talk: IT Summit</option>
+                        <option value="Schedule Adjustment">Schedule Adjustment</option>
+                        <option value="QCU Bayanihan Week">QCU Bayanihan Week</option>
+                        <option value="Career Fair 2025">Career Fair 2025</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-registration-status">Status <span class="required">*</span></label>
+                    <select id="edit-registration-status">
+                        <option value="Confirmed">Confirmed</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="document.getElementById('edit-registration-modal').style.display='none'">Cancel</button>
+                <button class="btn-submit" id="btn-save-registration">Save Changes</button>
+            </div>
         </div>
     </div>
 

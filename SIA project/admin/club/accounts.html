@@ -11,7 +11,7 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="logo-section">
-                <div class="logo">🎓</div>
+                <img src="qculogo.png.png" class="logo-img">
                 <div class="logo-text">
                     <h3>QCU Student Services</h3>
                     <p>Admin Portal - Club</p>
@@ -20,19 +20,15 @@
 
             <nav class="sidebar-nav">
                 <div class="nav-item" data-page="overview">
-                    <span class="nav-icon">📊</span>
                     <span>Overview</span>
                 </div>
                 <div class="nav-item" data-page="listings">
-                    <span class="nav-icon">📋</span>
                     <span>Club Listings</span>
                 </div>
                 <div class="nav-item" data-page="analytics">
-                    <span class="nav-icon">📈</span>
                     <span>Analytics</span>
                 </div>
                 <div class="nav-item active" data-page="accounts">
-                    <span class="nav-icon">👥</span>
                     <span>Accounts</span>
                 </div>
             </nav>
@@ -46,7 +42,6 @@
                     </div>
                 </div>
                 <button class="logout-btn">
-                    <span>🚪</span>
                     <span>Logout</span>
                 </button>
             </div>
@@ -61,7 +56,7 @@
                     <p>Create and manage user accounts for club leaders</p>
                 </div>
                 <button class="btn-create-account">
-                    <span>👤</span>
+                    <span class="simple-icon">+</span>
                     <span>Create Account</span>
                 </button>
             </div>
@@ -70,7 +65,7 @@
             <div class="accounts-table-container">
                 <!-- Search Box -->
                 <div class="search-box-wrapper">
-                    <span class="search-icon">🔍</span>
+                    <span class="search-icon">⌕</span>
                     <input 
                         type="text" 
                         id="search-accounts" 
@@ -86,6 +81,7 @@
                             <th>Name</th>
                             <th>Email</th>
                             <th>Username</th>
+                            <th>Club Name</th>
                             <th>Created</th>
                             <th>Action</th>
                         </tr>
@@ -96,6 +92,122 @@
                 </table>
             </div>
         </main>
+    </div>
+
+    <!-- Create Account Modal -->
+    <div id="create-account-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Account</h2>
+                <button class="modal-close" data-modal="create-account">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="form-subtitle">Add a new user account</p>
+                <form id="create-account-form">
+                    <div class="form-group">
+                        <label for="create-fullname">Full Name <span class="required">*</span></label>
+                        <input type="text" id="create-fullname" name="fullname" placeholder="Enter full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="create-email">Email <span class="required">*</span></label>
+                        <input type="email" id="create-email" name="email" placeholder="Enter email address" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="create-username">Username <span class="required">*</span></label>
+                        <input type="text" id="create-username" name="username" placeholder="Enter username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="create-clubname">Club Name <span class="required">*</span></label>
+                        <input type="text" id="create-clubname" name="clubname" placeholder="Enter club name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="create-password">Password <span class="required">*</span></label>
+                        <input type="password" id="create-password" name="password" placeholder="Enter password" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" data-modal="create-account">Cancel</button>
+                <button class="btn-confirm" id="create-account-submit">Create Account</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Account Modal -->
+    <div id="edit-account-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Account</h2>
+                <button class="modal-close" data-modal="edit-account">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="form-subtitle">Update account information</p>
+                <form id="edit-account-form">
+                    <input type="hidden" id="edit-account-id">
+                    <div class="form-group">
+                        <label for="edit-fullname">Full Name <span class="required">*</span></label>
+                        <input type="text" id="edit-fullname" name="fullname" placeholder="Enter full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-email">Email <span class="required">*</span></label>
+                        <input type="email" id="edit-email" name="email" placeholder="Enter email address" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-username">Username <span class="required">*</span></label>
+                        <input type="text" id="edit-username" name="username" placeholder="Enter username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-clubname">Club Name <span class="required">*</span></label>
+                        <input type="text" id="edit-clubname" name="clubname" placeholder="Enter club name" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" data-modal="edit-account">Cancel</button>
+                <button class="btn-confirm" id="edit-account-submit">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Password Modal -->
+    <div id="reset-password-modal" class="modal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2>Reset Password</h2>
+                <button class="modal-close" data-modal="reset-password">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="reset-password-form">
+                    <input type="hidden" id="reset-password-id">
+                    <div class="form-group">
+                        <label for="reset-new-password">New Password <span class="required">*</span></label>
+                        <input type="password" id="reset-new-password" name="password" placeholder="Enter new password" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" data-modal="reset-password">Cancel</button>
+                <button class="btn-confirm" id="reset-password-submit">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Remove Account Modal -->
+    <div id="remove-account-modal" class="modal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2>Remove Account</h2>
+                <button class="modal-close" data-modal="remove-account">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="remove-account-message">Are you sure you want to remove this account from the system?</p>
+                <input type="hidden" id="remove-account-id">
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" data-modal="remove-account">Cancel</button>
+                <button class="btn-confirm btn-danger" id="remove-account-submit">Remove</button>
+            </div>
+        </div>
     </div>
 
     <!-- Logout Confirmation Modal -->

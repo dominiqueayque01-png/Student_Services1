@@ -189,6 +189,7 @@ if (sessionCards.length > 0) {
             // Get session ID from card
             const sessionId = this.getAttribute('data-id');
             const data = sessionsData[sessionId];
+            const sessionStatus = this.getAttribute('data-status');
 
             // Update details panel
             if (data) {
@@ -208,6 +209,17 @@ if (sessionCards.length > 0) {
                 const statusBadge = document.getElementById('detail-status');
                 statusBadge.className = 'status-badge ' + this.getAttribute('data-status');
                 statusBadge.textContent = data.status;
+
+                // Show or hide completion section based on session status
+                if (completionSection) {
+                    if (sessionStatus === 'scheduled') {
+                        completionSection.style.display = 'block';
+                        markCompletedCheckbox.checked = false;
+                    } else {
+                        completionSection.style.display = 'none';
+                        markCompletedCheckbox.checked = false;
+                    }
+                }
 
                 // Show details, hide empty state
                 if (emptyState) emptyState.style.display = 'none';
@@ -309,7 +321,7 @@ if (sessionCards.length > 0) {
 
             // Validation
             if (!date || !time || !counselor) {
-                alert('Please fill in all fields (Date, Time, and Counselor)');
+                showValidationModal('Please fill in all fields (Date, Time, and Counselor)');
                 return;
             }
 
@@ -363,11 +375,47 @@ if (sessionCards.length > 0) {
     if (markCompletedCheckbox) {
         markCompletedCheckbox.addEventListener('change', function() {
             if (this.checked) {
-                // Show confirmation modal
-                if (confirm('Completing this session will update its status and remove it from the active list. This action cannot be undone.')) {
-                    completeSession();
-                } else {
-                    this.checked = false;
+                // Show completion modal
+                const completionModal = document.getElementById('completion-modal');
+                if (completionModal) {
+                    completionModal.style.display = 'flex';
+                    completionModal.classList.add('show');
+                    
+                    // Handle confirmation
+                    const confirmBtn = document.getElementById('completion-modal-confirm');
+                    const cancelBtn = document.getElementById('completion-modal-cancel');
+                    const closeBtn = document.getElementById('completion-modal-close');
+                    
+                    const handleConfirm = () => {
+                        completeSession();
+                        completionModal.style.display = 'none';
+                        completionModal.classList.remove('show');
+                        removeEventListeners();
+                    };
+                    
+                    const handleCancel = () => {
+                        markCompletedCheckbox.checked = false;
+                        completionModal.style.display = 'none';
+                        completionModal.classList.remove('show');
+                        removeEventListeners();
+                    };
+                    
+                    const removeEventListeners = () => {
+                        confirmBtn.removeEventListener('click', handleConfirm);
+                        cancelBtn.removeEventListener('click', handleCancel);
+                        closeBtn.removeEventListener('click', handleCancel);
+                    };
+                    
+                    confirmBtn.addEventListener('click', handleConfirm);
+                    cancelBtn.addEventListener('click', handleCancel);
+                    closeBtn.addEventListener('click', handleCancel);
+                    
+                    // Close on overlay click
+                    completionModal.addEventListener('click', function(e) {
+                        if (e.target === this) {
+                            handleCancel();
+                        }
+                    }, { once: true });
                 }
             }
         });
@@ -408,6 +456,13 @@ if (sessionCards.length > 0) {
             }
 
             showSuccessNotification('Session mark as completed');
+            
+            // Close the details panel after a short delay to show the update
+            setTimeout(function() {
+                sessionCards.forEach(c => c.classList.remove('selected'));
+                if (emptyState) emptyState.style.display = 'flex';
+                if (sessionDetails) sessionDetails.style.display = 'none';
+            }, 1500);
         }
     }
 
@@ -430,10 +485,11 @@ if (sessionCards.length > 0) {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background-color: #4CAF50;
-            color: white;
+            background-color: white;
+            color: #2d5aa8;
             padding: 16px 24px;
             border-radius: 4px;
+            border: 2px solid #2d5aa8;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             z-index: 1000;
             animation: slideIn 0.3s ease-in;
@@ -448,6 +504,29 @@ if (sessionCards.length > 0) {
                 notification.remove();
             }, 300);
         }, 3000);
+    }
+
+    function showValidationModal(message) {
+        // Remove existing toast if present
+        const existingToast = document.querySelector('.validation-toast');
+        if (existingToast) {
+            existingToast.remove();
+        }
+
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = 'validation-toast';
+        toast.textContent = message;
+        
+        document.body.appendChild(toast);
+        
+        // Auto-remove after 4 seconds
+        setTimeout(function() {
+            toast.classList.add('hidden');
+            setTimeout(function() {
+                toast.remove();
+            }, 300);
+        }, 4000);
     }
 
     // Trigger first card to show details on page load
@@ -656,8 +735,8 @@ if (counselorsGrid) {
 
                 <div class="counselor-card-section">
                     <p class="card-label">Contact Information</p>
-                    <p class="card-contact">📧 ${counselor.email}</p>
-                    <p class="card-contact">📞 ${counselor.phone}</p>
+                    <p class="card-contact">✉ ${counselor.email}</p>
+                    <p class="card-contact">☎ ${counselor.phone}</p>
                 </div>
 
                 <div class="counselor-card-section">
@@ -760,21 +839,28 @@ if (counselorsGrid) {
 
                 // Validation
                 if (!name || !title || !email || !phone || !days || !time) {
-                    alert('Please fill in all fields');
+                    const missingFields = [];
+                    if (!name) missingFields.push('Name');
+                    if (!title) missingFields.push('Title');
+                    if (!email) missingFields.push('Email');
+                    if (!phone) missingFields.push('Phone');
+                    if (!days) missingFields.push('Days');
+                    if (!time) missingFields.push('Time');
+                    showCounselorToast('error', `Missing fields: ${missingFields.join(', ')}`);
                     return;
                 }
 
                 // Validate email format
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(email)) {
-                    alert('Please enter a valid email address');
+                    showCounselorToast('error', 'Please enter a valid email address');
                     return;
                 }
 
                 // Validate phone format (at least 10 digits)
                 const phoneDigits = phone.replace(/\D/g, '');
                 if (phoneDigits.length < 10) {
-                    alert('Please enter a valid phone number (at least 10 digits)');
+                    showCounselorToast('error', 'Please enter a valid phone number (at least 10 digits)');
                     return;
                 }
 
@@ -792,7 +878,7 @@ if (counselorsGrid) {
                         
                         // Save to localStorage immediately
                         saveCounselorsData();
-                        alert('Counselor updated successfully');
+                        showCounselorToast('success', 'Counselor updated successfully!');
                     }
                 } else {
                     // Add new counselor
@@ -810,7 +896,7 @@ if (counselorsGrid) {
                     
                     // Save to localStorage immediately
                     saveCounselorsData();
-                    alert('Counselor added successfully');
+                    showCounselorToast('success', 'Counselor added successfully!');
                 }
 
                 // Render updated counselors immediately
@@ -829,11 +915,12 @@ if (counselorsGrid) {
     // Delete Counselor
     if (btnDelete) {
         btnDelete.addEventListener('click', function() {
+            const counselor = counselorsData.find(c => c.id === currentEditingCounselorId);
             counselorsData = counselorsData.filter(c => c.id !== currentEditingCounselorId);
             saveCounselorsData();
             renderCounselors(counselorsData);
             deleteModal.style.display = 'none';
-            showSuccessNotification('Counselor deleted successfully');
+            showCounselorToast('success', `${counselor.name} removed successfully!`);
             currentEditingCounselorId = null;
         });
     }
@@ -875,6 +962,41 @@ if (counselorsGrid) {
             currentEditingCounselorId = null;
         }
     });
+
+    // Toast notification function for counselors
+    function showCounselorToast(type, message) {
+        // Remove existing toast if present
+        const existingToast = document.querySelector('.counselor-toast');
+        if (existingToast) {
+            existingToast.remove();
+        }
+
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `counselor-toast ${type}`;
+        
+        // Add icon based on type
+        const icon = type === 'success' ? '✓' : '!';
+        toast.innerHTML = `
+            <span class="toast-icon">${icon}</span>
+            <span class="toast-message">${message}</span>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Trigger animation
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 10);
+        
+        // Auto-remove after 4 seconds
+        setTimeout(function() {
+            toast.classList.remove('show');
+            setTimeout(function() {
+                toast.remove();
+            }, 300);
+        }, 4000);
+    }
 }
 
 // ========== ANNOUNCEMENTS PAGE FUNCTIONALITY ==========
@@ -1039,7 +1161,10 @@ if (announcementsList) {
 
                 // Validation
                 if (!title || !content) {
-                    alert('Please fill in all fields');
+                    const missingFields = [];
+                    if (!title) missingFields.push('Title');
+                    if (!content) missingFields.push('Content');
+                    showAnnouncementToast('error', `Missing fields: ${missingFields.join(', ')}`);
                     return;
                 }
 
@@ -1056,7 +1181,10 @@ if (announcementsList) {
                     }
                     // Save to localStorage
                     saveAnnouncementsData();
-                    alert('Announcement edited successfully');
+                    renderAnnouncements(announcementsData);
+                    announcementModal.style.display = 'none';
+                    currentEditingAnnouncementId = null;
+                    showAnnouncementToast('success', 'Announcement updated successfully!');
                 } else {
                     // Add new announcement
                     const newAnnouncement = {
@@ -1069,14 +1197,48 @@ if (announcementsList) {
                     announcementsData.push(newAnnouncement);
                     // Save to localStorage
                     saveAnnouncementsData();
-                    alert('Announcement added successfully');
+                    renderAnnouncements(announcementsData);
+                    announcementModal.style.display = 'none';
+                    currentEditingAnnouncementId = null;
+                    showAnnouncementToast('success', 'Announcement published successfully!');
                 }
-
-                renderAnnouncements(announcementsData);
-                announcementModal.style.display = 'none';
-                currentEditingAnnouncementId = null;
             });
         }
+    }
+
+    // Toast notification function for announcements
+    function showAnnouncementToast(type, message) {
+        // Remove existing toast if present
+        const existingToast = document.querySelector('.announcement-toast');
+        if (existingToast) {
+            existingToast.remove();
+        }
+
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `announcement-toast ${type}`;
+        
+        // Add icon based on type
+        const icon = type === 'success' ? '✓' : '!';
+        toast.innerHTML = `
+            <span class="toast-icon">${icon}</span>
+            <span class="toast-message">${message}</span>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Trigger animation
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 10);
+        
+        // Auto-remove after 4 seconds
+        setTimeout(function() {
+            toast.classList.remove('show');
+            setTimeout(function() {
+                toast.remove();
+            }, 300);
+        }, 4000);
     }
 
     // Attach announcement submit listener
@@ -1089,7 +1251,7 @@ if (announcementsList) {
             saveAnnouncementsData();
             renderAnnouncements(announcementsData);
             deleteAnnouncementModal.style.display = 'none';
-            alert('Announcement deleted successfully');
+            showAnnouncementToast('success', 'Announcement deleted successfully!');
             currentEditingAnnouncementId = null;
         });
     }

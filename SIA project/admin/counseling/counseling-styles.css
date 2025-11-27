@@ -50,6 +50,14 @@ header h1 {
     overflow-y: auto;
 }
 
+.logo img,
+.logo-img {
+    width: 50px;      /* adjust size here */
+    height: 50px;
+    object-fit: contain;
+    display: block;
+}
+
 .logo-section {
     display: flex;
     flex-direction: column;
@@ -61,6 +69,9 @@ header h1 {
 
 .logo {
     margin-bottom: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
 }
 
 .logo-text {
@@ -112,6 +123,18 @@ header h1 {
 
 .nav-icon {
     font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+}
+
+.nav-icon svg {
+    width: 100%;
+    height: 100%;
+    stroke: #999999;
+    color: #999999;
 }
 
 /* Sidebar Footer */
@@ -395,7 +418,11 @@ header h1 {
 }
 
 .section-icon {
-    font-size: 18px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #666;
+    display: inline-block;
+    filter: grayscale(100%);
 }
 
 .section-header h4 {
@@ -1249,4 +1276,369 @@ textarea::placeholder {
 
 .logout-modal-confirm:hover {
     background-color: #1e3f7f;
+}
+
+/* Completion Modal Styles */
+.completion-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1001;
+    align-items: center;
+    justify-content: center;
+}
+
+.completion-modal-overlay.show {
+    display: flex;
+}
+
+.completion-modal-content {
+    background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    max-width: 450px;
+    width: 90%;
+    animation: slideIn 0.3s ease-out;
+    border-left: 5px solid #2d5aa8;
+}
+
+.completion-modal-header {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 28px 28px 20px 28px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.completion-header-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2d5aa8 0%, #1e3f7f 100%);
+    color: white;
+    font-size: 24px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.completion-modal-header h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2d5aa8;
+    margin: 0 0 4px 0;
+}
+
+.completion-modal-header p {
+    font-size: 13px;
+    color: #666;
+    margin: 0;
+}
+
+.completion-modal-close {
+    background: none;
+    border: none;
+    font-size: 28px;
+    color: #999;
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+}
+
+.completion-modal-close:hover {
+    color: #333;
+    transform: rotate(90deg);
+}
+
+.completion-modal-body {
+    padding: 24px 28px;
+}
+
+.completion-warning {
+    font-size: 13px;
+    color: #666;
+    margin: 0;
+    line-height: 1.6;
+    background-color: #f0f8f5;
+    padding: 12px 14px;
+    border-radius: 6px;
+    border-left: 3px solid #d4edda;
+}
+
+.completion-modal-footer {
+    display: flex;
+    gap: 12px;
+    padding: 20px 28px 28px 28px;
+    justify-content: flex-end;
+}
+
+.completion-btn-cancel,
+.completion-btn-confirm {
+    padding: 11px 24px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s;
+    min-width: 120px;
+}
+
+.completion-btn-cancel {
+    background-color: #f0f0f0;
+    color: #666;
+    border: 1px solid #ddd;
+}
+
+.completion-btn-cancel:hover {
+    background-color: #efefef;
+    border-color: #ccc;
+    transform: translateY(-1px);
+}
+
+.completion-btn-confirm {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.completion-btn-confirm:hover {
+    background: linear-gradient(135deg, #218838 0%, #1aa179 100%);
+    box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+    transform: translateY(-2px);
+}
+
+/* Validation Toast Notification Styles */
+.validation-toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: white;
+    color: #d32f2f;
+    padding: 16px 24px;
+    border-radius: 8px;
+    border: 2px solid #d32f2f;
+    box-shadow: 0 4px 16px rgba(211, 47, 47, 0.2);
+    z-index: 1000;
+    animation: slideInToast 0.3s ease-out;
+    border-left: 4px solid #d32f2f;
+    max-width: 400px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.validation-toast::before {
+    content: '!';
+    font-size: 18px;
+    font-weight: bold;
+    background-color: #d32f2f;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.validation-toast.hidden {
+    animation: slideOutToast 0.3s ease-in;
+}
+
+@keyframes slideInToast {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutToast {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
+/* Announcement Toast Notification Styles */
+.announcement-toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 16px 24px;
+    border-radius: 8px;
+    z-index: 1000;
+    animation: slideInAnnouncement 0.3s ease-out;
+    max-width: 400px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    transform: translateX(400px);
+    transition: all 0.3s ease;
+}
+
+.announcement-toast.show {
+    opacity: 1;
+    transform: translateX(0);
+    animation: slideInAnnouncement 0.3s ease-out;
+}
+
+.announcement-toast.success {
+    background-color: white;
+    color: #2d5aa8;
+    border: 2px solid #2d5aa8;
+    border-left: 4px solid #2d5aa8;
+}
+
+.announcement-toast.success .toast-icon {
+    background-color: #2d5aa8;
+    color: white;
+}
+
+.announcement-toast.error {
+    background-color: white;
+    color: #d32f2f;
+    border: 2px solid #d32f2f;
+    border-left: 4px solid #d32f2f;
+}
+
+.announcement-toast.error .toast-icon {
+    background-color: #d32f2f;
+    color: white;
+}
+
+.announcement-toast .toast-icon {
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.25);
+    flex-shrink: 0;
+}
+
+.announcement-toast .toast-message {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: inherit;
+}
+
+@keyframes slideInAnnouncement {
+    from {
+        opacity: 0;
+        transform: translateX(400px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Counselor Toast Notification Styles */
+.counselor-toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 16px 24px;
+    border-radius: 8px;
+    z-index: 1000;
+    max-width: 400px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    transform: translateX(400px);
+    transition: all 0.3s ease;
+}
+
+.counselor-toast.show {
+    opacity: 1;
+    transform: translateX(0);
+    animation: slideInCounselor 0.3s ease-out;
+}
+
+.counselor-toast.success {
+    background-color: white;
+    color: #2d5aa8;
+    border: 2px solid #2d5aa8;
+    border-left: 4px solid #2d5aa8;
+}
+
+.counselor-toast.success .toast-icon {
+    background-color: #2d5aa8;
+    color: white;
+}
+
+.counselor-toast.error {
+    background: white;
+    color: #d32f2f;
+    border-left: 4px solid #d32f2f;
+    border: 2px solid #d32f2f;
+}
+
+.counselor-toast .toast-icon {
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.25);
+    flex-shrink: 0;
+}
+
+.counselor-toast.error .toast-icon {
+    background-color: #d32f2f;
+    color: white;
+}
+
+.counselor-toast .toast-message {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+@keyframes slideInCounselor {
+    from {
+        opacity: 0;
+        transform: translateX(400px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }

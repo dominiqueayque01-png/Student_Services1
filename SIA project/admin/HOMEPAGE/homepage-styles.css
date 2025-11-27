@@ -1,0 +1,454 @@
+/* ============================================
+   Admin Homepage - Enhanced Styles
+   ============================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+    color: #333;
+    min-height: 100vh;
+}
+
+/* ============================================
+   Header
+   ============================================ */
+
+.header {
+    background: linear-gradient(135deg, #2d5aa8 0%, #1e3f66 100%);
+    color: white;
+    padding: 18px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    flex: 1;
+    text-align: center;
+    letter-spacing: 0.5px;
+}
+
+.back-button,
+.profile-button {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.back-button:hover,
+.profile-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+/* ============================================
+   Main Container
+   ============================================ */
+
+.container {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+/* ============================================
+   Welcome Hero Section
+   ============================================ */
+
+.welcome-hero {
+    background: transparent;
+    border-radius: 0;
+    padding: 40px 0;
+    margin-bottom: 40px;
+    box-shadow: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: none;
+}
+
+.welcome-content h2 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #2d5aa8;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+}
+
+.welcome-content p {
+    font-size: 16px;
+    color: #666;
+    font-weight: 500;
+}
+
+.welcome-stats {
+    display: flex;
+    gap: 24px;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #2d5aa8 0%, #1e3f66 100%);
+    color: white;
+    padding: 24px 28px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(45, 90, 168, 0.2);
+    min-width: 140px;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(45, 90, 168, 0.3);
+}
+
+.stat-value {
+    font-size: 36px;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 12px;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
+/* ============================================
+   Quick Access Section
+   ============================================ */
+
+.quick-access-section {
+    margin-bottom: 40px;
+}
+
+.section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #2d5aa8;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.section-title::before {
+    content: '';
+    width: 4px;
+    height: 24px;
+    background: linear-gradient(135deg, #2d5aa8 0%, #1e3f66 100%);
+    border-radius: 2px;
+}
+
+/* ============================================
+   Sections Grid
+   ============================================ */
+
+.sections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+.section-card {
+    background: white;
+    border-radius: 14px;
+    padding: 28px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 2px solid transparent;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+}
+
+.section-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #2d5aa8 0%, #90caf9 100%);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+}
+
+.section-card:hover::before {
+    transform: scaleX(1);
+}
+
+.section-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 28px rgba(45, 90, 168, 0.2);
+    border-color: #e3f2fd;
+}
+
+.section-card.featured {
+    background: linear-gradient(135deg, #f8fbff 0%, #e3f2fd 100%);
+    border: 2px solid #90caf9;
+}
+
+.section-card.featured:hover {
+    background: linear-gradient(135deg, #2d5aa8 0%, #1e3f66 100%);
+}
+
+.section-card.featured h4,
+.section-card.featured .section-description,
+.section-card.featured .card-badge {
+    transition: color 0.3s ease;
+}
+
+.section-card.featured:hover h4,
+.section-card.featured:hover .section-description,
+.section-card.featured:hover .card-badge {
+    color: white;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.section-icon {
+    font-size: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-badge {
+    background: linear-gradient(135deg, #e3f2fd 0%, #e1f5fe 100%);
+    color: #2d5aa8;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.section-card h4 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2d5aa8;
+    margin-bottom: 8px;
+    letter-spacing: -0.3px;
+}
+
+.section-description {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.5;
+    margin-bottom: 16px;
+    flex-grow: 1;
+}
+
+.card-footer {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.arrow {
+    font-size: 18px;
+    color: #90caf9;
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+.section-card:hover .arrow {
+    color: #2d5aa8;
+    transform: translateX(4px);
+}
+
+/* ============================================
+   Responsive Design
+   ============================================ */
+
+@media (max-width: 1024px) {
+    .welcome-hero {
+        flex-direction: column;
+        gap: 32px;
+        text-align: center;
+    }
+
+    .welcome-stats {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .sections-grid {
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .header {
+        padding: 14px 16px;
+    }
+
+    .header h1 {
+        font-size: 18px;
+    }
+
+    .container {
+        padding: 24px 16px;
+    }
+
+    .welcome-hero {
+        padding: 24px;
+        margin-bottom: 32px;
+    }
+
+    .welcome-content h2 {
+        font-size: 24px;
+    }
+
+    .welcome-content p {
+        font-size: 14px;
+    }
+
+    .welcome-stats {
+        gap: 12px;
+    }
+
+    .stat-card {
+        padding: 16px 20px;
+        min-width: 110px;
+    }
+
+    .stat-value {
+        font-size: 28px;
+    }
+
+    .stat-label {
+        font-size: 10px;
+    }
+
+    .section-title {
+        font-size: 18px;
+        margin-bottom: 16px;
+    }
+
+    .sections-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .section-card {
+        padding: 20px;
+    }
+
+    .section-icon {
+        font-size: 36px;
+    }
+
+    .section-card h4 {
+        font-size: 16px;
+    }
+
+    .section-description {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        padding: 12px 12px;
+    }
+
+    .header h1 {
+        font-size: 16px;
+    }
+
+    .container {
+        padding: 16px 12px;
+    }
+
+    .welcome-hero {
+        padding: 16px;
+        margin-bottom: 24px;
+    }
+
+    .welcome-content h2 {
+        font-size: 20px;
+    }
+
+    .welcome-content p {
+        font-size: 12px;
+    }
+
+    .welcome-stats {
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .stat-card {
+        flex: 1;
+        min-width: 90px;
+        padding: 12px 16px;
+    }
+
+    .stat-value {
+        font-size: 24px;
+    }
+
+    .stat-label {
+        font-size: 9px;
+    }
+
+    .section-title {
+        font-size: 16px;
+        margin-bottom: 12px;
+    }
+
+    .section-card {
+        padding: 16px;
+    }
+
+    .section-icon {
+        font-size: 32px;
+    }
+
+    .section-card h4 {
+        font-size: 15px;
+    }
+
+    .section-description {
+        font-size: 11px;
+    }
+
+    .card-header {
+        gap: 8px;
+    }
+
+    .card-badge {
+        padding: 2px 8px;
+        font-size: 9px;
+    }
+}

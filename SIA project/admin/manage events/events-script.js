@@ -74,14 +74,21 @@ function renderEvents() {
     const activeEvents = eventsData.filter(e => e.status === 'Active');
     const archivedEvents = eventsData.filter(e => e.status === 'Archived');
 
-    // Update counts
-    document.getElementById('active-count').textContent = activeEvents.length;
-    document.getElementById('archived-count').textContent = archivedEvents.length;
+    // Update section titles with counts
+    const activeSectionTitle = document.querySelector('.active-column .section-title');
+    const archivedSectionTitle = document.querySelector('.archived-column .section-title');
+    
+    if (activeSectionTitle) {
+        activeSectionTitle.textContent = `Active Events (${activeEvents.length})`;
+    }
+    if (archivedSectionTitle) {
+        archivedSectionTitle.textContent = `Archived Events (${archivedEvents.length})`;
+    }
 
     // Render active events
     activeEventsGrid.innerHTML = '';
     if (activeEvents.length === 0) {
-        activeEventsGrid.innerHTML = '<p style="color: #999;">No active events</p>';
+        activeEventsGrid.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">No active events</p>';
     } else {
         activeEvents.forEach(event => {
             activeEventsGrid.appendChild(createEventCard(event));
@@ -91,7 +98,7 @@ function renderEvents() {
     // Render archived events
     archivedEventsGrid.innerHTML = '';
     if (archivedEvents.length === 0) {
-        archivedEventsGrid.innerHTML = '<p style="color: #999;">No archived events</p>';
+        archivedEventsGrid.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">No archived events</p>';
     } else {
         archivedEvents.forEach(event => {
             archivedEventsGrid.appendChild(createEventCard(event));
@@ -106,6 +113,7 @@ function createEventCard(event) {
     card.className = 'event-card';
     
     const capacityPercent = (event.registered / event.capacity) * 100;
+    const archiveButtonText = event.status === 'Active' ? 'Archive' : 'Unarchive';
     
     card.innerHTML = `
         <div class="event-banner">
@@ -119,16 +127,36 @@ function createEventCard(event) {
             <p class="event-organizer">${event.organizer}</p>
             <div class="event-meta">
                 <div class="event-meta-item">
-                    <span>📅 ${formatDate(event.date)}</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <span>${formatDate(event.date)}</span>
                 </div>
                 <div class="event-meta-item">
-                    <span>⏰ ${formatTime(event.time)} - 5:00 PM</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    <span>${formatTime(event.time)} - 5:00 PM</span>
                 </div>
                 <div class="event-meta-item">
-                    <span>📍 ${event.location}</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    <span>${event.location}</span>
                 </div>
                 <div class="event-meta-item">
-                    <span>👥 ${event.registered}/${event.capacity} registered</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    <span>${event.registered}/${event.capacity} registered</span>
                 </div>
             </div>
             <div class="event-capacity">
@@ -139,7 +167,7 @@ function createEventCard(event) {
             </div>
             <div class="event-actions">
                 <button class="btn-edit" data-id="${event.id}">Edit</button>
-                <button class="btn-archive" data-id="${event.id}">${event.status === 'Active' ? 'Archive' : 'Unarchive'}</button>
+                <button class="btn-archive" data-id="${event.id}">${archiveButtonText}</button>
                 <button class="btn-delete" data-id="${event.id}">Delete</button>
             </div>
         </div>
@@ -206,11 +234,83 @@ function toggleArchive(id) {
 }
 
 function deleteEventConfirm(id) {
+    console.log('deleteEventConfirm called with ID:', id);
+    if (!id) {
+        console.error('ERROR: No ID provided to deleteEventConfirm');
+        showSuccessNotification('Error: Invalid event ID', 'error');
+        return;
+    }
+    
     currentDeletingEventId = id;
+    console.log('currentDeletingEventId set to:', currentDeletingEventId);
+    
     const deleteEventModal = document.getElementById('delete-event-modal');
     if (deleteEventModal) {
         deleteEventModal.style.display = 'flex';
+        console.log('Delete modal opened');
+    } else {
+        console.error('ERROR: Delete modal not found');
     }
+}
+
+function deleteEventNow() {
+    console.log('deleteEventNow called, currentDeletingEventId:', currentDeletingEventId);
+    
+    // Verify we have a valid ID
+    if (!currentDeletingEventId || currentDeletingEventId === null || currentDeletingEventId === undefined) {
+        console.error('ERROR: No event ID to delete, currentDeletingEventId:', currentDeletingEventId);
+        showSuccessNotification('Error: No event selected', 'error');
+        return;
+    }
+
+    // Find the event index
+    const eventIndex = eventsData.findIndex(event => {
+        console.log('Checking event ID:', event.id, 'against:', currentDeletingEventId);
+        return event.id === currentDeletingEventId;
+    });
+    
+    console.log('Event index found:', eventIndex);
+    
+    if (eventIndex === -1) {
+        console.error('ERROR: Event not found with ID:', currentDeletingEventId);
+        console.log('Available event IDs:', eventsData.map(e => e.id));
+        showSuccessNotification('Error: Event not found', 'error');
+        currentDeletingEventId = null;
+        return;
+    }
+
+    // Remove the event from array
+    const deletedEvent = eventsData.splice(eventIndex, 1);
+    console.log('Event deleted:', deletedEvent[0].title);
+
+    // Save to localStorage
+    saveEventsData();
+    console.log('Data saved to localStorage');
+
+    // Re-render the events display
+    renderEvents();
+    console.log('Events re-rendered');
+
+    // Close the delete modal
+    const deleteEventModal = document.getElementById('delete-event-modal');
+    if (deleteEventModal) {
+        deleteEventModal.style.display = 'none';
+        console.log('Delete modal closed');
+    }
+
+    // Close the event view modal if open
+    const eventViewModal = document.getElementById('event-view-modal');
+    if (eventViewModal) {
+        eventViewModal.style.display = 'none';
+        console.log('Event view modal closed');
+    }
+
+    // Show success message
+    showSuccessNotification('Event deleted successfully');
+
+    // Clear the ID
+    currentDeletingEventId = null;
+    console.log('currentDeletingEventId cleared');
 }
 
 function viewEventDetails(id) {
@@ -386,24 +486,22 @@ function editEvent(eventId) {
     openEventModal(true, eventId);
 }
 
-function showSuccessNotification(message) {
+function showSuccessNotification(message, type = 'success') {
     const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        background-color: #4CAF50;
-        color: white;
-        padding: 16px 24px;
-        border-radius: 4px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        z-index: 1000;
-    `;
+    notification.className = 'notification';
+    if (type === 'error') {
+        notification.style.borderLeftColor = '#d32f2f';
+        notification.style.borderColor = '#d32f2f';
+        notification.style.color = '#d32f2f';
+    }
     notification.textContent = message;
     document.body.appendChild(notification);
 
     setTimeout(function() {
-        notification.remove();
+        notification.style.animation = 'slideOutDown 0.3s ease-out';
+        setTimeout(function() {
+            notification.remove();
+        }, 300);
     }, 3000);
 }
 
@@ -519,12 +617,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 const about = document.getElementById('event-about').value.trim();
 
                 if (!title || !category || !date || !time || !location || !capacity || !organizer || !about) {
-                    alert('Please fill in all required fields');
+                    showSuccessNotification('Please fill in all required fields', 'error');
                     return;
                 }
 
                 if (!currentEventBanner) {
-                    alert('Please upload an event banner image');
+                    showSuccessNotification('Please upload an event banner image', 'error');
                     return;
                 }
 
@@ -538,7 +636,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
 
                 if (agenda.length === 0) {
-                    alert('Please add at least one agenda item');
+                    showSuccessNotification('Please add at least one agenda item', 'error');
                     return;
                 }
 
@@ -593,17 +691,29 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // Delete Event Button
-        if (btnDeleteEvent) {
-            btnDeleteEvent.addEventListener('click', function() {
-                eventsData = eventsData.filter(e => e.id !== currentDeletingEventId);
-                saveEventsData();
-                renderEvents();
-                deleteEventModal.style.display = 'none';
-                showSuccessNotification('Event deleted successfully');
-                currentDeletingEventId = null;
-            });
+        // Delete Event Button - Robust listener that works every time
+        function setupDeleteButtonListener() {
+            const deleteEventButton = document.querySelector('#delete-event-modal .btn-delete');
+            if (deleteEventButton) {
+                // Remove old listener if exists
+                deleteEventButton.onclick = null;
+                
+                // Add new listener
+                deleteEventButton.addEventListener('click', function(e) {
+                    console.log('Delete button clicked');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    deleteEventNow();
+                });
+                
+                console.log('Delete button listener attached');
+            } else {
+                console.error('Delete button not found');
+            }
         }
+        
+        // Setup listener when page loads
+        setupDeleteButtonListener();
 
         // Modal close buttons
         document.querySelectorAll('.modal-close').forEach(btn => {
@@ -655,44 +765,74 @@ document.addEventListener('DOMContentLoaded', function() {
         if (eventSearch) {
             eventSearch.addEventListener('keyup', function() {
                 const searchTerm = this.value.toLowerCase().trim();
-                filterEvents(searchTerm);
+                const filterDropdown = document.querySelector('.filter-dropdown');
+                const dateFilter = filterDropdown ? filterDropdown.value : '';
+                applyFilters(searchTerm, dateFilter);
             });
         }
 
-        // Category filter functionality
-        const categoryFilter = document.getElementById('category-filter');
-        if (categoryFilter) {
-            categoryFilter.addEventListener('change', function() {
-                const selectedCategory = this.value;
+        // Filter dropdown functionality
+        const filterDropdown = document.querySelector('.filter-dropdown');
+        if (filterDropdown) {
+            filterDropdown.addEventListener('change', function() {
+                const dateFilter = this.value;
                 const searchTerm = eventSearch ? eventSearch.value.toLowerCase().trim() : '';
-                filterEvents(searchTerm, selectedCategory);
+                applyFilters(searchTerm, dateFilter);
             });
         }
 
         // Combined filter function
-        function filterEvents(searchTerm = '', selectedCategory = '') {
-            const allCards = document.querySelectorAll('.event-card');
+        function applyFilters(searchTerm = '', dateFilter = '') {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // Filter active events
+            const activeEventsGrid = document.getElementById('active-events');
+            const activeCards = activeEventsGrid ? activeEventsGrid.querySelectorAll('.event-card') : [];
             
-            allCards.forEach(card => {
-                const title = card.querySelector('.event-title').textContent.toLowerCase();
-                const locationItem = Array.from(card.querySelectorAll('.event-meta-item')).find(item => item.textContent.includes('📍'));
-                const location = locationItem ? locationItem.textContent.toLowerCase() : '';
-                const organizer = card.querySelector('.event-organizer').textContent.toLowerCase();
-                const categoryBadge = card.querySelector('.event-category').textContent.trim();
-                
-                // Check search term match
-                const matchesSearch = !searchTerm || title.includes(searchTerm) || location.includes(searchTerm) || organizer.includes(searchTerm);
-                
-                // Check category match
-                const matchesCategory = !selectedCategory || categoryBadge === selectedCategory;
-                
-                // Show or hide card based on both filters
-                if (matchesSearch && matchesCategory) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
+            activeCards.forEach(card => {
+                const matches = checkEventMatch(card, searchTerm, dateFilter, today);
+                card.style.display = matches ? 'block' : 'none';
             });
+
+            // Filter archived events
+            const archivedEventsGrid = document.getElementById('archived-events');
+            const archivedCards = archivedEventsGrid ? archivedEventsGrid.querySelectorAll('.event-card') : [];
+            
+            archivedCards.forEach(card => {
+                const matches = checkEventMatch(card, searchTerm, dateFilter, today);
+                card.style.display = matches ? 'block' : 'none';
+            });
+        }
+
+        function checkEventMatch(card, searchTerm, dateFilter, today) {
+            const title = card.querySelector('.event-title').textContent.toLowerCase();
+            const locationItem = Array.from(card.querySelectorAll('.event-meta-item'))[2];
+            const location = locationItem ? locationItem.textContent.toLowerCase() : '';
+            const organizer = card.querySelector('.event-organizer').textContent.toLowerCase();
+            
+            // Get event date for date filtering
+            const dateItem = Array.from(card.querySelectorAll('.event-meta-item'))[0];
+            let eventDate = null;
+            if (dateItem) {
+                const dateStr = dateItem.textContent.trim();
+                eventDate = new Date(dateStr);
+                eventDate.setHours(0, 0, 0, 0);
+            }
+            
+            // Check search term match
+            const matchesSearch = !searchTerm || title.includes(searchTerm) || location.includes(searchTerm) || organizer.includes(searchTerm);
+            
+            // Check date filter match
+            let matchesDateFilter = true;
+            if (dateFilter === 'upcoming') {
+                matchesDateFilter = eventDate && eventDate >= today;
+            } else if (dateFilter === 'past') {
+                matchesDateFilter = eventDate && eventDate < today;
+            }
+            // If dateFilter is empty, show all events
+            
+            return matchesSearch && matchesDateFilter;
         }
     }
 

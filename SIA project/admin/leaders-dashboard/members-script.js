@@ -91,29 +91,91 @@ function renderMembers(membersToDisplay = membersData) {
                 </span>
             </td>
             <td class="table-actions">
-                <button class="btn-action btn-edit" onclick="editMember(${member.id})" title="Edit">✏️</button>
-                <button class="btn-action btn-remove" onclick="removeMember(${member.id})" title="Remove">🗑️</button>
+                <button class="btn-action btn-edit" onclick="editMember(${member.id})" title="Edit">✎</button>
+                <button class="btn-action btn-remove" onclick="removeMember(${member.id})" title="Remove">✕</button>
             </td>
         </tr>
     `).join('');
 }
 
-// Edit member
+// Edit member with modal
 function editMember(memberId) {
     const member = membersData.find(m => m.id === memberId);
     if (!member) return;
 
-    const newName = prompt('Enter member name:', member.name);
-    if (newName === null) return;
+    // Create edit modal
+    const modal = document.createElement('div');
+    modal.className = 'edit-member-modal modal-overlay';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Member</h2>
+                <button class="modal-close" type="button">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="edit-member-name">Name <span class="required">*</span></label>
+                    <input type="text" id="edit-member-name" value="${member.name}" placeholder="Enter member name">
+                </div>
+                <div class="form-group">
+                    <label for="edit-member-email">Email <span class="required">*</span></label>
+                    <input type="email" id="edit-member-email" value="${member.email}" placeholder="Enter member email">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" type="button">Cancel</button>
+                <button class="btn-submit" type="button">Save Changes</button>
+            </div>
+        </div>
+    `;
 
-    const newEmail = prompt('Enter member email:', member.email);
-    if (newEmail === null) return;
+    document.body.appendChild(modal);
+    modal.classList.add('show');
 
-    member.name = newName.trim();
-    member.email = newEmail.trim();
+    // Close button
+    modal.querySelector('.modal-close').addEventListener('click', () => {
+        modal.classList.remove('show');
+        setTimeout(() => modal.remove(), 300);
+    });
 
-    saveMembersData();
-    renderMembers(filterMembers());
+    // Cancel button
+    modal.querySelector('.btn-cancel').addEventListener('click', () => {
+        modal.classList.remove('show');
+        setTimeout(() => modal.remove(), 300);
+    });
+
+    // Submit button
+    modal.querySelector('.btn-submit').addEventListener('click', () => {
+        const newName = document.getElementById('edit-member-name').value.trim();
+        const newEmail = document.getElementById('edit-member-email').value.trim();
+
+        if (!newName || !newEmail) {
+            showMemberToast('error', 'Please fill in all required fields');
+            return;
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
+            showMemberToast('error', 'Please enter a valid email address');
+            return;
+        }
+
+        member.name = newName;
+        member.email = newEmail;
+
+        saveMembersData();
+        renderMembers(filterMembers());
+        modal.classList.remove('show');
+        setTimeout(() => modal.remove(), 300);
+        showMemberToast('success', 'Member updated successfully!');
+    });
+
+    // Close on overlay click
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.remove('show');
+            setTimeout(() => modal.remove(), 300);
+        }
+    });
 }
 
 // Remove member from club
@@ -121,11 +183,57 @@ function removeMember(memberId) {
     const member = membersData.find(m => m.id === memberId);
     if (!member) return;
 
-    if (confirm(`Are you sure you want to remove ${member.name} from the club?`)) {
+    // Create confirmation modal
+    const modal = document.createElement('div');
+    modal.className = 'remove-member-modal modal-overlay';
+    modal.innerHTML = `
+        <div class="modal-content modal-confirm">
+            <div class="modal-header">
+                <h2>Remove Member?</h2>
+                <button class="modal-close" type="button">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to remove <strong>${member.name}</strong> from the club? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" type="button">Cancel</button>
+                <button class="btn-delete" type="button">Remove</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    modal.classList.add('show');
+
+    // Close button
+    modal.querySelector('.modal-close').addEventListener('click', () => {
+        modal.classList.remove('show');
+        setTimeout(() => modal.remove(), 300);
+    });
+
+    // Cancel button
+    modal.querySelector('.btn-cancel').addEventListener('click', () => {
+        modal.classList.remove('show');
+        setTimeout(() => modal.remove(), 300);
+    });
+
+    // Delete button
+    modal.querySelector('.btn-delete').addEventListener('click', () => {
         membersData = membersData.filter(m => m.id !== memberId);
         saveMembersData();
         renderMembers(filterMembers());
-    }
+        modal.classList.remove('show');
+        setTimeout(() => modal.remove(), 300);
+        showMemberToast('success', `${member.name} removed successfully!`);
+    });
+
+    // Close on overlay click
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.remove('show');
+            setTimeout(() => modal.remove(), 300);
+        }
+    });
 }
 
 // Toggle member status
@@ -245,3 +353,40 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// ============================================
+// Toast Notification
+// ============================================
+function showMemberToast(type, message) {
+    // Remove existing toast if present
+    const existingToast = document.querySelector('.member-toast');
+    if (existingToast) {
+        existingToast.remove();
+    }
+
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `member-toast ${type}`;
+    
+    // Add icon based on type
+    const icon = type === 'success' ? '✓' : '!';
+    toast.innerHTML = `
+        <span class="toast-icon">${icon}</span>
+        <span class="toast-message">${message}</span>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Trigger animation
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 10);
+    
+    // Auto-remove after 4 seconds
+    setTimeout(function() {
+        toast.classList.remove('show');
+        setTimeout(function() {
+            toast.remove();
+        }, 300);
+    }, 4000);
+}

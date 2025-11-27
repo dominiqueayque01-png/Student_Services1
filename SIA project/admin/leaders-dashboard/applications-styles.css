@@ -38,6 +38,14 @@ body {
     overflow-y: auto;
 }
 
+.logo img,
+.logo-img {
+    width: 50px;      /* adjust size here */
+    height: 50px;
+    object-fit: contain;
+    display: block;
+}
+
 .logo-section {
     display: flex;
     flex-direction: column;
@@ -113,6 +121,18 @@ body {
 
 .nav-icon {
     font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+}
+
+.nav-icon svg {
+    width: 100%;
+    height: 100%;
+    stroke: #999999;
+    color: #999999;
 }
 
 /* ============================================
@@ -134,17 +154,16 @@ body {
 }
 
 .user-avatar {
-    width: 40px;
-    height: 40px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
+    background-color: #8fa3d4;
+    color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
-    font-size: 16px;
-    flex-shrink: 0;
+    font-weight: 600;
+    font-size: 14px;
 }
 
 .user-info h4 {

@@ -48,22 +48,23 @@
 
 .btn-create-job {
     padding: 12px 24px;
-    background: linear-gradient(135deg, #2d5aa8 0%, #1e3f7a 100%);
+    background-color: #2d5aa8;
     color: white;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 13px;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
 .btn-create-job:hover {
-    transform: translateY(-2px);
+    background-color: #1e3f7a;
     box-shadow: 0 4px 12px rgba(45, 90, 168, 0.3);
+    transform: translateY(-2px);
 }
 
 /* ============================================
@@ -76,15 +77,17 @@
 }
 
 .job-card {
-    border: 2px solid #e8f0ff;
+    border: 1px solid #e8e8e8;
     border-radius: 8px;
     padding: 20px;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .job-card:hover {
-    border-color: #2d5aa8;
-    box-shadow: 0 4px 12px rgba(45, 90, 168, 0.1);
+    border-color: #d0d0d0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .job-card-header {
@@ -101,7 +104,7 @@
 .job-card-title {
     font-size: 16px;
     font-weight: 700;
-    color: #2d5aa8;
+    color: #333333;
     margin: 0 0 4px 0;
 }
 
@@ -151,24 +154,24 @@
 }
 
 .job-meta-item.rate {
-    color: #4CAF50;
+    color: #666666;
     font-weight: 600;
 }
 
 .job-meta-item.location {
-    color: #FF9800;
+    color: #666666;
 }
 
 .job-meta-item.applicants {
-    color: #9C27B0;
+    color: #666666;
 }
 
 .job-meta-item.duration {
-    color: #2196F3;
+    color: #666666;
 }
 
 .job-meta-item.hours {
-    color: #F44336;
+    color: #666666;
 }
 
 .job-card-actions {
@@ -211,27 +214,27 @@
 }
 
 .btn-pause.paused {
-    background-color: #e3f2fd;
-    color: #2d5aa8;
-    border-color: #90caf9;
+    background-color: #f0f0f0;
+    color: #333333;
+    border-color: #d9d9d9;
 }
 
 .btn-edit {
-    color: #666;
+    color: #666666;
 }
 
 .btn-edit:hover {
-    color: #2d5aa8;
-    border-color: #2d5aa8;
+    color: #333333;
+    border-color: #cccccc;
 }
 
 .btn-delete {
-    color: #f44336;
+    color: #666666;
 }
 
 .btn-delete:hover {
-    background-color: #ffebee;
-    border-color: #f44336;
+    background-color: #f5f5f5;
+    border-color: #cccccc;
 }
 
 /* ============================================
@@ -417,19 +420,20 @@
 
 .btn-submit {
     padding: 10px 20px;
-    background: linear-gradient(135deg, #2d5aa8 0%, #1e3f7a 100%);
-    color: white;
-    border: none;
-    border-radius: 6px;
+    background-color: #e0e0e0;
+    color: #333333;
+    border: 1px solid #c0c0c0;
+    border-radius: 8px;
     font-size: 12px;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
 }
 
 .btn-submit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(45, 90, 168, 0.3);
+    background-color: #d0d0d0;
+    border-color: #a0a0a0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Delete Modal Styles */
@@ -449,19 +453,20 @@
 
 .btn-delete-confirm {
     padding: 10px 18px;
-    background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+    background-color: #d32f2f;
     color: white;
-    border: none;
-    border-radius: 6px;
+    border: 1px solid #b71c1c;
+    border-radius: 8px;
     font-size: 12px;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
 }
 
 .btn-delete-confirm:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+    background-color: #b71c1c;
+    border-color: #9a1515;
+    box-shadow: 0 2px 8px rgba(211, 47, 47, 0.3);
 }
 
 /* ============================================
@@ -482,4 +487,86 @@
         gap: 16px;
         align-items: flex-start;
     }
+}
+
+/* ============================================
+   Job Toast Notification
+   ============================================ */
+.job-toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 16px 24px;
+    border-radius: 8px;
+    z-index: 2000;
+    max-width: 400px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    transform: translateX(400px);
+    transition: all 0.3s ease;
+}
+
+.job-toast.show {
+    opacity: 1;
+    transform: translateX(0);
+    animation: slideInToast 0.3s ease-out;
+}
+
+@keyframes slideInToast {
+    from {
+        opacity: 0;
+        transform: translateX(400px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.job-toast.success {
+    background-color: white;
+    color: #2d5aa8;
+    border: 2px solid #2d5aa8;
+    border-left: 4px solid #2d5aa8;
+}
+
+.job-toast.success .toast-icon {
+    background-color: #2d5aa8;
+    color: white;
+}
+
+.job-toast.error {
+    background-color: white;
+    color: #d32f2f;
+    border: 2px solid #d32f2f;
+    border-left: 4px solid #d32f2f;
+}
+
+.job-toast.error .toast-icon {
+    background-color: #d32f2f;
+    color: white;
+}
+
+.job-toast .toast-icon {
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.25);
+    flex-shrink: 0;
+}
+
+.job-toast .toast-message {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: inherit;
 }

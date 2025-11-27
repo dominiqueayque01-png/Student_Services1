@@ -222,3 +222,70 @@ input:focus {
 .locked-box .protected-text {
     color: #bbb;
 }
+
+/* Validation Toast Notification */
+.validation-toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: white;
+    color: #d32f2f;
+    border: 2px solid #d32f2f;
+    padding: 16px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 2000;
+    opacity: 1;
+    animation: slideIn 0.3s ease-out;
+    max-width: 400px;
+}
+
+.validation-toast.hidden {
+    animation: slideOut 0.3s ease-out;
+    opacity: 0;
+}
+
+/* Success Notification */
+.success-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: white;
+    color: white;
+    border: 2px solid #2d5aa8;
+    padding: 16px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 2000;
+    opacity: 1;
+    animation: slideIn 0.3s ease-in;
+    max-width: 400px;
+}
+
+.success-notification.slideOut {
+    animation: slideOut 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(100px);
+    }
+}

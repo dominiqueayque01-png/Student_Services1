@@ -10,6 +10,12 @@ body {
     background-color: #f5f5f5;
 }
 
+/* Grayscale Icons */
+svg {
+    filter: grayscale(100%);
+    color: #666;
+}
+
 .container {
     display: flex;
     flex-direction: column;
@@ -47,6 +53,14 @@ header h1 {
     flex-direction: column;
     padding: 20px;
     overflow-y: auto;
+}
+
+.logo img,
+.logo-img {
+    width: 50px;      /* adjust size here */
+    height: 50px;
+    object-fit: contain;
+    display: block;
 }
 
 .logo-section {
@@ -110,6 +124,18 @@ header h1 {
 
 .nav-icon {
     font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+}
+
+.nav-icon svg {
+    width: 100%;
+    height: 100%;
+    stroke: #999999;
+    color: #999999;
 }
 
 .sidebar-footer {
@@ -178,30 +204,98 @@ header h1 {
     overflow: hidden;
 }
 
+/* Search Header */
+.search-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #e8e8e8;
+    background-color: #ffffff;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.search-box {
+    padding: 12px 14px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 13px;
+    background-color: #ffffff;
+    width: 50%;
+    height: 40px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.search-box:focus {
+    outline: none;
+    border-color: #2f73e9;
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(45, 90, 168, 0.1);
+}
+
+.search-box::placeholder {
+    color: #999;
+}
+
+/* Filter Dropdown */
+.filter-dropdown {
+    padding: 12px 14px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 13px;
+    background-color: #ffffff;
+    color: #333;
+    height: 40px;
+    min-width: 140px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filter-dropdown:hover {
+    border-color: #2d5aa8;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.filter-dropdown:focus {
+    outline: none;
+    border-color: #2d5aa8;
+    box-shadow: 0 0 0 3px rgba(45, 90, 168, 0.1);
+}
+
+/* Create Event Button */
+.btn-create-event {
+    padding: 12px 24px;
+    border: none;
+    background-color: #2d5aa8;
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    height: 40px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-create-event:hover {
+    background-color: #1e3f7a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(45, 90, 168, 0.3);
+}
+
 /* Events Header */
 .events-header {
-    padding: 20px;
+    padding: 16px 20px;
     border-bottom: 1px solid #e8e8e8;
     background-color: #fff;
+    display: flex;
+    justify-content: flex-end;
 }
 
 .search-and-button {
     display: flex;
     gap: 15px;
     align-items: center;
-}
-
-.search-box {
-    flex: 1;
-    padding: 12px 16px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 13px;
-    background-color: #f5f5f5;
-}
-
-.search-box::placeholder {
-    color: #999;
 }
 
 .filter-group {
@@ -302,6 +396,47 @@ header h1 {
     cursor: pointer;
 }
 
+/* Events Sections */
+.events-sections-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    flex: 1;
+    overflow: hidden;
+    padding: 20px;
+}
+
+.events-column {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow: hidden;
+}
+
+.archived-column {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow: hidden;
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: white;
+    padding: 14px 16px;
+    background-color: #2d5aa8;
+    border-radius: 8px;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.section-title.archived {
+    background-color: #f5f5f5;
+    color: #333;
+    border: 1px solid #e0e0e0;
+}
+
 /* Events Container */
 .events-container {
     display: flex;
@@ -334,6 +469,7 @@ header h1 {
     flex-direction: column;
     gap: 15px;
     overflow-y: auto;
+    flex: 1;
     padding-right: 8px;
 }
 
@@ -347,6 +483,8 @@ header h1 {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     display: flex;
     flex-direction: column;
+    max-height: 420px;
+    flex-shrink: 0;
 }
 
 .event-card:hover {
@@ -438,6 +576,14 @@ header h1 {
     display: flex;
     align-items: center;
     gap: 4px;
+    font-size: 12px;
+    color: #999;
+}
+
+.event-meta-item svg {
+    stroke: #999;
+    color: #999;
+    flex-shrink: 0;
 }
 
 .event-capacity {
@@ -509,7 +655,12 @@ header h1 {
 }
 
 .archived-column .btn-archive {
-    color: #333;
+    color: #d32f2f;
+}
+
+.archived-column .btn-archive:hover {
+    background-color: #fff5f5;
+    border-color: #d32f2f;
 }
 
 /* Modal Styles */
@@ -843,8 +994,63 @@ textarea::placeholder {
     }
 }
 
+@keyframes slideInUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutDown {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+}
+
 .notification {
     animation: slideIn 0.3s ease-out;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: white;
+    border: 2px solid #2d5aa8;
+    border-left: 6px solid #2d5aa8;
+    color: #2d5aa8;
+    padding: 16px 24px;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(45, 90, 168, 0.15);
+    z-index: 2000;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 300px;
+    animation: slideInUp 0.3s ease-out;
+}
+
+.notification::before {
+    content: "✓";
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background-color: #2d5aa8;
+    color: white;
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 14px;
+    flex-shrink: 0;
 }
 
 /* ============================================
@@ -1014,6 +1220,7 @@ textarea::placeholder {
     border-radius: 3px;
     cursor: pointer;
     transition: all 0.2s;
+    color: #999;
 }
 
 .btn-edit-event:hover {
@@ -1068,6 +1275,20 @@ textarea::placeholder {
 
 .info-icon {
     font-size: 20px;
+    color: #999999;
+    opacity: 0.8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.info-icon svg {
+    width: 100%;
+    height: 100%;
+    stroke: #999999;
+    color: #999999;
 }
 
 .info-label {

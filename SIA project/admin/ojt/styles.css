@@ -52,6 +52,14 @@ header {
     gap: 25px;
 }
 
+.logo img,
+.logo-img {
+    width: 50px;      /* adjust size here */
+    height: 50px;
+    object-fit: contain;
+    display: block;
+}
+
 .logo-section {
     display: flex;
     gap: 12px;
@@ -114,6 +122,18 @@ header {
 
 .nav-icon {
     font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+}
+
+.nav-icon svg {
+    width: 100%;
+    height: 100%;
+    stroke: #999999;
+    color: #999999;
 }
 
 /* ============================================
@@ -137,13 +157,13 @@ header {
 .user-avatar {
     width: 32px;
     height: 32px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
     border-radius: 50%;
+    background-color: #8fa3d4;
+    color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
+    font-weight: 600;
     font-size: 14px;
 }
 
@@ -244,6 +264,18 @@ header {
 
 .stat-icon {
     font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.stat-icon svg {
+    width: 100%;
+    height: 100%;
+    stroke: #999999;
+    color: #999999;
 }
 
 .stat-value {

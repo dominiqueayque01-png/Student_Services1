@@ -15,10 +15,7 @@
             <aside class="sidebar">
                 <div class="logo-section">
                     <div class="logo">
-                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                            <rect width="40" height="40" rx="8" fill="#8fa3d4"/>
-                            <path d="M20 8C15.6 8 12 11.6 12 16C12 19.2 13.8 21.9 16.5 23.1V28H23.5V23.1C26.2 21.9 28 19.2 28 16C28 11.6 24.4 8 20 8Z" fill="white"/>
-                        </svg>
+                    <img src="qculogo.png.png" class="logo-img">
                     </div>
                     <div class="logo-text">
                         <h3>QCU Student Services</h3>
@@ -28,15 +25,12 @@
 
                 <nav class="sidebar-nav">
                     <div class="nav-item active" data-page="events">
-                        <span class="nav-icon">📅</span>
                         <span>Manage Events</span>
                     </div>
                     <div class="nav-item" data-page="registrations">
-                        <span class="nav-icon">📋</span>
                         <span>Registrations</span>
                     </div>
                     <div class="nav-item" data-page="announcements">
-                        <span class="nav-icon">📢</span>
                         <span>Announcements</span>
                     </div>
                 </nav>
@@ -55,15 +49,35 @@
 
             <!-- Main Panel -->
             <main class="main-panel events-panel">
-                <!-- Top Section with Button and Search -->
-                <div class="events-header">
-                    <button class="btn-new-event">+ New Event</button>
-                    <input type="text" class="search-box" id="event-search" placeholder="Search for an event...">
+                <!-- Search Bar at Top -->
+                <div class="search-header">
+                    <input type="text" class="search-box" id="event-search" placeholder="Search events by title, location, or organizer...">
+                    <select class="filter-dropdown">
+                        <option value="">All Events</option>
+                        <option value="upcoming">Upcoming</option>
+                        <option value="past">Past</option>
+                        <option value="archived">Archived</option>
+                    </select>
+                    <button class="btn-create-event">+ Create Event</button>
                 </div>
 
-                <!-- Events List -->
-                <div class="events-list" id="events-list">
-                    <!-- Event items will be populated here -->
+                <!-- Events Sections -->
+                <div class="events-sections-container">
+                    <!-- Active Events Section -->
+                    <div class="events-column active-column">
+                        <h2 class="section-title">Active Events (4)</h2>
+                        <div class="events-grid" id="active-events">
+                            <!-- Active event cards will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Archived Events Section -->
+                    <div class="events-column archived-column">
+                        <h2 class="section-title archived">Archived Events (2)</h2>
+                        <div class="events-grid" id="archived-events">
+                            <!-- Archived event cards will be populated here -->
+                        </div>
+                    </div>
                 </div>
             </main>
         </div>
@@ -123,10 +137,35 @@
                     <label for="event-about">About this Event <span class="required">*</span></label>
                     <textarea id="event-about" placeholder="Describe your event in detail..." rows="4"></textarea>
                 </div>
+
+                <div class="form-group">
+                    <label>Event Banner <span class="required">*</span></label>
+                    <div class="upload-area" id="upload-area">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <path d="M21 15l-5-5L5 21"></path>
+                        </svg>
+                        <p>Click to upload or drag and drop</p>
+                        <small>PNG, JPG up to 10MB</small>
+                    </div>
+                    <input type="file" id="event-banner" style="display: none;" accept="image/*">
+                </div>
+
+                <div class="form-group">
+                    <label for="event-requirements">Requirements & Notes</label>
+                    <textarea id="event-requirements" placeholder="e.g., Bring your laptop, formal attire required..." rows="2"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Event Agenda</label>
+                    <div id="agenda-list"></div>
+                    <button class="btn-add-agenda" type="button">+ Add Agenda Item</button>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn-cancel">Cancel</button>
-                <button class="btn-submit" id="event-submit-btn">Publish Event</button>
+                <button class="btn-submit" id="event-publish-btn">Publish Event</button>
             </div>
         </div>
     </div>
@@ -144,6 +183,137 @@
             <div class="modal-footer">
                 <button class="btn-cancel">Cancel</button>
                 <button class="btn-delete">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event View Modal -->
+    <div class="modal" id="event-view-modal">
+        <div class="modal-content event-view-modal">
+            <div class="modal-header">
+                <div class="event-title-area">
+                    <span class="event-category-badge" id="view-category">Academic</span>
+                    <h1 id="view-title">Event Title</h1>
+                    <p class="event-details-subtitle">Event Details</p>
+                </div>
+                <div class="event-details-actions">
+                    <button class="btn-edit-event" id="view-edit-btn">Edit</button>
+                    <button class="btn-delete-event" id="view-delete-btn">Delete</button>
+                </div>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="event-details-container">
+                    <div class="event-banner">
+                        <img id="view-banner" src="https://via.placeholder.com/800x300" alt="Event Banner">
+                    </div>
+                    
+                    <div class="event-info-grid">
+                        <div class="info-card">
+                            <div class="info-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="info-label">Date</p>
+                                <p class="info-value" id="view-date">Tuesday, September 16, 2025</p>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="info-label">Time</p>
+                                <p class="info-value" id="view-time">2:00 PM - 5:00 PM</p>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="info-label">Location</p>
+                                <p class="info-value" id="view-location">QCU Auditorium</p>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="info-label">Attendance</p>
+                                <p class="info-value" id="view-attendance">156/200</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="event-main-content">
+                    <div class="content-section">
+                        <h2>About this Event</h2>
+                        <p id="view-about">Event description goes here.</p>
+                    </div>
+
+                    <div class="content-sections-row">
+                        <div class="flex-item">
+                            <h3>Capacity</h3>
+                            <p class="info-value" id="view-capacity-info">156 is participating</p>
+                            <div class="capacity-bar-detail">
+                                <div class="capacity-fill-detail" id="view-capacity-fill"></div>
+                            </div>
+                            <p class="capacity-text" id="view-capacity-text">44 slots remaining · 78% Full</p>
+                        </div>
+
+                        <div class="flex-item">
+                            <h3>What to Expect?</h3>
+                            <ul class="expectations-list" id="view-expectations">
+                                <li>Expert speakers from the industry</li>
+                                <li>Hands-on workshops and activities</li>
+                                <li>Networking opportunities</li>
+                                <li>Certificate of participation</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="content-section">
+                        <h3>Keywords</h3>
+                        <div id="view-keywords" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+                    </div>
+
+                    <div class="requirements-section">
+                        <div class="requirements-title">
+                            <strong>Requirements:</strong>
+                        </div>
+                        <div class="requirements-box" id="view-requirements">
+                            Bring your laptop for hands-on workshops
+                        </div>
+                    </div>
+
+                    <div class="content-section">
+                        <h3>Agenda</h3>
+                        <div class="agenda-section" id="view-agenda"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel-details" onclick="document.getElementById('event-view-modal').style.display='none'">Cancel</button>
+                <button class="btn-save-changes" onclick="document.getElementById('event-view-modal').style.display='none'">Save Changes</button>
             </div>
         </div>
     </div>

@@ -79,16 +79,16 @@ function renderJobListings() {
             </div>
             <p class="job-card-description">${job.overview}</p>
             <div class="job-card-meta">
-                <div class="job-meta-item rate">💰 ${job.rate}/hour</div>
-                <div class="job-meta-item location">📍 ${job.location}</div>
-                <div class="job-meta-item applicants">👥 ${job.applicants} applicants</div>
-                <div class="job-meta-item duration">📅 ${job.duration}</div>
-                <div class="job-meta-item hours">⏰ ${job.hours} hours/week</div>
+                <div class="job-meta-item rate">¥ ₱${job.rate}/hour</div>
+                <div class="job-meta-item location">◉ ${job.location}</div>
+                <div class="job-meta-item applicants">◈ ${job.applicants} applicants</div>
+                <div class="job-meta-item duration">⊞ ${job.duration}</div>
+                <div class="job-meta-item hours">▬ ${job.hours} hours/week</div>
             </div>
             <div class="job-card-actions">
-                <button class="btn-icon btn-edit" onclick="editJob(${job.id})" title="Edit">✏️</button>
+                <button class="btn-icon btn-edit" onclick="editJob(${job.id})" title="Edit">✎</button>
                 <button class="btn-pause ${job.status === 'Paused' ? 'paused' : ''}" onclick="toggleJobStatus(${job.id})">${job.status === 'Active' ? 'Pause' : 'Active'}</button>
-                <button class="btn-icon btn-delete" onclick="openDeleteModal(${job.id})" title="Delete">🗑️</button>
+                <button class="btn-icon btn-delete" onclick="openDeleteModal(${job.id})" title="Delete">✕</button>
             </div>
         </div>
     `).join('');
@@ -171,8 +171,10 @@ document.getElementById('job-modal-submit').addEventListener('click', function()
     if (currentEditingId) {
         const index = jobListings.findIndex(j => j.id === currentEditingId);
         jobListings[index] = newJob;
+        showJobToast('success', 'Job listing updated successfully!');
     } else {
         jobListings.unshift(newJob);
+        showJobToast('success', 'Job listing created successfully!');
     }
 
     renderJobListings();
@@ -205,9 +207,11 @@ function openDeleteModal(id) {
 
 // Delete job
 document.getElementById('delete-modal-confirm').addEventListener('click', function() {
+    const job = jobListings.find(j => j.id === currentDeletingId);
     jobListings = jobListings.filter(j => j.id !== currentDeletingId);
     renderJobListings();
     deleteModalOverlay.classList.remove('active');
+    showJobToast('success', `Job listing "${job.title}" deleted successfully!`);
     currentDeletingId = null;
 });
 
@@ -249,3 +253,40 @@ deleteModalOverlay.addEventListener('click', function(e) {
 
 // Initialize
 renderJobListings();
+
+// ============================================
+// Toast Notification
+// ============================================
+function showJobToast(type, message) {
+    // Remove existing toast if present
+    const existingToast = document.querySelector('.job-toast');
+    if (existingToast) {
+        existingToast.remove();
+    }
+
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `job-toast ${type}`;
+    
+    // Add icon based on type
+    const icon = type === 'success' ? '✓' : '!';
+    toast.innerHTML = `
+        <span class="toast-icon">${icon}</span>
+        <span class="toast-message">${message}</span>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Trigger animation
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 10);
+    
+    // Auto-remove after 4 seconds
+    setTimeout(function() {
+        toast.classList.remove('show');
+        setTimeout(function() {
+            toast.remove();
+        }, 300);
+    }, 4000);
+}

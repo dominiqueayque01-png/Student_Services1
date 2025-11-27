@@ -14,10 +14,7 @@
             <aside class="sidebar">
                 <div class="logo-section">
                     <div class="logo">
-                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                            <rect width="40" height="40" rx="8" fill="#8fa3d4"/>
-                            <path d="M20 8C15.6 8 12 11.6 12 16C12 19.2 13.8 21.9 16.5 23.1V28H23.5V23.1C26.2 21.9 28 19.2 28 16C28 11.6 24.4 8 20 8Z" fill="white"/>
-                        </svg>
+                    <img src="qculogo.png.png" class="logo-img">
                     </div>
                     <div class="logo-text">
                         <h3>QCU Student Services</h3>
@@ -26,18 +23,15 @@
                 </div>
 
                 <nav class="sidebar-nav">
-                    <a href="./events.html" class="nav-item" data-page="events">
-                        <span class="nav-icon">📅</span>
+                    <div class="nav-item" data-page="events">
                         <span>Manage Events</span>
-                    </a>
-                    <a href="./registrations.html" class="nav-item" data-page="registrations">
-                        <span class="nav-icon">📋</span>
+                    </div>
+                    <div class="nav-item" data-page="registrations">
                         <span>Registrations</span>
-                    </a>
-                    <a href="./announcements.html" class="nav-item active" data-page="announcements">
-                        <span class="nav-icon">📢</span>
+                    </div>
+                    <div class="nav-item active" data-page="announcements">
                         <span>Announcements</span>
-                    </a>
+                    </div>
                 </nav>
 
                 <div class="sidebar-footer">
@@ -53,18 +47,16 @@
             </aside>
 
             <!-- Main Panel -->
-            <main class="main-panel">
-                <div class="announcements-container">
-                    <!-- Header with Search and Create Button -->
-                    <div class="announcements-header">
-                        <input type="text" id="search-announcements" placeholder="Search for an announcement...">
-                        <button class="btn-new-announcement" id="btn-add-announcement">+ New Announcement</button>
-                    </div>
+            <main class="main-panel announcements-panel">
+                <!-- Header with Create Button and Search -->
+                <div class="announcements-header">
+                    <button class="btn-new-announcement" type="button" onclick="window.openNewAnnouncementModal(); return false;">+ New Announcement</button>
+                    <input type="text" class="search-box" id="announcement-search" placeholder="Search for an announcement...">
+                </div>
 
-                    <!-- Announcements List -->
-                    <div class="announcements-list" id="announcements-list">
-                        <!-- Announcements will be populated here -->
-                    </div>
+                <!-- Announcements List -->
+                <div class="announcements-list" id="announcements-container">
+                    <!-- Announcements will be populated here -->
                 </div>
             </main>
         </div>
@@ -88,50 +80,56 @@
     </div>
 
     <!-- Announcement Modal -->
-    <div class="modal-overlay" id="announcement-modal-overlay">
-        <div class="announcement-modal">
+    <div class="modal" id="announcement-modal">
+        <div class="modal-content announcement-modal-content">
             <div class="modal-header">
-                <h2 id="modal-title">Add Announcement</h2>
-                <button class="modal-close" id="modal-close">&times;</button>
+                <div>
+                    <h2 id="announcement-modal-title" style="font-size: 24px; font-weight: 700; margin: 0; color: #333;">Add Announcement</h2>
+                    <p class="modal-subtitle" id="announcement-modal-subtitle" style="font-size: 14px; color: #999; margin: 6px 0 0 0;">Post a new announcement for students to see</p>
+                </div>
+                <button class="modal-close" type="button" onclick="document.getElementById('announcement-modal').style.display='none'; return false;" style="background: none; border: none; font-size: 28px; color: #999; cursor: pointer; margin: 0; padding: 0;">&times;</button>
             </div>
             <div class="modal-body">
-                <p class="modal-subtitle" id="modal-subtitle">Post a new announcement for students to see</p>
                 <div class="form-group">
-                    <label for="announcement-title">Title <span class="required">*</span></label>
-                    <input type="text" id="announcement-title" placeholder="e.g., Tech Talk: IT Summit">
+                    <label for="announcement-title" style="display: block; font-weight: 600; font-size: 14px; color: #333; margin-bottom: 8px;">Title <span class="required" style="color: #d32f2f;">*</span></label>
+                    <input type="text" id="announcement-title" placeholder="Your title" style="width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 14px; box-sizing: border-box; background: #f5f5f5;">
                 </div>
-                <div class="form-group">
-                    <label for="announcement-content">Content <span class="required">*</span></label>
-                    <textarea id="announcement-content" placeholder="Enter announcement content..."></textarea>
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <label for="announcement-content" style="display: block; font-weight: 600; font-size: 14px; color: #333; margin-bottom: 8px;">Content <span class="required" style="color: #d32f2f;">*</span></label>
+                    <textarea id="announcement-content" placeholder="Write your announcement message" rows="5" style="width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 14px; box-sizing: border-box; background: #f5f5f5; font-family: inherit; resize: vertical;"></textarea>
+                </div>
+
+                <div class="form-group" style="margin-top: 20px; display: none;">
+                    <label for="announcement-status" style="display: block; font-weight: 600; font-size: 14px; color: #333; margin-bottom: 8px;">Status <span class="required" style="color: #d32f2f;">*</span></label>
+                    <select id="announcement-status" style="width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 14px; box-sizing: border-box; background: #f5f5f5;">
+                        <option value="Published">Published</option>
+                        <option value="Draft">Draft</option>
+                    </select>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="btn-cancel" id="modal-cancel">Cancel</button>
-                <button class="btn-submit" id="modal-submit">Publish Announcement</button>
+            <div class="modal-footer" style="display: flex; gap: 12px; justify-content: flex-end; padding-top: 20px; border-top: 1px solid #e0e0e0; margin-top: 20px;">
+                <button class="btn-cancel" type="button" onclick="document.getElementById('announcement-modal').style.display='none'; return false;" style="padding: 12px 24px; border: 1px solid #e0e0e0; background: white; color: #333; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer;">Cancel</button>
+                <button class="btn-submit" type="button" onclick="window.saveAnnouncement(); return false;" style="padding: 12px 24px; background: #2d5aa8; color: white; border: none; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer;">Publish Announcement</button>
             </div>
         </div>
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <div class="modal-overlay" id="delete-modal-overlay">
-        <div class="delete-modal">
+    <div class="modal" id="delete-announcement-modal">
+        <div class="modal-content modal-confirm">
             <div class="modal-header">
                 <h2>Delete Announcement?</h2>
-                <button class="modal-close" id="delete-modal-close">&times;</button>
+                <button class="modal-close" type="button" onclick="document.getElementById('delete-announcement-modal').style.display='none'; return false;" style="background: none; border: none; font-size: 28px; color: #999; cursor: pointer; margin: 0; padding: 0;">&times;</button>
             </div>
             <div class="modal-body">
-                <p>This will permanently remove this announcement. This action cannot be undone.</p>
+                <p>This announcement will be permanently deleted. This action cannot be undone.</p>
             </div>
-            <div class="modal-footer">
-                <button class="btn-cancel" id="delete-cancel">Cancel</button>
-                <button class="btn-delete-confirm" id="delete-confirm">Delete</button>
+            <div class="modal-footer" style="display: flex; gap: 12px; justify-content: flex-end; padding-top: 20px; border-top: 1px solid #e0e0e0; margin-top: 20px;">
+                <button class="btn-cancel" type="button" onclick="document.getElementById('delete-announcement-modal').style.display='none'; return false;" style="padding: 12px 24px; border: 1px solid #e0e0e0; background: white; color: #333; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer; flex: 1; display: flex; align-items: center; justify-content: center;">Cancel</button>
+                <button class="btn-delete" type="button" onclick="window.confirmDelete(); return false;" style="padding: 12px 24px; background: #d32f2f; color: white; border: none; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer; flex: 1; display: flex; align-items: center; justify-content: center;">Delete</button>
             </div>
         </div>
-    </div>
-
-    <!-- Success Message -->
-    <div class="success-message" id="success-message">
-        <span id="success-text">Announcement added successfully</span>
     </div>
 
     <script src="script.js"></script>

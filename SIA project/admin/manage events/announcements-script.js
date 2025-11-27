@@ -1,199 +1,268 @@
-// Sample announcements data
-let announcements = [
+// Announcements data
+let announcementsData = [
     {
         id: 1,
-        title: "Tech Talk: IT Summit Registration Now Open!",
-        content: "Join us for an exciting tech summit featuring industry leaders. Register now to secure your spot!",
-        date: "10/8/2025",
-        status: "Published"
+        title: 'Tech Talk: IT Summit Registration Now Open!',
+        content: 'Join us for an exciting tech summit featuring industry leaders. Register now to secure your spot!',
+        postedDate: '10/08/2025',
+        status: 'Published'
     },
     {
         id: 2,
-        title: "Reminder: QCU Bayanihan Week Tomorrow",
+        title: 'Reminder: QCU Bayanihan Week Tomorrow',
         content: "Don't forget! QCU Bayanihan Week starts tomorrow. See you there!",
-        date: "09/28/2025",
-        status: "Published"
+        postedDate: '09/25/2025',
+        status: 'Published'
     },
     {
         id: 3,
-        title: "Career Fair 2025 - Save the Date",
+        title: 'Career Fair 2025 - Save the Date',
         content: "Mark your calendars! Our annual Career Fair is coming up. Connect with top employers.",
-        date: "08/15/2025",
-        status: "Published"
+        postedDate: '08/15/2025',
+        status: 'Published'
     }
 ];
 
-let currentEditingId = null;
-let currentDeletingId = null;
+let currentEditingAnnouncementId = null;
 
-const modal = document.getElementById('announcement-modal-overlay');
-const modalTitle = document.getElementById('modal-title');
-const modalSubtitle = document.getElementById('modal-subtitle');
-const titleInput = document.getElementById('announcement-title');
-const contentInput = document.getElementById('announcement-content');
-const submitBtn = document.getElementById('modal-submit');
-const deleteModal = document.getElementById('delete-modal-overlay');
-const successMessage = document.getElementById('success-message');
-const successText = document.getElementById('success-text');
+// ============ GLOBAL FUNCTIONS ============
 
-// Render announcements
-function renderAnnouncements(filter = '') {
-    const list = document.getElementById('announcements-list');
-    const filtered = announcements.filter(a => 
-        a.title.toLowerCase().includes(filter.toLowerCase()) ||
-        a.content.toLowerCase().includes(filter.toLowerCase())
-    );
-
-    if (filtered.length === 0) {
-        list.innerHTML = '<div class="empty-state"><p>No announcements found</p></div>';
-        return;
+window.openNewAnnouncementModal = function() {
+    console.log('Opening new announcement modal');
+    currentEditingAnnouncementId = null;
+    
+    const titleEl = document.getElementById('announcement-modal-title');
+    const subtitleEl = document.getElementById('announcement-modal-subtitle');
+    const titleInput = document.getElementById('announcement-title');
+    const contentInput = document.getElementById('announcement-content');
+    const statusSelect = document.getElementById('announcement-status');
+    const modal = document.getElementById('announcement-modal');
+    
+    if (titleEl) titleEl.textContent = 'Add Announcement';
+    if (subtitleEl) subtitleEl.textContent = 'Post a new announcement for students to see';
+    if (titleInput) titleInput.value = '';
+    if (contentInput) contentInput.value = '';
+    if (statusSelect) statusSelect.value = 'Published';
+    
+    if (modal) {
+        modal.style.display = 'flex';
+        console.log('Modal displayed');
     }
+};
 
-    list.innerHTML = filtered.map(announcement => `
-        <div class="announcement-card">
-            <div class="announcement-banner"></div>
-            <div class="announcement-container">
-                <div class="announcement-header">
-                    <h3 class="announcement-title">${announcement.title}</h3>
-                    <span class="announcement-status">${announcement.status}</span>
-                </div>
-                <p class="announcement-content">${announcement.content}</p>
-                <p class="announcement-meta">Posted: ${announcement.date}</p>
-                <div class="announcement-actions">
-                    <button class="btn-edit" onclick="editAnnouncement(${announcement.id})">
-                        ✏️ Edit
-                    </button>
-                    <button class="btn-delete" onclick="openDeleteModal(${announcement.id})">
-                        🗑️ Delete
-                    </button>
-                </div>
-            </div>
-        </div>
-    `).join('');
-}
-
-// Open modal for creating new announcement
-document.getElementById('btn-add-announcement').addEventListener('click', function() {
-    currentEditingId = null;
-    modalTitle.textContent = 'Add Announcement';
-    modalSubtitle.textContent = 'Post a new announcement for students to see';
-    titleInput.value = '';
-    contentInput.value = '';
-    submitBtn.textContent = 'Publish Announcement';
-    modal.classList.add('active');
-});
-
-// Edit announcement
-function editAnnouncement(id) {
-    const announcement = announcements.find(a => a.id === id);
-    if (announcement) {
-        currentEditingId = id;
-        modalTitle.textContent = 'Edit Announcement';
-        modalSubtitle.textContent = 'Update announcement details';
-        titleInput.value = announcement.title;
-        contentInput.value = announcement.content;
-        submitBtn.textContent = 'Update Announcement';
-        modal.classList.add('active');
-    }
-}
-
-// Save announcement
-document.getElementById('modal-submit').addEventListener('click', function() {
-    const title = titleInput.value.trim();
-    const content = contentInput.value.trim();
+window.saveAnnouncement = function() {
+    const title = document.getElementById('announcement-title').value.trim();
+    const content = document.getElementById('announcement-content').value.trim();
+    const status = document.getElementById('announcement-status').value;
 
     if (!title || !content) {
-        alert('Please fill in all fields');
+        const missingFields = [];
+        if (!title) missingFields.push('Title');
+        if (!content) missingFields.push('Content');
+        showAnnouncementToast('error', `Missing fields: ${missingFields.join(', ')}`);
         return;
     }
 
-    const today = new Date();
-    const dateStr = `${today.getMonth() + 1}/${today.getDate()}/${today.getFullYear()}`;
-
-    if (currentEditingId === null) {
-        // Add new announcement
-        const newId = Math.max(...announcements.map(a => a.id), 0) + 1;
-        announcements.unshift({
-            id: newId,
-            title,
-            content,
-            date: dateStr,
-            status: 'Published'
-        });
-        successText.textContent = 'Announcement added successfully';
-    } else {
-        // Edit existing announcement
-        const announcement = announcements.find(a => a.id === currentEditingId);
+    if (currentEditingAnnouncementId) {
+        const announcement = announcementsData.find(a => a.id === currentEditingAnnouncementId);
         if (announcement) {
             announcement.title = title;
             announcement.content = content;
-            announcement.date = dateStr;
-            successText.textContent = 'Announcement edited successfully';
+            announcement.status = status;
         }
+    } else {
+        const newId = Math.max(...announcementsData.map(a => a.id), 0) + 1;
+        const today = new Date();
+        const formattedDate = `${String(today.getMonth() + 1).padStart(2, '0')}/${String(today.getDate()).padStart(2, '0')}/${today.getFullYear()}`;
+
+        announcementsData.unshift({
+            id: newId,
+            title: title,
+            content: content,
+            postedDate: formattedDate,
+            status: status
+        });
     }
 
     renderAnnouncements();
-    modal.classList.remove('active');
-    showSuccessMessage();
-});
+    document.getElementById('announcement-modal').style.display = 'none';
+    showAnnouncementToast('success', currentEditingAnnouncementId ? 'Announcement updated successfully!' : 'Announcement published successfully!');
+};
 
-// Open delete confirmation modal
-function openDeleteModal(id) {
-    currentDeletingId = id;
-    deleteModal.classList.add('active');
+window.confirmDelete = function() {
+    if (currentEditingAnnouncementId) {
+        announcementsData = announcementsData.filter(a => a.id !== currentEditingAnnouncementId);
+        renderAnnouncements();
+        document.getElementById('delete-announcement-modal').style.display = 'none';
+        showAnnouncementToast('success', 'Announcement deleted successfully!');
+    }
+};
+
+window.openEditAnnouncementModal = function(id) {
+    const announcement = announcementsData.find(a => a.id === id);
+    if (!announcement) return;
+
+    currentEditingAnnouncementId = id;
+    document.getElementById('announcement-modal-title').textContent = 'Edit Announcement';
+    document.getElementById('announcement-modal-subtitle').textContent = 'Update announcement details';
+    document.getElementById('announcement-title').value = announcement.title;
+    document.getElementById('announcement-content').value = announcement.content;
+    document.getElementById('announcement-status').value = announcement.status;
+    document.getElementById('announcement-modal').style.display = 'flex';
+};
+
+window.openDeleteConfirmation = function(id) {
+    currentEditingAnnouncementId = id;
+    document.getElementById('delete-announcement-modal').style.display = 'flex';
+};
+
+window.filterAnnouncements = function() {
+    const searchTerm = document.getElementById('announcement-search').value.toLowerCase();
+    const container = document.getElementById('announcements-container');
+
+    const filteredData = announcementsData.filter(announcement => 
+        announcement.title.toLowerCase().includes(searchTerm) ||
+        announcement.content.toLowerCase().includes(searchTerm)
+    );
+
+    container.innerHTML = '';
+
+    if (filteredData.length === 0) {
+        container.innerHTML = '<div class="no-announcements"><p>No announcements found matching your search.</p></div>';
+        return;
+    }
+
+    filteredData.forEach(announcement => {
+        const announcementCard = document.createElement('div');
+        announcementCard.className = 'announcement-card';
+        announcementCard.innerHTML = `
+            <div class="announcement-card-header">
+                <h3>${announcement.title}</h3>
+                <span class="status-badge ${announcement.status.toLowerCase()}">${announcement.status}</span>
+            </div>
+            <div class="announcement-card-content">
+                <p>${announcement.content}</p>
+            </div>
+            <div class="announcement-card-footer">
+                <span class="announcement-date">Posted ${announcement.postedDate}</span>
+                <div class="announcement-actions">
+                    <button class="btn-edit" onclick="window.openEditAnnouncementModal(${announcement.id}); return false;">Edit</button>
+                    <button class="btn-delete" onclick="window.openDeleteConfirmation(${announcement.id}); return false;">Delete</button>
+                </div>
+            </div>
+        `;
+        container.appendChild(announcementCard);
+    });
+};
+
+// ============ RENDER ANNOUNCEMENTS ============
+function renderAnnouncements() {
+    const container = document.getElementById('announcements-container');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    if (announcementsData.length === 0) {
+        container.innerHTML = '<div class="no-announcements"><p>No announcements yet. Create one to get started!</p></div>';
+        return;
+    }
+
+    announcementsData.forEach(announcement => {
+        const announcementCard = document.createElement('div');
+        announcementCard.className = 'announcement-card';
+        announcementCard.innerHTML = `
+            <div class="announcement-card-header">
+                <h3>${announcement.title}</h3>
+                <span class="status-badge ${announcement.status.toLowerCase()}">${announcement.status}</span>
+            </div>
+            <div class="announcement-card-content">
+                <p>${announcement.content}</p>
+            </div>
+            <div class="announcement-card-footer">
+                <span class="announcement-date">Posted ${announcement.postedDate}</span>
+                <div class="announcement-actions">
+                    <button class="btn-edit" onclick="window.openEditAnnouncementModal(${announcement.id}); return false;">Edit</button>
+                    <button class="btn-delete" onclick="window.openDeleteConfirmation(${announcement.id}); return false;">Delete</button>
+                </div>
+            </div>
+        `;
+        container.appendChild(announcementCard);
+    });
 }
 
-// Delete announcement
-document.getElementById('delete-confirm').addEventListener('click', function() {
-    announcements = announcements.filter(a => a.id !== currentDeletingId);
-    renderAnnouncements();
-    deleteModal.classList.remove('active');
-    successText.textContent = 'Announcement deleted successfully';
-    showSuccessMessage();
-});
-
-// Close modals
-document.getElementById('modal-close').addEventListener('click', function() {
-    modal.classList.remove('active');
-});
-
-document.getElementById('modal-cancel').addEventListener('click', function() {
-    modal.classList.remove('active');
-});
-
-document.getElementById('delete-modal-close').addEventListener('click', function() {
-    deleteModal.classList.remove('active');
-});
-
-document.getElementById('delete-cancel').addEventListener('click', function() {
-    deleteModal.classList.remove('active');
-});
-
-// Close modal on overlay click
-modal.addEventListener('click', function(e) {
-    if (e.target === modal) {
-        modal.classList.remove('active');
+// ============ SETUP EVENT HANDLERS ============
+function setupEventHandlers() {
+    console.log('Setting up event handlers...');
+    
+    // Search Input
+    const searchInput = document.getElementById('announcement-search');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            window.filterAnnouncements();
+        });
     }
-});
+}
 
-deleteModal.addEventListener('click', function(e) {
-    if (e.target === deleteModal) {
-        deleteModal.classList.remove('active');
+// ============ NOTIFICATIONS ============
+function showAnnouncementToast(type, message) {
+    // Remove existing toast if present
+    const existingToast = document.querySelector('.announcement-toast');
+    if (existingToast) {
+        existingToast.remove();
     }
-});
 
-// Search announcements
-document.getElementById('search-announcements').addEventListener('keyup', function() {
-    renderAnnouncements(this.value);
-});
-
-// Show success message
-function showSuccessMessage() {
-    successMessage.classList.add('show');
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `announcement-toast ${type}`;
+    
+    // Add icon based on type
+    const icon = type === 'success' ? '✓' : '!';
+    toast.innerHTML = `
+        <span class="toast-icon">${icon}</span>
+        <span class="toast-message">${message}</span>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Trigger animation
     setTimeout(() => {
-        successMessage.classList.remove('show');
+        toast.classList.add('show');
+    }, 10);
+    
+    // Auto-remove after 4 seconds
+    setTimeout(function() {
+        toast.classList.remove('show');
+        setTimeout(function() {
+            toast.remove();
+        }, 300);
+    }, 4000);
+}
+
+function showSuccessNotification(message) {
+    const existing = document.querySelector('.success-notification');
+    if (existing) {
+        existing.remove();
+    }
+
+    const notification = document.createElement('div');
+    notification.className = 'success-notification';
+    notification.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        <span>${message}</span>
+    `;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.remove();
     }, 3000);
 }
 
-// Initial render
-renderAnnouncements();
+// ============ INITIALIZE ============
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded - initializing announcements');
+    renderAnnouncements();
+    setupEventHandlers();
+    console.log('Announcements initialized');
+});
