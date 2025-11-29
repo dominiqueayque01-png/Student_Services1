@@ -3,6 +3,7 @@ require('dotenv').config(); // <--- NEW: Load environment variables first!
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const { connectMainDB } = require('./config/db');
 
 // --- 2. INITIALIZE YOUR APP ---
 const app = express();
@@ -13,20 +14,7 @@ app.use(express.json());
 
 // --- 4. CONNECT TO MONGODB ---
 // We use process.env to get the secret string
-const mongoURI = process.env.MONGO_URI;
-
-if (!mongoURI) {
-    console.error("FATAL ERROR: MONGO_URI is not defined in .env file.");
-    process.exit(1);
-}
-
-mongoose.connect(mongoURI)
-  .then(() => {
-    console.log('Successfully connected to MongoDB Atlas!');
-  })
-  .catch(err => {
-    console.error('MongoDB connection error:', err);
-  });
+connectMainDB();
 
 // --- 5. IMPORT & USE YOUR ROUTES ---
 const clubRoutes = require('./routes/club.routes.js');
