@@ -1,5 +1,5 @@
 /* ============================================
-   OJT LISTING MODULE (FINAL)
+   OJT LISTING MODULE (STUDENT VIEW - CLEANED)
    ============================================ */
 
 let allOjtData = [];
@@ -117,7 +117,7 @@ function searchAndFilterOJT() {
         const daysAgo = Math.floor((new Date() - new Date(ojt.postedAt)) / (1000 * 60 * 60 * 24));
         const postedText = daysAgo === 0 ? "Today" : `${daysAgo} days ago`;
 
-        const subCatHTML = ojt.subCategory ? `<span class="club-subcategory-badge">${ojt.subCategory}</span>` : '';
+        // REMOVED: subCatHTML and subcategory badge
         const recommendedHTML = ojt.isRecommended ? `<div class="recommended-badge">Recommended</div>` : '';
         const highlightStyle = ojt.isRecommended ? 'border: 1px solid #8b5cf6; background-color: #fbfaff;' : '';
 
@@ -130,7 +130,7 @@ function searchAndFilterOJT() {
             <div class="club-header">
                 <h2 class="club-name">${ojt.position}</h2>
                 <div class="club-badges">
-                    ${subCatHTML}
+                    <!-- REMOVED: Subcategory badge -->
                     <span class="club-category-badge">${ojt.category}</span>
                 </div>
             </div>
@@ -164,51 +164,45 @@ function searchAndFilterOJT() {
     document.getElementById('ojtCount').textContent = `${visibleOJT.length} training opportunities found`;
 }
 
-// --- 4. MODAL & APPLY ---
+// --- MODAL WITH COMPANY CONTACT INFO (NO APPLY BUTTON) ---
 function openOJTCompanyModal(ojtId) {
     const ojt = getOJTById(ojtId);
     if (!ojt) return;
 
     const container = document.getElementById('ojtCompanyContent');
-    const isApplied = myOjtApplications.includes(ojt._id);
 
-    let applyButton = '';
-    if (isApplied) {
-        applyButton = `<button disabled style="background:#ecfdf5; color:#047857; border:1px solid #10b981; padding:10px 18px; border-radius:6px; font-weight:600; cursor:default;">✓ Applied</button>`;
-    } else {
-        applyButton = `<button class="learn-more-btn" style="background:#2c3e7f;color:#fff;padding:10px 18px;border-radius:6px;border:0;cursor:pointer;" onclick="applyToOJT('${ojt._id}')">Apply Now</button>`;
-    }
-
-    const skillsHTML = (ojt.skills && ojt.skills.length > 0) 
-        ? ojt.skills.map(s => `<span style="background:#e8f0ff;color:#2c3e7f;padding:6px 12px;border-radius:20px;font-size:12px;">${s}</span>`).join('')
-        : '<span>No specific skills listed</span>';
-
-    // Related Jobs (Inside Modal)
-    const relatedJobs = allOjtData.filter(item => 
-        item.subCategory === ojt.subCategory && item._id !== ojt._id
-    ).slice(0, 3);
-
-    let relatedJobsHTML = '';
-    if (relatedJobs.length > 0) {
-        relatedJobsHTML = `
-            <div class="related-jobs-container">
-                <h3 style="color:#2c3e7f;font-size:14px;margin-bottom:10px;">More in ${ojt.subCategory}</h3>
-                ${relatedJobs.map(job => `
-                    <div class="related-job-card" onclick="openOJTCompanyModal('${job._id}')">
-                        <div>
-                            <div class="related-job-title">${job.position}</div>
-                            <div class="related-job-company">${job.company}</div>
-                        </div>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2c3e7f" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-                    </div>
-                `).join('')}
+    // Format website to be clickable
+    let websiteHTML = '';
+    if (ojt.website) {
+        const websiteUrl = ojt.website.startsWith('http') ? ojt.website : `https://${ojt.website}`;
+        websiteHTML = `
+            <div style="margin-bottom: 12px;">
+                <div style="font-weight: 600; color: #2c3e7f; margin-bottom: 4px;">🌐 Company Website</div>
+                <a href="${websiteUrl}" target="_blank" style="color: #2c3e7f; text-decoration: none; font-size: 14px;">
+                    ${ojt.website}
+                </a>
             </div>
         `;
     }
 
+    // Format email to be clickable
+    let emailHTML = '';
+    if (ojt.email) {
+        emailHTML = `
+            <div style="margin-bottom: 20px;">
+                <div style="font-weight: 600; color: #2c3e7f; margin-bottom: 4px;">📧 Contact Email</div>
+                <a href="mailto:${ojt.email}" style="color: #2c3e7f; text-decoration: none; font-size: 14px;">
+                    ${ojt.email}
+                </a>
+            </div>
+        `;
+    }
+
+    // REMOVED: Related Jobs section since it used subCategory
+
     container.innerHTML = `
         <h2 id="ojtCompanyTitle" style="color:#2c3e7f;margin-bottom:8px;">${ojt.position}</h2>
-        <div style="margin-bottom:12px;"><span class="club-subcategory-badge">${ojt.subCategory || ojt.category}</span></div>
+        <!-- REMOVED: Subcategory badge -->
         
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;color:#666;font-size:14px;">
             <span>${ojt.company}</span> <span>•</span> <span>${ojt.location}</span>
@@ -227,17 +221,22 @@ function openOJTCompanyModal(ojtId) {
             </div>
         </div>
 
-        <h3 style="color:#2c3e7f;font-size:16px;margin-bottom:10px;">Skills</h3>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;">
-            ${skillsHTML}
+        <!-- COMPANY CONTACT INFORMATION -->
+        <h3 style="color:#2c3e7f;font-size:16px;margin-bottom:10px;">Company Contact Information</h3>
+        <div style="background:#f0f9ff;padding:16px;border-radius:8px;margin-bottom:20px;border:1px solid #bae6fd;">
+            ${websiteHTML}
+            ${emailHTML}
+            <div style="font-size:13px;color:#666;margin-top:8px;">
+                <strong>Note:</strong> Please contact the company directly using the information above for application inquiries.
+            </div>
         </div>
 
-        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
-            <button type="button" class="learn-more-btn" style="background:#fff;color:#333;border:1px solid #e8e8e8;padding:10px 18px;border-radius:6px;" onclick="closeOJTCompanyModal()">Close</button>
-            ${applyButton}
+        <!-- Only keep the modal close button (top right) and back link -->
+        <div style="display:flex;justify-content:flex-end;margin-top:20px;">
+            <button type="button" class="learn-more-btn" style="background:#fff;color:#333;border:1px solid #e8e8e8;padding:10px 18px;border-radius:6px;" onclick="closeOJTCompanyModal()">Close Details</button>
         </div>
 
-        ${relatedJobsHTML}
+        <!-- REMOVED: Related Jobs section -->
     `;
 
     const modal = document.getElementById('ojtCompanyModal');
@@ -250,35 +249,6 @@ function closeOJTCompanyModal() {
     if (modal) {
         modal.setAttribute('aria-hidden', 'true');
         modal.classList.remove('open');
-    }
-}
-
-async function applyToOJT(ojtId) {
-    const studentId = localStorage.getItem('currentStudentId');
-    if (!studentId) {
-        alert("Please submit a counseling form first to set your Student ID.");
-        return;
-    }
-
-    try {
-        const res = await fetch('http://localhost:3001/api/ojt/apply', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ojtId, studentId })
-        });
-
-        if (!res.ok) {
-            const err = await res.json();
-            throw new Error(err.message);
-        }
-
-        alert("Application submitted successfully!");
-        myOjtApplications.push(ojtId);
-        openOJTCompanyModal(ojtId); // Refresh modal to show "Applied"
-        searchAndFilterOJT(); // Refresh list to remove "Recommended" badge if applied
-
-    } catch (error) {
-        alert(error.message);
     }
 }
 

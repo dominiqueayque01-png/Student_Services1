@@ -1,54 +1,85 @@
 const express = require('express');
 const router = express.Router();
 const OjtListing = require('../models/ojt.model');
-const OjtApplication = require('../models/ojtApplication.model');
 
 // GET ALL LISTINGS
 router.get('/', async (req, res) => {
     try {
-        const listings = await OjtListing.find().sort({ postedAt: -1 });
+        const listings = await OjtListing.find().sort({ createdAt: -1 });
         res.json(listings);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 });
 
-// POST A NEW LISTING (For Admin/Testing)
-router.post('/', async (req, res) => {
-    const ojt = new OjtListing(req.body);
+// GET SINGLE LISTING
+router.get('/:id', async (req, res) => {
     try {
-        const newListing = await ojt.save();
+        const listing = await OjtListing.findById(req.params.id);
+        if (!listing) {
+            return res.status(404).json({ message: 'Listing not found' });
+        }
+        res.json(listing);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// CREATE NEW LISTING
+router.post('/', async (req, res) => {
+    try {
+        const listing = new OjtListing(req.body);
+        const newListing = await listing.save();
         res.status(201).json(newListing);
     } catch (err) {
         res.status(400).json({ message: err.message });
     }
 });
 
-// APPLY TO OJT
-router.post('/apply', async (req, res) => {
-    const { ojtId, studentId } = req.body;
-    
-    // Check duplicate
-    const existing = await OjtApplication.findOne({ ojtId, studentId });
-    if (existing) return res.status(400).json({ message: "You already applied to this position." });
-
-    const application = new OjtApplication({ ojtId, studentId });
-    
+// UPDATE LISTING
+router.put('/:id', async (req, res) => {
     try {
-        await application.save();
-        res.status(201).json({ message: "Application successful" });
+        const listing = await OjtListing.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true, runValidators: true }
+        );
+        if (!listing) {
+            return res.status(404).json({ message: 'Listing not found' });
+        }
+        res.json(listing);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+});
+
+// DELETE LISTING
+router.delete('/:id', async (req, res) => {
+    try {
+        const listing = await OjtListing.findByIdAndDelete(req.params.id);
+        if (!listing) {
+            return res.status(404).json({ message: 'Listing not found' });
+        }
+        res.json({ message: 'Listing deleted successfully' });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 });
 
-// GET MY APPLICATIONS
-router.get('/my-applications/:studentId', async (req, res) => {
+// TOGGLE STATUS
+router.patch('/:id/status', async (req, res) => {
     try {
-        const apps = await OjtApplication.find({ studentId: req.params.studentId });
-        res.json(apps.map(a => a.ojtId)); // Return just IDs for easy checking
+        const listing = await OjtListing.findById(req.params.id);
+        if (!listing) {
+            return res.status(404).json({ message: 'Listing not found' });
+        }
+        
+        listing.status = listing.status === 'active' ? 'paused' : 'active';
+        await listing.save();
+        
+        res.json(listing);
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        res.status(400).json({ message: err.message });
     }
 });
 

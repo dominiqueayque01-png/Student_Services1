@@ -226,6 +226,39 @@ header {
 }
 
 /* ============================================
+   Year Filter
+   ============================================ */
+.year-filter {
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.year-filter label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
+
+.year-filter select {
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.year-filter select:focus {
+    outline: none;
+    border-color: #2d5aa8;
+    box-shadow: 0 0 0 4px rgba(45, 90, 168, 0.1);
+    background-color: #f8fbff;
+}
+
+/* ============================================
    Stats Grid
    ============================================ */
 .stats-grid {
@@ -531,4 +564,3 @@ header {
 .logout-modal-confirm:hover {
     background-color: #1e3f7f;
 }
-

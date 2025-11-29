@@ -1,292 +1,464 @@
-// Sample job listings data
-let jobListings = [
-    {
-        id: 1,
-        title: "Social Media Assistant",
-        company: "ABC Company",
-        overview: "Join our marketing team to learn social media strategy, content creation, and digital marketing analytics while working on real client campaigns.",
-        rate: 50,
-        location: "Remote/Hybrid",
-        duration: "8 weeks",
-        hours: 10,
-        applicants: 10,
-        category: "Digital Marketing",
-        worktype: "Remote",
-        program: "Summer OJT 2025",
-        website: "https://abc-company.com",
-        email: "hr@abc-company.com",
-        status: "Active"
-    },
-    {
-        id: 2,
-        title: "Marketing Assistant",
-        company: "XYZ Company",
-        overview: "Join our marketing team to learn social media strategy, content creation, and digital marketing analytics while working on real client campaigns.",
-        rate: 30,
-        location: "On Site",
-        duration: "7 weeks",
-        hours: 10,
-        applicants: 18,
-        category: "Digital Marketing",
-        worktype: "On Site",
-        program: "Summer OJT 2025",
-        website: "https://xyz-company.com",
-        email: "careers@xyz-company.com",
-        status: "Active"
+/* ============================================
+   OJT ADMIN - DATABASE VERSION
+   Using your existing /api/ojt routes
+   ============================================ */
+
+const API_URL = 'http://localhost:3001/api/ojt';
+
+class JobListingsManager {
+    constructor() {
+        this.jobListings = [];
+        this.currentEditingId = null;
+        this.currentDeletingId = null;
+        this.init();
     }
-];
 
-let currentEditingId = null;
-let currentDeletingId = null;
+    async init() {
+        this.setupEventListeners();
+        await this.loadJobListings();
+    }
 
-const jobModalOverlay = document.getElementById('job-modal-overlay');
-const jobModalTitle = document.getElementById('job-modal-title');
-const jobModalSubtitle = document.getElementById('job-modal-subtitle');
-const deleteModalOverlay = document.getElementById('delete-modal-overlay');
-const jobForm = document.getElementById('job-form');
-const validationMessage = document.getElementById('validation-message');
+    setupEventListeners() {
+        // Create Job Button
+        document.getElementById('btn-create-job').addEventListener('click', () => {
+            this.openJobModal();
+        });
 
-const jobTitleInput = document.getElementById('job-title');
-const jobCompanyInput = document.getElementById('job-company');
-const jobOverviewInput = document.getElementById('job-overview');
-const jobRateInput = document.getElementById('job-rate');
-const jobLocationInput = document.getElementById('job-location');
-const jobDurationInput = document.getElementById('job-duration');
-const jobHoursInput = document.getElementById('job-hours');
-const jobCategoryInput = document.getElementById('job-category');
-const jobWorktypeInput = document.getElementById('job-worktype');
-const jobProgramInput = document.getElementById('job-program');
-const jobWebsiteInput = document.getElementById('job-website');
-const jobEmailInput = document.getElementById('job-email');
+        // Job Modal
+        document.getElementById('job-modal-close').addEventListener('click', () => {
+            this.closeJobModal();
+        });
 
-// Render job listings
-function renderJobListings() {
-    const container = document.getElementById('job-listings-container');
+        document.getElementById('job-modal-cancel').addEventListener('click', () => {
+            this.closeJobModal();
+        });
+
+        document.getElementById('job-modal-submit').addEventListener('click', () => {
+            this.handleJobSubmit();
+        });
+
+        // Delete Modal
+        document.getElementById('delete-modal-close').addEventListener('click', () => {
+            this.closeDeleteModal();
+        });
+
+        document.getElementById('delete-modal-cancel').addEventListener('click', () => {
+            this.closeDeleteModal();
+        });
+
+        document.getElementById('delete-modal-confirm').addEventListener('click', () => {
+            this.confirmDelete();
+        });
+
+        // Close modals when clicking outside
+        document.getElementById('job-modal-overlay').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                this.closeJobModal();
+            }
+        });
+
+        document.getElementById('delete-modal-overlay').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                this.closeDeleteModal();
+            }
+        });
+
+        // Allow form submission with Enter key
+        document.getElementById('job-form').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.handleJobSubmit();
+            }
+        });
+    }
+
+    // --- DATABASE OPERATIONS ---
+
+    async loadJobListings() {
+        try {
+            const response = await fetch(API_URL);
+            if (!response.ok) throw new Error('Failed to fetch job listings');
+
+            const rawData = await response.json();
+
+            // Map MongoDB data to match our frontend structure
+            this.jobListings = rawData.map(job => ({
+                ...job,
+                id: job._id // Map _id to id for frontend compatibility
+            }));
+
+            console.log('Loaded job listings:', this.jobListings); // Debug log
+
+            this.renderJobListings();
+            this.updateOtherPages();
+        } catch (error) {
+            console.error('Error loading job listings:', error);
+            this.showToast('Error loading job listings from database', 'error');
+            
+            // Fallback to localStorage if DB is unavailable
+            this.loadFromLocalStorage();
+        }
+    }
+
+    async saveJobListing(jobData) {
+        try {
+            const method = this.currentEditingId ? 'PUT' : 'POST';
+            const url = this.currentEditingId ? `${API_URL}/${this.currentEditingId}` : API_URL;
+
+            console.log('Saving job data:', jobData); // Debug log
+
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(jobData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to save job listing');
+            }
+
+            const savedJob = await response.json();
+            
+            // Update local data
+            await this.loadJobListings();
+            
+            return savedJob;
+        } catch (error) {
+            console.error('Error saving job listing:', error);
+            throw error;
+        }
+    }
+
+    async deleteJobListing(jobId) {
+        try {
+            const response = await fetch(`${API_URL}/${jobId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to delete job listing');
+            }
+
+            // Update local data
+            await this.loadJobListings();
+        } catch (error) {
+            console.error('Error deleting job:', error);
+            throw error;
+        }
+    }
+
+    async toggleJobStatus(jobId) {
+        try {
+            const job = this.jobListings.find(j => j.id === jobId);
+            if (!job) throw new Error('Job not found');
+
+            const newStatus = job.status === 'active' ? 'paused' : 'active';
+            
+            const response = await fetch(`${API_URL}/${jobId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ...job,
+                    status: newStatus
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to update job status');
+            }
+
+            // Update local data
+            await this.loadJobListings();
+        } catch (error) {
+            console.error('Error updating job status:', error);
+            throw error;
+        }
+    }
+
+    // --- LOCALSTORAGE FALLBACK ---
     
-    if (jobListings.length === 0) {
-        container.innerHTML = '<div class="empty-state"><p>No job listings yet. Click "Create Club" to add one.</p></div>';
-        return;
+    loadFromLocalStorage() {
+        const stored = localStorage.getItem('ojtJobListings');
+        if (stored) {
+            this.jobListings = JSON.parse(stored);
+            this.renderJobListings();
+            this.showToast('Loaded from local storage (database unavailable)', 'error');
+        }
     }
 
-    container.innerHTML = jobListings.map(job => `
-        <div class="job-card">
-            <div class="job-card-header">
-                <div class="job-card-title-section">
-                    <p class="job-card-title">${job.title}</p>
-                    <p class="job-card-company">${job.company} • ${job.category}</p>
+    saveToLocalStorage() {
+        localStorage.setItem('ojtJobListings', JSON.stringify(this.jobListings));
+    }
+
+    // --- UI MANAGEMENT ---
+
+    openJobModal(jobId = null) {
+        const modal = document.getElementById('job-modal-overlay');
+        const title = document.getElementById('job-modal-title');
+        const submitBtn = document.getElementById('job-modal-submit');
+
+        this.currentEditingId = jobId;
+
+        if (jobId) {
+            // Edit mode
+            title.textContent = 'Edit Job Listing';
+            submitBtn.textContent = 'Update Job Listing';
+            this.populateForm(jobId);
+        } else {
+            // Create mode
+            title.textContent = 'Create Job Listing';
+            submitBtn.textContent = 'Create Job Listing';
+            this.clearForm();
+        }
+
+        modal.classList.add('active');
+        document.getElementById('validation-message').style.display = 'none';
+    }
+
+    closeJobModal() {
+        document.getElementById('job-modal-overlay').classList.remove('active');
+        this.currentEditingId = null;
+        this.clearForm();
+    }
+
+    clearForm() {
+        document.getElementById('job-form').reset();
+    }
+
+    populateForm(jobId) {
+        const job = this.jobListings.find(j => j.id === jobId);
+        if (!job) return;
+
+        console.log('Populating form with job:', job); // Debug log
+
+        // Map your model fields to admin form fields
+        document.getElementById('job-title').value = job.position || '';
+        document.getElementById('job-company').value = job.company || '';
+        document.getElementById('job-overview').value = job.overview || '';
+        document.getElementById('job-rate').value = job.payPerHour || '';
+        document.getElementById('job-location').value = job.location || '';
+        
+        // Handle duration - remove "weeks" if present
+        const durationValue = job.duration ? job.duration.toString().replace(' weeks', '') : '';
+        document.getElementById('job-duration').value = durationValue;
+        
+        document.getElementById('job-hours').value = job.hoursPerWeek || '';
+        document.getElementById('job-category').value = job.category || '';
+        document.getElementById('job-worktype').value = job.workArrangement || '';
+        document.getElementById('job-website').value = job.website || '';
+        document.getElementById('job-email').value = job.email || '';
+    }
+
+    validateForm() {
+        const requiredFields = [
+            'job-title', 'job-company', 'job-overview', 'job-rate',
+            'job-location', 'job-duration', 'job-hours', 'job-category',
+            'job-worktype', 'job-website', 'job-email'
+        ];
+
+        let isValid = true;
+        const validationMessage = document.getElementById('validation-message');
+
+        requiredFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (!field.value.trim()) {
+                isValid = false;
+                field.style.borderColor = '#f44336';
+            } else {
+                field.style.borderColor = '#ddd';
+            }
+        });
+
+        validationMessage.style.display = isValid ? 'none' : 'block';
+        return isValid;
+    }
+
+    async handleJobSubmit() {
+        if (!this.validateForm()) {
+            return;
+        }
+
+        // Map admin form fields to your model fields
+        const jobData = {
+            position: document.getElementById('job-title').value,
+            company: document.getElementById('job-company').value,
+            overview: document.getElementById('job-overview').value,
+            payPerHour: parseFloat(document.getElementById('job-rate').value),
+            location: document.getElementById('job-location').value,
+            duration: parseInt(document.getElementById('job-duration').value) || 0,
+            hoursPerWeek: parseInt(document.getElementById('job-hours').value),
+            category: document.getElementById('job-category').value,
+            workArrangement: document.getElementById('job-worktype').value,
+            website: document.getElementById('job-website').value,
+            email: document.getElementById('job-email').value,
+            description: document.getElementById('job-overview').value, // Use overview for description too
+            status: 'active',
+            subCategory: document.getElementById('job-category').value
+        };
+
+        console.log('Submitting job data:', jobData); // Debug log
+
+        try {
+            await this.saveJobListing(jobData);
+            this.closeJobModal();
+            this.showToast(`Job listing ${this.currentEditingId ? 'updated' : 'created'} successfully!`, 'success');
+
+        } catch (error) {
+            console.error('Failed to save job listing:', error);
+            this.showToast('Failed to save job listing: ' + error.message, 'error');
+        }
+    }
+
+    renderJobListings() {
+        const container = document.getElementById('job-listings-container');
+        if (!container) return;
+
+        if (this.jobListings.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <p>No job listings found.</p>
+                    <p>Click the "Create Job" button to add a new listing.</p>
                 </div>
-                <span class="job-card-status active">${job.status}</span>
-            </div>
-            <p class="job-card-description">${job.overview}</p>
-            <div class="job-card-meta">
-                <div class="job-meta-item rate">¥ ₱${job.rate}/hour</div>
-                <div class="job-meta-item location">◉ ${job.location}</div>
-                <div class="job-meta-item applicants">◈ ${job.applicants} applicants</div>
-                <div class="job-meta-item duration">⊞ ${job.duration}</div>
-                <div class="job-meta-item hours">▬ ${job.hours} hours/week</div>
-            </div>
-            <div class="job-card-actions">
-                <button class="btn-icon btn-edit" onclick="editJob(${job.id})" title="Edit">✎</button>
-                <button class="btn-pause ${job.status === 'Paused' ? 'paused' : ''}" onclick="toggleJobStatus(${job.id})">${job.status === 'Active' ? 'Pause' : 'Active'}</button>
-                <button class="btn-icon btn-delete" onclick="openDeleteModal(${job.id})" title="Delete">✕</button>
-            </div>
-        </div>
-    `).join('');
-}
+            `;
+            return;
+        }
 
-// Open create job modal
-document.getElementById('btn-create-job').addEventListener('click', function() {
-    currentEditingId = null;
-    jobModalTitle.textContent = 'Create Job Listing';
-    jobModalSubtitle.textContent = 'Create job details and requirements.';
-    jobForm.reset();
-    validationMessage.style.display = 'none';
-    document.getElementById('job-modal-submit').textContent = 'Create Job Listing';
-    jobModalOverlay.classList.add('active');
-});
+        container.innerHTML = this.jobListings.map(job => `
+            <div class="job-card" data-job-id="${job.id}">
+                <div class="job-card-header">
+                    <div class="job-card-title-section">
+                        <h3 class="job-card-title">${job.position}</h3>
+                        <p class="job-card-company">${job.company}</p>
+                    </div>
+                    <span class="job-card-status ${job.status}">${job.status}</span>
+                </div>
+                <p class="job-card-description">${job.overview}</p>
+                <div class="job-card-meta">
+                    <div class="job-meta-item rate">
+                        <span>₱${job.payPerHour}/hour</span>
+                    </div>
+                    <div class="job-meta-item location">
+                        <span>${job.location}</span>
+                    </div>
+                    <div class="job-meta-item duration">
+                        <span>${job.duration} weeks</span>
+                    </div>
+                    <div class="job-meta-item hours">
+                        <span>${job.hoursPerWeek} hrs/week</span>
+                    </div>
+                </div>
+                <div class="job-card-actions">
+                    <button class="btn-pause ${job.status === 'paused' ? 'paused' : ''}" 
+                            onclick="jobManager.handleToggleStatus('${job.id}')">
+                        ${job.status === 'paused' ? 'Resume' : 'Pause'}
+                    </button>
+                    <button class="btn-edit" 
+                            onclick="jobManager.openJobModal('${job.id}')">
+                        Edit
+                    </button>
+                    <button class="btn-delete" 
+                            onclick="jobManager.showDeleteModal('${job.id}')">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
 
-// Edit job
-function editJob(id) {
-    const job = jobListings.find(j => j.id === id);
-    if (job) {
-        currentEditingId = id;
-        jobModalTitle.textContent = 'Edit Job Listing';
-        jobModalSubtitle.textContent = 'Update job details and requirements.';
+    // FIXED: This method handles the button click without recursion
+    async handleToggleStatus(jobId) {
+        try {
+            await this.toggleJobStatus(jobId);
+            this.showToast('Job status updated successfully!', 'success');
+        } catch (error) {
+            console.error('Failed to update job status:', error);
+            this.showToast('Failed to update job status: ' + error.message, 'error');
+        }
+    }
+
+    showDeleteModal(jobId) {
+        this.currentDeletingId = jobId;
+        document.getElementById('delete-modal-overlay').classList.add('active');
+    }
+
+    closeDeleteModal() {
+        document.getElementById('delete-modal-overlay').classList.remove('active');
+        this.currentDeletingId = null;
+    }
+
+    async confirmDelete() {
+        if (this.currentDeletingId) {
+            try {
+                await this.deleteJobListing(this.currentDeletingId);
+                this.closeDeleteModal();
+                this.showToast('Job listing deleted successfully!', 'success');
+            } catch (error) {
+                console.error('Failed to delete job:', error);
+                this.showToast('Failed to delete job listing: ' + error.message, 'error');
+            }
+        }
+    }
+
+    showToast(message, type) {
+        // Remove existing toasts to prevent spam
+        const existingToasts = document.querySelectorAll('.job-toast');
+        existingToasts.forEach(toast => toast.remove());
+
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `job-toast ${type}`;
+        toast.innerHTML = `
+            <div class="toast-icon">${type === 'success' ? '✓' : '!'}</div>
+            <div class="toast-message">${message}</div>
+        `;
+
+        // Add to page
+        document.body.appendChild(toast);
+
+        // Show toast
+        setTimeout(() => toast.classList.add('show'), 100);
+
+        // Hide and remove after 3 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }, 3000);
+    }
+
+    // Method to expose job listings to other components
+    getJobListings() {
+        return this.jobListings;
+    }
+
+    // Update other pages when data changes
+    updateOtherPages() {
+        // Save to localStorage for cross-page communication
+        this.saveToLocalStorage();
         
-        jobTitleInput.value = job.title;
-        jobCompanyInput.value = job.company;
-        jobOverviewInput.value = job.overview;
-        jobRateInput.value = job.rate;
-        jobLocationInput.value = job.location;
-        jobDurationInput.value = job.duration;
-        jobHoursInput.value = job.hours;
-        jobCategoryInput.value = job.category;
-        jobWorktypeInput.value = job.worktype;
-        jobProgramInput.value = job.program;
-        jobWebsiteInput.value = job.website;
-        jobEmailInput.value = job.email;
+        // Refresh analytics if available
+        if (window.analyticsData && typeof window.analyticsData.refreshAnalytics === 'function') {
+            window.analyticsData.refreshAnalytics();
+        }
         
-        validationMessage.style.display = 'none';
-        document.getElementById('job-modal-submit').textContent = 'Update Job Listing';
-        jobModalOverlay.classList.add('active');
+        // Refresh overview if available
+        if (window.overviewData && typeof window.overviewData.refreshOverview === 'function') {
+            window.overviewData.refreshOverview();
+        }
     }
 }
 
-// Toggle job status (Active/Paused)
-function toggleJobStatus(id) {
-    const job = jobListings.find(j => j.id === id);
-    if (job) {
-        job.status = job.status === 'Active' ? 'Paused' : 'Active';
-        renderJobListings();
-    }
-}
-
-// Save job listing
-document.getElementById('job-modal-submit').addEventListener('click', function() {
-    if (!validateForm()) {
-        validationMessage.style.display = 'block';
-        return;
-    }
-
-    validationMessage.style.display = 'none';
-
-    const newJob = {
-        id: currentEditingId || Math.max(...jobListings.map(j => j.id), 0) + 1,
-        title: jobTitleInput.value.trim(),
-        company: jobCompanyInput.value.trim(),
-        overview: jobOverviewInput.value.trim(),
-        rate: parseInt(jobRateInput.value),
-        location: jobLocationInput.value.trim(),
-        duration: jobDurationInput.value.trim(),
-        hours: parseInt(jobHoursInput.value),
-        applicants: currentEditingId ? jobListings.find(j => j.id === currentEditingId).applicants : 0,
-        category: jobCategoryInput.value,
-        worktype: jobWorktypeInput.value,
-        program: jobProgramInput.value.trim(),
-        website: jobWebsiteInput.value.trim(),
-        email: jobEmailInput.value.trim(),
-        status: currentEditingId ? jobListings.find(j => j.id === currentEditingId).status : 'Active'
-    };
-
-    if (currentEditingId) {
-        const index = jobListings.findIndex(j => j.id === currentEditingId);
-        jobListings[index] = newJob;
-        showJobToast('success', 'Job listing updated successfully!');
-    } else {
-        jobListings.unshift(newJob);
-        showJobToast('success', 'Job listing created successfully!');
-    }
-
-    renderJobListings();
-    jobModalOverlay.classList.remove('active');
-    jobForm.reset();
-    currentEditingId = null;
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    window.jobManager = new JobListingsManager();
 });
-
-// Validate form
-function validateForm() {
-    return jobTitleInput.value.trim() !== '' &&
-           jobCompanyInput.value.trim() !== '' &&
-           jobOverviewInput.value.trim() !== '' &&
-           jobRateInput.value !== '' &&
-           jobLocationInput.value.trim() !== '' &&
-           jobDurationInput.value.trim() !== '' &&
-           jobHoursInput.value !== '' &&
-           jobCategoryInput.value !== '' &&
-           jobWorktypeInput.value !== '' &&
-           jobProgramInput.value.trim() !== '' &&
-           jobWebsiteInput.value.trim() !== '' &&
-           jobEmailInput.value.trim() !== '';
-}
-
-// Open delete modal
-function openDeleteModal(id) {
-    currentDeletingId = id;
-    deleteModalOverlay.classList.add('active');
-}
-
-// Delete job
-document.getElementById('delete-modal-confirm').addEventListener('click', function() {
-    const job = jobListings.find(j => j.id === currentDeletingId);
-    jobListings = jobListings.filter(j => j.id !== currentDeletingId);
-    renderJobListings();
-    deleteModalOverlay.classList.remove('active');
-    showJobToast('success', `Job listing "${job.title}" deleted successfully!`);
-    currentDeletingId = null;
-});
-
-// Close modals
-document.getElementById('job-modal-close').addEventListener('click', function() {
-    jobModalOverlay.classList.remove('active');
-    jobForm.reset();
-    validationMessage.style.display = 'none';
-});
-
-document.getElementById('job-modal-cancel').addEventListener('click', function() {
-    jobModalOverlay.classList.remove('active');
-    jobForm.reset();
-    validationMessage.style.display = 'none';
-});
-
-document.getElementById('delete-modal-close').addEventListener('click', function() {
-    deleteModalOverlay.classList.remove('active');
-});
-
-document.getElementById('delete-modal-cancel').addEventListener('click', function() {
-    deleteModalOverlay.classList.remove('active');
-});
-
-// Close on overlay click
-jobModalOverlay.addEventListener('click', function(e) {
-    if (e.target === jobModalOverlay) {
-        jobModalOverlay.classList.remove('active');
-        jobForm.reset();
-        validationMessage.style.display = 'none';
-    }
-});
-
-deleteModalOverlay.addEventListener('click', function(e) {
-    if (e.target === deleteModalOverlay) {
-        deleteModalOverlay.classList.remove('active');
-    }
-});
-
-// Initialize
-renderJobListings();
-
-// ============================================
-// Toast Notification
-// ============================================
-function showJobToast(type, message) {
-    // Remove existing toast if present
-    const existingToast = document.querySelector('.job-toast');
-    if (existingToast) {
-        existingToast.remove();
-    }
-
-    // Create toast element
-    const toast = document.createElement('div');
-    toast.className = `job-toast ${type}`;
-    
-    // Add icon based on type
-    const icon = type === 'success' ? '✓' : '!';
-    toast.innerHTML = `
-        <span class="toast-icon">${icon}</span>
-        <span class="toast-message">${message}</span>
-    `;
-    
-    document.body.appendChild(toast);
-    
-    // Trigger animation
-    setTimeout(() => {
-        toast.classList.add('show');
-    }, 10);
-    
-    // Auto-remove after 4 seconds
-    setTimeout(function() {
-        toast.classList.remove('show');
-        setTimeout(function() {
-            toast.remove();
-        }, 300);
-    }, 4000);
-}

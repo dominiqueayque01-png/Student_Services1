@@ -19,6 +19,89 @@
 }
 
 /* ============================================
+   Month Selector
+   ============================================ */
+.month-selector {
+    background: white;
+    border: 2px solid #e8f0ff;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.month-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.month-nav-btn {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: #475569;
+    transition: all 0.2s;
+}
+
+.month-nav-btn:hover {
+    background: #e2e8f0;
+    border-color: #cbd5e1;
+}
+
+.month-select,
+.year-select {
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: white;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+    cursor: pointer;
+}
+
+.month-select:focus,
+.year-select:focus {
+    outline: none;
+    border-color: #2d5aa8;
+    box-shadow: 0 0 0 3px rgba(45, 90, 168, 0.1);
+}
+
+.month-stats {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+}
+
+.month-stat-item {
+    text-align: center;
+}
+
+.month-stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #2d5aa8;
+    margin-bottom: 4px;
+}
+
+.month-stat-label {
+    font-size: 12px;
+    color: #666;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ============================================
    Section Title
    ============================================ */
 .section-title {
@@ -146,17 +229,78 @@
 }
 
 /* ============================================
+   Trend Chart
+   ============================================ */
+.trend-container {
+    display: flex;
+    align-items: flex-end;
+    gap: 15px;
+    height: 200px;
+    padding: 20px 0;
+    border-bottom: 2px solid #e8f0ff;
+}
+
+.trend-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    height: 100%;
+}
+
+.trend-bar {
+    background: linear-gradient(to top, #667eea, #764ba2);
+    border-radius: 4px 4px 0 0;
+    width: 40px;
+    min-height: 20px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 5px;
+    position: relative;
+    transition: all 0.3s;
+}
+
+.trend-bar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.trend-value {
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.trend-label {
+    margin-top: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #666;
+    text-align: center;
+}
+
+/* ============================================
    Empty State
    ============================================ */
 .empty-state {
     text-align: center;
     padding: 60px 20px;
     color: #999;
+    background-color: #fafafa;
+    border-radius: 8px;
+    border: 2px dashed #e0e0e0;
 }
 
 .empty-state p {
     margin: 10px 0;
     font-size: 14px;
+}
+
+.empty-state p:first-child {
+    font-size: 16px;
+    font-weight: 600;
+    color: #666;
 }
 
 /* ============================================
@@ -169,6 +313,17 @@
 
     .analytics-card.full-width {
         grid-column: 1;
+    }
+
+    .month-selector {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .month-stats {
+        width: 100%;
+        justify-content: space-between;
     }
 }
 
@@ -208,5 +363,22 @@
 
     .chart-value {
         font-size: 11px;
+    }
+
+    .month-stat-value {
+        font-size: 20px;
+    }
+
+    .month-stat-label {
+        font-size: 10px;
+    }
+
+    .trend-container {
+        gap: 10px;
+        height: 150px;
+    }
+
+    .trend-bar {
+        width: 30px;
     }
 }

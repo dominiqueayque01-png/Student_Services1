@@ -1,5 +1,3 @@
-
-
 // Common helpers and global initializer (shared across student pages)
 
 // Navigation / profile helpers

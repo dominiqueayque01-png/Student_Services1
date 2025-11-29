@@ -6,32 +6,37 @@
 /* Assuming you link ojt.css separately, paste the Clubs Header/Grid styles here too or use a shared layout file */
 
 /* Unique OJT Styles */
-.related-jobs-container { margin-top: 30px; padding-top: 20px; border-top: 1px dashed #e2e8f0; }
-.related-job-card { display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid #e8e8e8; border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s ease; }
-.related-job-card:hover { background-color: #f8fafc; border-color: #cbd5e1; }
-.related-job-title { font-size: 13px; font-weight: 700; color: #2c3e7f; }
-.related-job-company { font-size: 12px; color: #64748b; }
 
-.club-subcategory-badge { font-size: 10px; padding: 4px 8px; border-radius: 12px; background-color: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
-.club-badges { display: flex; gap: 6px; align-items: center; }
+/* REMOVED: .related-jobs-container (no longer used) */
+/* REMOVED: .related-job-card (no longer used) */
+/* REMOVED: .related-job-title (no longer used) */
+/* REMOVED: .related-job-company (no longer used) */
 
-.recommended-badge { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 6px rgba(139, 92, 246, 0.3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; width: fit-content; }
-.recommended-badge::before { content: "✨"; }/* ============================================
-   OJT LISTINGS STYLES
-   ============================================ */
+/* REMOVED: .club-subcategory-badge (subcategory tags removed) */
 
-/* Reuse Clubs Grid/Header styles (already defined in clubs.css if you link both, otherwise copy them here) */
-/* Assuming you link ojt.css separately, paste the Clubs Header/Grid styles here too or use a shared layout file */
+.club-badges { 
+    display: flex; 
+    gap: 6px; 
+    align-items: center; 
+}
 
-/* Unique OJT Styles */
-.related-jobs-container { margin-top: 30px; padding-top: 20px; border-top: 1px dashed #e2e8f0; }
-.related-job-card { display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid #e8e8e8; border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s ease; }
-.related-job-card:hover { background-color: #f8fafc; border-color: #cbd5e1; }
-.related-job-title { font-size: 13px; font-weight: 700; color: #2c3e7f; }
-.related-job-company { font-size: 12px; color: #64748b; }
+.recommended-badge { 
+    background: linear-gradient(135deg, #6366f1, #8b5cf6); 
+    color: white; 
+    font-size: 10px; 
+    font-weight: 700; 
+    padding: 4px 10px; 
+    border-radius: 20px; 
+    display: inline-flex; 
+    align-items: center; 
+    gap: 4px; 
+    box-shadow: 0 2px 6px rgba(139, 92, 246, 0.3); 
+    text-transform: uppercase; 
+    letter-spacing: 0.5px; 
+    margin-bottom: 8px; 
+    width: fit-content; 
+}
 
-.club-subcategory-badge { font-size: 10px; padding: 4px 8px; border-radius: 12px; background-color: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
-.club-badges { display: flex; gap: 6px; align-items: center; }
-
-.recommended-badge { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 6px rgba(139, 92, 246, 0.3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; width: fit-content; }
-.recommended-badge::before { content: "✨"; }
+.recommended-badge::before { 
+    content: "✨"; 
+}

@@ -8,8 +8,6 @@
 </head>
 <body>
     <div class="container">
-
-
         <div class="main-content">
             <!-- Sidebar -->
             <aside class="sidebar">
@@ -60,8 +58,8 @@
                             <h3>Total Job Listings</h3>
                             <span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="4" height="4"/><rect x="10" y="3" width="4" height="4"/><rect x="17" y="3" width="4" height="4"/><rect x="3" y="10" width="4" height="4"/><rect x="10" y="10" width="4" height="4"/><rect x="17" y="10" width="4" height="4"/></svg></span>
                         </div>
-                        <div class="stat-value">6</div>
-                        <div class="stat-meta">5 active</div>
+                        <div class="stat-value" id="total-listings">0</div>
+                        <div class="stat-meta" id="active-listings">0 active</div>
                     </div>
 
                     <div class="stat-card">
@@ -69,8 +67,8 @@
                             <h3>Active Training Programs</h3>
                             <span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/></svg></span>
                         </div>
-                        <div class="stat-value">2</div>
-                        <div class="stat-meta">Unique Programs Offered</div>
+                        <div class="stat-value" id="active-programs">0</div>
+                        <div class="stat-meta" id="programs-meta">Unique Programs Offered</div>
                     </div>
 
                     <div class="stat-card">
@@ -78,8 +76,8 @@
                             <h3>Avg. Hourly Rate</h3>
                             <span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M9 9h6a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-6"/></svg></span>
                         </div>
-                        <div class="stat-value">₱ 30</div>
-                        <div class="stat-meta">Across all projects</div>
+                        <div class="stat-value" id="avg-hourly-rate">₱ 0</div>
+                        <div class="stat-meta" id="rate-meta">Across all projects</div>
                     </div>
 
                     <div class="stat-card">
@@ -87,30 +85,16 @@
                             <h3>Job Categories</h3>
                             <span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M8 7h8M8 11h8M8 15h4"/></svg></span>
                         </div>
-                        <div class="stat-value">5</div>
-                        <div class="stat-meta">Active Categories</div>
+                        <div class="stat-value" id="job-categories">0</div>
+                        <div class="stat-meta" id="categories-meta">Active Categories</div>
                     </div>
                 </div>
 
                 <!-- Recent Activity -->
                 <div class="recent-activity">
                     <h2>Recent Activity</h2>
-                    <div class="activity-list">
-                        <div class="activity-item new">
-                            <div class="activity-badge">+</div>
-                            <div class="activity-content">
-                                <p class="activity-title">New job listing posted for <strong>Social Media Marketing Trainee</strong></p>
-                                <p class="activity-time">1 day ago</p>
-                            </div>
-                        </div>
-
-                        <div class="activity-item updated">
-                            <div class="activity-badge">◐</div>
-                            <div class="activity-content">
-                                <p class="activity-title">Updated job details for <strong>Data Analyst Trainee</strong></p>
-                                <p class="activity-time">2 days ago</p>
-                            </div>
-                        </div>
+                    <div class="activity-list" id="activity-list">
+                        <!-- Dynamic activities will be populated here -->
                     </div>
                 </div>
             </main>
@@ -135,5 +119,6 @@
     </div>
 
     <script src="script.js"></script>
+    <script src="overview-data.js"></script>
 </body>
 </html>
