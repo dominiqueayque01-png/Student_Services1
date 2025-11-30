@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>OJT Listings - Student Services</title>
     <link rel="stylesheet" href="css/common.css">
-<link rel="stylesheet" href="css/clubs.css"> <link rel="stylesheet" href="css/ojt.css">
+    <link rel="stylesheet" href="css/clubs.css"> 
+    <link rel="stylesheet" href="css/ojt.css">
 </head>
 <body>
     <div class="app-container">
         <!-- Sidebar Navigation -->
-                <aside class="sidebar">
+        <aside class="sidebar">
             <div class="sidebar-logo">
                 <div class="logo-icon">
                     <svg width="50" height="50" viewBox="0 0 50 50" fill="none">
@@ -83,11 +84,11 @@
             </section>
 
             
-    <section id="recommendationSection" style="display: none; padding: 0 40px; margin-bottom: 20px;">
-    <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 20px;">
+            <section id="recommendationSection" style="display: none; padding: 0 40px; margin-bottom: 20px;">
+                <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 20px;">
+                </div>
+            </section>
 
-    </div>
-</section>
             <!-- Search and Filter Section -->
             <section class="clubs-controls">
                 <div class="search-container-clubs">
@@ -104,18 +105,18 @@
                             <path d="M13 6l-5 5-5-5"/>
                         </svg>
                     </button>
-                        <div id="ojtCategoryDropdown" style="display:none; position:absolute; background:#fff; border:1px solid #e8e8e8; border-radius:6px; margin-top:8px; z-index:10; min-width:180px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
-                            <button onclick="filterOJTByCategory('All')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #f1f1f1;">All</button>
-                            
-                            <button onclick="filterOJTByCategory('Technology')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #f1f1f1;">Technology</button>
-                            <button onclick="filterOJTByCategory('Accountancy')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #f1f1f1;">Accountancy</button>
-                            <button onclick="filterOJTByCategory('Business')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #f1f1f1;">Business</button>
-                            <button onclick="filterOJTByCategory('Engineering')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #f1f1f1;">Engineering</button>
-                            <button onclick="filterOJTByCategory('Analytics')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #f1f1f1;">Analytics</button>
-                            <button onclick="filterOJTByCategory('Design')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #f1f1f1;">Design</button>
-                            <button onclick="filterOJTByCategory('Education')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #f1f1f1;">Education</button>
-                            <button onclick="filterOJTByCategory('Finance')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;">Finance</button>
-                        </div>
+                    <div id="ojtCategoryDropdown" style="display:none; position:absolute; background:#fff; border:1px solid #e8e8e8; border-radius:6px; margin-top:8px; z-index:10; min-width:180px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                        <button onclick="filterOJTByCategory('All')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #f1f1f1;">All</button>
+                        
+                        <button onclick="filterOJTByCategory('Digital Marketing')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #f1f1f1;">Digital Marketing</button>
+                        <button onclick="filterOJTByCategory('Web Development')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #f1f1f1;">Web Development</button>
+                        <button onclick="filterOJTByCategory('Data Analytics')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #f1f1f1;">Data Analytics</button>
+                        <button onclick="filterOJTByCategory('Business')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #f1f1f1;">Business</button>
+                        <button onclick="filterOJTByCategory('Design')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #f1f1f1;">Design</button>
+                        <button onclick="filterOJTByCategory('Finance')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #f1f1f1;">Finance</button>
+                        <button onclick="filterOJTByCategory('Engineering')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;border-bottom:1px solid #f1f1f1;">Engineering</button>
+                        <button onclick="filterOJTByCategory('Education')" style="display:block;width:100%;padding:10px;border:0;background:none;text-align:left;cursor:pointer;">Education</button>
+                    </div>
                     <button class="clubs-sort-btn" id="ojtSortMenuBtn" onclick="toggleOJTSortMenu()" title="Sort options">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
                             <circle cx="10" cy="10" r="9"/>
@@ -148,7 +149,6 @@
 
             <!-- OJT Grid (reuse clubs grid styles) -->
             <section class="clubs-grid" id="ojtGrid">
-
             </section>
         </div>
     </div>

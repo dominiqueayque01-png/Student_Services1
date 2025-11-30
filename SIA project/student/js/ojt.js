@@ -9,16 +9,14 @@ let currentOJTSortBy = 'newest';
 
 // --- RECOMMENDATION ENGINE CONFIG ---
 const jobRelationships = {
-    'Web Development': ['Design', 'Marketing', 'IT Operations'],
-    'Software Engineering': ['Data Science', 'Project Management', 'Web Development'],
-    'IT Operations': ['Telecommunications', 'Cyber Security', 'Web Development'],
-    'Cyber Security': ['IT Operations', 'Telecommunications'],
-    'Marketing': ['Design', 'Business Development', 'Web Development'],
-    'Business Development': ['Marketing', 'Finance'],
-    'Telecommunications': ['IT Operations', 'Electronics'],
-    'Financial Analysis': ['Audit & Tax', 'Data Science'],
-    'Audit & Tax': ['Financial Analysis'],
-    'Education': ['Psychology', 'Training']
+    'Digital Marketing': ['Design', 'Business', 'Web Development'],
+    'Web Development': ['Design', 'Digital Marketing', 'Data Analytics'],
+    'Data Analytics': ['Business', 'Finance', 'Web Development'],
+    'Business': ['Finance', 'Digital Marketing', 'Data Analytics'],
+    'Design': ['Digital Marketing', 'Web Development'],
+    'Finance': ['Business', 'Data Analytics'],
+    'Engineering': ['Web Development', 'Data Analytics'],
+    'Education': ['Business', 'Design']
 };
 
 // --- INITIALIZATION ---
@@ -33,10 +31,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function fetchAndInitializeOJT() {
     try {
-        // 1. Fetch Listings
+        // 1. Fetch Listings - ONLY ACTIVE JOBS
         const response = await fetch('http://localhost:3001/api/ojt');
         if (!response.ok) throw new Error("Failed to fetch listings");
-        allOjtData = await response.json();
+        const allData = await response.json();
+        
+        // FILTER: Only show active jobs to students
+        allOjtData = allData.filter(job => job.status === 'active').map(job => ({
+            ...job,
+            id: job._id,
+            title: job.position,
+            company: job.company,
+            category: job.category || 'Uncategorized',
+            rate: job.payPerHour,
+            workType: job.workArrangement,
+            location: job.location,
+            duration: job.duration,
+            hoursPerWeek: job.hoursPerWeek,
+            status: job.status,
+            overview: job.overview,
+            createdAt: job.createdAt,
+            updatedAt: job.updatedAt
+        }));
+
+        console.log('Active jobs loaded:', allOjtData.length);
 
         // 2. Fetch My Applications (If logged in)
         const studentId = localStorage.getItem('currentStudentId');
@@ -82,7 +100,7 @@ function searchAndFilterOJT() {
         }
     });
 
-    // 2. Filter List
+    // 2. Filter List - ONLY ACTIVE JOBS (already filtered in fetch, but double-check)
     let visibleOJT = allOjtData.filter(ojt => {
         const matchesCategory = currentOJTCategory === 'All' || ojt.category === currentOJTCategory;
         const matchesSearch = !searchQuery || 
@@ -93,7 +111,7 @@ function searchAndFilterOJT() {
         // Mark if recommended
         ojt.isRecommended = myInterests.includes(ojt.subCategory) && !myOjtApplications.includes(ojt._id);
 
-        return matchesCategory && matchesSearch;
+        return matchesCategory && matchesSearch && ojt.status === 'active';
     });
 
     // 3. Sort List
@@ -198,8 +216,6 @@ function openOJTCompanyModal(ojtId) {
         `;
     }
 
-    // REMOVED: Related Jobs section since it used subCategory
-
     container.innerHTML = `
         <h2 id="ojtCompanyTitle" style="color:#2c3e7f;margin-bottom:8px;">${ojt.position}</h2>
         <!-- REMOVED: Subcategory badge -->
@@ -235,8 +251,6 @@ function openOJTCompanyModal(ojtId) {
         <div style="display:flex;justify-content:flex-end;margin-top:20px;">
             <button type="button" class="learn-more-btn" style="background:#fff;color:#333;border:1px solid #e8e8e8;padding:10px 18px;border-radius:6px;" onclick="closeOJTCompanyModal()">Close Details</button>
         </div>
-
-        <!-- REMOVED: Related Jobs section -->
     `;
 
     const modal = document.getElementById('ojtCompanyModal');
