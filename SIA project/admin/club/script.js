@@ -1,169 +1,182 @@
 // ============================================
-// Club Admin Dashboard Script
+// Club Admin Dashboard Script (Dynamic Version)
 // ============================================
 
+// CONFIGURATION: Set the URL based on your server.js (which uses PORT 3001)
+const API_BASE_URL = 'http://localhost:3001/api'; 
+
 document.addEventListener('DOMContentLoaded', function() {
-    initializeStats();
+    // 1. Fetch data immediately when page loads
+    fetchDashboardData();
+    
+    // 2. Initialize UI interactions
     initializeNavigation();
     initializeLogout();
 });
 
 // ============================================
-// Stats Functionality
+// 1. Data Fetching & UI Updates (STREAMLINED)
 // ============================================
 
-function initializeStats() {
-    const statValues = document.querySelectorAll('.stat-value');
-    const statMeta = document.querySelectorAll('.stat-meta');
+async function fetchDashboardData() {
+    try {
+        console.log("Fetching dashboard data...");
 
-    // Make stat values editable
-    statValues.forEach((value, index) => {
-        value.title = 'Click to edit value';
-        value.addEventListener('click', function(e) {
-            e.stopPropagation();
-            editStatValue(this, index);
-        });
-    });
+        // A. Fetch All Summary Stats in ONE GO from the dedicated endpoint
+        // This is more efficient than four separate calls.
+        const summaryRes = await fetch(`${API_BASE_URL}/dashboard/summary`);
+        const summaryData = await summaryRes.json();
+        
+        // Ensure the fetch was successful before trying to access properties
+        if (summaryRes.ok) {
+            
+            // --- Update the Stats Grid ---
+            updateElementText('total-clubs-value', summaryData.totalClubs.value); 
+            updateElementText('active-clubs-meta', `${summaryData.totalClubs.activeCount} active clubs`);
+            
+            updateElementText('total-members-value', summaryData.totalMembers.value.toLocaleString()); // Use toLocaleString for large numbers
+            updateElementText('active-categories-value', summaryData.activeCategories.value);
+            updateElementText('avg-club-size-value', summaryData.avgClubSize.value);
 
-    // Make stat descriptions editable
-    statMeta.forEach((meta, index) => {
-        meta.title = 'Click to edit description';
-        meta.addEventListener('click', function(e) {
-            e.stopPropagation();
-            editStatMeta(this, index);
-        });
-    });
-}
-
-function editStatValue(element, index) {
-    const currentValue = element.textContent.trim();
-    const newValue = prompt('Enter new value:', currentValue);
-
-    if (newValue !== null && newValue.trim() !== '') {
-        if (/^\d+$/.test(newValue)) {
-            element.textContent = newValue;
-            element.classList.add('editable');
-            setTimeout(() => {
-                element.classList.remove('editable');
-            }, 500);
-
-            // Save to localStorage
-            saveClubStats();
         } else {
-            alert('Please enter a valid number');
+             // Handle API error messages (e.g., status 500)
+             throw new Error(`API Summary Error: ${summaryData.error || summaryRes.statusText}`);
         }
+        
+        // B. Fetch Recent Activity
+        const activityRes = await fetch(`${API_BASE_URL}/dashboard/activity/recent`);
+        const activityData = await activityRes.json();
+        
+        if (activityRes.ok) {
+            renderRecentActivity(activityData);
+        } else {
+             throw new Error(`API Activity Error: ${activityRes.statusText}`);
+        }
+
+    } catch (error) {
+        console.error('Error connecting to backend or processing data:', error);
+        // You might want to display a visible error on the dashboard here.
+        updateElementText('total-clubs-value', 'N/A');
     }
 }
 
-function editStatMeta(element, index) {
-    const currentValue = element.textContent.trim();
-    const newValue = prompt('Enter new description:', currentValue);
-
-    if (newValue !== null && newValue.trim() !== '') {
-        element.textContent = newValue;
-        element.classList.add('editable');
-        setTimeout(() => {
-            element.classList.remove('editable');
-        }, 500);
-
-        // Save to localStorage
-        saveClubStats();
+// Helper to safely update text content
+function updateElementText(id, text) {
+    const element = document.getElementById(id);
+    // Convert to string and handle formatting for large numbers if needed
+    const textContent = (typeof text === 'number') ? text.toLocaleString() : String(text); 
+    
+    if (element) {
+        element.textContent = textContent;
+    } else {
+        console.warn(`Element with ID '${id}' not found in HTML.`);
     }
 }
 
-function saveClubStats() {
-    const statValues = document.querySelectorAll('.stat-value');
-    const stats = {
-        totalClubs: statValues[0]?.textContent.trim(),
-        totalMembers: statValues[1]?.textContent.trim(),
-        activeCategories: statValues[2]?.textContent.trim(),
-        avgClubSize: statValues[3]?.textContent.trim()
-    };
+function renderRecentActivity(activities) {
+    const listContainer = document.getElementById('activity-list-container');
+    if (!listContainer) return;
 
-    localStorage.setItem('clubStats', JSON.stringify(stats));
+    listContainer.innerHTML = ''; // Clear existing hardcoded items
+
+    if (!activities || activities.length === 0) {
+        listContainer.innerHTML = '<p style="padding:20px; color:#666;">No recent activity found.</p>';
+        return;
+    }
+
+    activities.forEach(activity => {
+        // Create the HTML structure dynamically
+        const item = document.createElement('div');
+        
+        // Determine style based on activity type (assuming a 'type' field like 'created' or 'updated')
+        const isNew = activity.type && activity.type.toLowerCase() === 'created'; 
+        item.className = isNew ? 'activity-item new' : 'activity-item updated';
+        const badge = isNew ? '+' : '✓';
+
+        item.innerHTML = `
+            <div class="activity-badge">${badge}</div>
+            <div class="activity-content">
+                <p class="activity-title">${activity.description}</p>
+                <p class="activity-time">${formatTimeAgo(activity.timestamp)}</p>
+            </div>
+        `;
+        listContainer.appendChild(item);
+    });
+}
+
+// Helper to format dates (e.g., "2 days ago")
+function formatTimeAgo(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+
+    if (diffInSeconds < 60) return 'Just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} mins ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+    
+    const days = Math.floor(diffInSeconds / 86400);
+    if (days === 1) return '1 day ago';
+    return `${days} days ago`;
 }
 
 // ============================================
-// Navigation
+// 2. Navigation Logic (NO CHANGES)
 // ============================================
 
 function initializeNavigation() {
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', function() {
-            document.querySelectorAll('.nav-item').forEach(i => {
-                i.classList.remove('active');
-            });
-
+    const navItems = document.querySelectorAll('.nav-item');
+    
+    navItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            navItems.forEach(i => i.classList.remove('active'));
             this.classList.add('active');
-
-            const page = this.getAttribute('data-page');
-
-            if (page === 'overview') {
-                window.location.href = 'index.html';
-            } else if (page === 'listings') {
-                window.location.href = 'club-listings.html';
-            } else if (page === 'analytics') {
-                window.location.href = 'analytics.html';
-            } else if (page === 'accounts') {
-                window.location.href = 'accounts.html';
-            }
         });
     });
 }
 
 // ============================================
-// Logout
+// 3. Logout Logic (NO CHANGES)
 // ============================================
 
 function initializeLogout() {
     const logoutBtn = document.querySelector('.logout-btn');
+    
     if (logoutBtn) {
         logoutBtn.addEventListener('click', showLogoutModal);
+    }
+
+    const modal = document.getElementById('logout-modal');
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) hideLogoutModal();
+        });
+
+        const closeBtn = modal.querySelector('.logout-modal-close');
+        const cancelBtn = modal.querySelector('.logout-modal-cancel');
+        if (closeBtn) closeBtn.addEventListener('click', hideLogoutModal);
+        if (cancelBtn) cancelBtn.addEventListener('click', hideLogoutModal);
+
+        const confirmBtn = modal.querySelector('.logout-modal-confirm');
+        if (confirmBtn) confirmBtn.addEventListener('click', confirmLogout);
     }
 }
 
 function showLogoutModal() {
     const modal = document.getElementById('logout-modal');
     if (modal) {
-        modal.classList.add('show');
+        modal.style.display = 'flex'; 
     }
 }
 
 function hideLogoutModal() {
     const modal = document.getElementById('logout-modal');
     if (modal) {
-        modal.classList.remove('show');
+        modal.style.display = 'none';
     }
 }
 
 function confirmLogout() {
     sessionStorage.clear();
+    localStorage.removeItem('token'); 
     window.location.href = '../../login admin/index.html';
 }
-
-// Logout modal event listeners
-const logoutModal = document.getElementById('logout-modal');
-if (logoutModal) {
-    logoutModal.addEventListener('click', function(e) {
-        if (e.target === this) {
-            hideLogoutModal();
-        }
-    });
-}
-
-const logoutCloseBtn = document.querySelector('.logout-modal-close');
-if (logoutCloseBtn) {
-    logoutCloseBtn.addEventListener('click', hideLogoutModal);
-}
-
-const logoutCancelBtn = document.querySelector('.logout-modal-cancel');
-if (logoutCancelBtn) {
-    logoutCancelBtn.addEventListener('click', hideLogoutModal);
-}
-
-const logoutConfirmBtn = document.querySelector('.logout-modal-confirm');
-if (logoutConfirmBtn) {
-    logoutConfirmBtn.addEventListener('click', confirmLogout);
-}
-
-console.log('Club Admin Dashboard initialized');

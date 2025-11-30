@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Club Organization Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
+    <!-- We will keep the link to the external CSS for other styles -->
+    <link rel="stylesheet" href="styles.css"> 
 </head>
 <body>
     <div class="container">
@@ -63,8 +64,8 @@
                         <h3>Total Clubs</h3>
                         <span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></span>
                     </div>
-                    <div class="stat-value">6</div>
-                    <div class="stat-meta">5 active clubs</div>
+                   <div class="stat-value" id="total-clubs-value">6</div>
+    <div class="stat-meta" id="active-clubs-meta">5 active clubs</div>
                 </div>
 
                 <!-- Total Members Card -->
@@ -73,8 +74,8 @@
                         <h3>Total Members</h3>
                         <span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/></svg></span>
                     </div>
-                    <div class="stat-value">1007</div>
-                    <div class="stat-meta">Unique students across programs</div>
+                    <div class="stat-value" id="total-members-value">1007</div>
+    <div class="stat-meta">Unique students across programs</div>
                 </div>
 
                 <!-- Active Categories Card -->
@@ -83,8 +84,8 @@
                         <h3>Active Categories</h3>
                         <span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="4" height="4"/><rect x="10" y="3" width="4" height="4"/><rect x="17" y="3" width="4" height="4"/><rect x="3" y="10" width="4" height="4"/><rect x="10" y="10" width="4" height="4"/><rect x="17" y="10" width="4" height="4"/></svg></span>
                     </div>
-                    <div class="stat-value">4</div>
-                    <div class="stat-meta">Club types represented</div>
+                    <div class="stat-value" id="active-categories-value">4</div>
+    <div class="stat-meta">Club types represented</div>
                 </div>
 
                 <!-- Avg Club Size Card -->
@@ -93,30 +94,17 @@
                         <h3>Avg. Club Size</h3>
                         <span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></span>
                     </div>
-                    <div class="stat-value">53</div>
-                    <div class="stat-meta">Members per active club</div>
+                    <div class="stat-value" id="avg-club-size-value">53</div>
+    <div class="stat-meta">Members per active club</div>
                 </div>
             </div>
 
             <!-- Recent Activity Section -->
             <div class="recent-activity">
                 <h2>Recent Activity</h2>
-                <div class="activity-list">
-                    <div class="activity-item new">
-                        <div class="activity-badge">+</div>
-                        <div class="activity-content">
-                            <p class="activity-title">New club created: <strong>Data Science Collective</strong></p>
-                            <p class="activity-time">1 day ago</p>
-                        </div>
-                    </div>
-
-                    <div class="activity-item updated">
-                        <div class="activity-badge">✓</div>
-                        <div class="activity-content">
-                            <p class="activity-title"><strong>Tech Innovation Club</strong> reached <strong>142 members</strong></p>
-                            <p class="activity-time">2 days ago</p>
-                        </div>
-                    </div>
+                <!-- Added ID and initial loading message -->
+                <div class="activity-list" id="activity-list">
+                    <div class="activity-loading">Fetching live activity...</div>
                 </div>
             </div>
         </main>
@@ -126,7 +114,7 @@
     <div id="logout-modal" class="logout-modal">
         <div class="logout-modal-content">
             <div class="logout-modal-header">
-                <h2>Logout Confirmation</h2>
+                <h2>Logout Confirmation </h2>
                 <button class="logout-modal-close">&times;</button>
             </div>
             <div class="logout-modal-body">
