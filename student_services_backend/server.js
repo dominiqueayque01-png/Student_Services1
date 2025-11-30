@@ -4,6 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const { connectMainDB } = require('./config/db');
+const activityRoutes = require('./routes/activity.routes');
 
 // --- 2. INITIALIZE YOUR APP ---
 const app = express();
@@ -29,6 +30,7 @@ const faqRoutes = require('./routes/faq.routes.js');
 const savedEventRoutes = require('./routes/savedEvent.routes.js');
 const notificationRoutes = require('./routes/notification.routes.js');
 const dashboardRoutes = require('./routes/dashboard.routes.js'); // <-- NEW Dashboard Route
+const accountRoutes = require("./routes/accounts.routes.js");
 
 // --- 5B. USE YOUR ROUTES (Mapping the path to the imported file) ---
 app.use('/api/clubs', clubRoutes);
@@ -43,6 +45,8 @@ app.use('/api/faqs', faqRoutes);
 app.use('/api/saved-events', savedEventRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/dashboard', dashboardRoutes); // <-- Dashboard is now available at /api/dashboard/...
+app.use('/api', activityRoutes);
+app.use('/api/accounts', accountRoutes);
 
 
 // --- 6. START THE SERVER ---

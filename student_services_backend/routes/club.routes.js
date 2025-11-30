@@ -147,6 +147,53 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({ message: 'Server Error during delete' });
   }
 });
+// ============================================
+// 6. CLUB ANALYTICS (DYNAMIC)
+// Endpoint: GET /api/clubs/analytics
+// ============================================
+router.get('/analytics', async (req, res) => {
+    try {
+        const clubs = await Club.find();
+
+        // CATEGORY COUNTS
+       // CATEGORY COUNTS (add 3 new categories)
+const categories = {
+    Technology: clubs.filter(c => c.category === 'Technology').length,
+    Business: clubs.filter(c => c.category === 'Business').length,
+    Arts: clubs.filter(c => c.category === 'Arts').length,
+    Sports: clubs.filter(c => c.category === 'Sports').length,
+    Science: clubs.filter(c => c.category === 'Science').length,    // NEW
+    Culture: clubs.filter(c => c.category === 'Culture').length,    // NEW
+    Service: clubs.filter(c => c.category === 'Service').length     // NEW
+};
+
+
+        // MEMBER DISTRIBUTION
+        const memberDist = {
+            "0-50": clubs.filter(c => c.members <= 50).length,
+            "51-100": clubs.filter(c => c.members >= 51 && c.members <= 100).length,
+            "101-150": clubs.filter(c => c.members >= 101 && c.members <= 150).length,
+            "150+": clubs.filter(c => c.members >= 150).length
+        };
+
+        // CLUB STATUS
+        const status = {
+            active: clubs.filter(c => c.status === 'Active').length,
+            inactive: clubs.filter(c => c.status === 'Inactive').length
+        };
+
+        res.json({
+            categories,
+            memberDist,
+            status
+        });
+
+    } catch (error) {
+        console.error('SERVER ERROR: GET /api/clubs/analytics', error.message);
+        res.status(500).json({ message: 'Failed to load analytics', error: error.message });
+    }
+});
 
 // This exports the router instance
 module.exports = router;
+

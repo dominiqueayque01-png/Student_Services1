@@ -1,95 +1,121 @@
 // ============================================
-// Accounts Management Script
+// Accounts Management Script (MongoDB integrated)
 // ============================================
 
-// Sample accounts data
-let accountsData = [
-    {
-        id: 1,
-        name: 'Juan Sy',
-        email: 'juan.edu.ph',
-        username: 'Leader_Debate_Club',
-        clubname: 'Debate Club',
-        created: '2025-10-25',
-        status: 'active'
-    },
-    {
-        id: 2,
-        name: 'Juan Sy',
-        email: 'juan.edu.ph',
-        username: 'Leader_Debate_Club',
-        clubname: 'Debate Club',
-        created: '2025-10-25',
-        status: 'active'
-    },
-    {
-        id: 3,
-        name: 'Juan Sy',
-        email: 'juan.edu.ph',
-        username: 'Leader_Debate_Club',
-        clubname: 'Debate Club',
-        created: '2025-10-25',
-        status: 'active'
-    },
-    {
-        id: 4,
-        name: 'Juan Sy',
-        email: 'juan.edu.ph',
-        username: 'Leader_Debate_Club',
-        clubname: 'Debate Club',
-        created: '2025-10-25',
-        status: 'active'
-    }
-];
+const API_BASE = "http://localhost:3001/api/accounts"; // adjust port if needed
+
+// Holds the accounts currently loaded from server
+let accountsData = [];
+
+// Keep references to DOM elements that are reused
+const tableSelector = '.accounts-table tbody';
+const searchInputId = 'search-accounts';
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeAccounts();
     initializeNavigation();
     initializeLogout();
     initializeModalHandlers();
-    loadAccountsData();
-    renderAccounts();
+    fetchAccounts(); // load from backend
 });
 
 // ============================================
-// Accounts Management Functionality
+// Data fetch / CRUD (talk to your backend)
 // ============================================
 
-function initializeAccounts() {
-    // Setup search functionality
-    const searchBox = document.getElementById('search-accounts');
-    if (searchBox) {
-        searchBox.addEventListener('input', filterAccounts);
-    }
+async function fetchAccounts() {
+    const tableBody = document.querySelector(tableSelector);
+    if (!tableBody) return;
 
-    // Setup create account button
-    const createBtn = document.querySelector('.btn-create-account');
-    if (createBtn) {
-        createBtn.addEventListener('click', openCreateAccountModal);
-    }
-}
+    tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px">Loading...</td></tr>`;
 
-function loadAccountsData() {
-    // Try to load from localStorage, fallback to sample data
-    const savedAccounts = localStorage.getItem('accountsData');
-    if (savedAccounts) {
-        accountsData = JSON.parse(savedAccounts);
-    } else {
-        saveAccountsData();
+    try {
+        const res = await fetch(API_BASE);
+        if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
+        accountsData = await res.json();
+        renderAccounts();
+    } catch (err) {
+        console.error("Failed to fetch accounts:", err);
+        tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px">Error loading accounts.</td></tr>`;
     }
 }
 
-function saveAccountsData() {
-    localStorage.setItem('accountsData', JSON.stringify(accountsData));
+async function createAccountOnServer(account) {
+    try {
+        const res = await fetch(API_BASE, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(account)
+        });
+        if (!res.ok) {
+            const err = await res.json().catch(()=>null);
+            throw new Error(err?.error || `Create failed: ${res.status}`);
+        }
+        return await res.json();
+    } catch (err) {
+        throw err;
+    }
 }
 
-function renderAccounts() {
-    const tableBody = document.querySelector('.accounts-table tbody');
+async function updateAccountOnServer(id, update) {
+    try {
+        const res = await fetch(`${API_BASE}/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(update)
+        });
+        if (!res.ok) {
+            const err = await res.json().catch(()=>null);
+            throw new Error(err?.error || `Update failed: ${res.status}`);
+        }
+        return await res.json();
+    } catch (err) {
+        throw err;
+    }
+}
+
+async function deleteAccountOnServer(id) {
+    try {
+        const res = await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
+        if (!res.ok) {
+            const err = await res.json().catch(()=>null);
+            throw new Error(err?.error || `Delete failed: ${res.status}`);
+        }
+        return await res.json();
+    } catch (err) {
+        throw err;
+    }
+}
+
+async function resetPasswordOnServer(id, newPassword) {
+    try {
+        // backend may ignore body and set a default; we still send password if provided
+        const res = await fetch(`${API_BASE}/${id}/reset`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: newPassword })
+        });
+        if (!res.ok) {
+            const err = await res.json().catch(()=>null);
+            throw new Error(err?.error || `Reset failed: ${res.status}`);
+        }
+        return await res.json();
+    } catch (err) {
+        throw err;
+    }
+}
+
+// ============================================
+// Render & UI
+// ============================================
+
+function renderAccounts(list = accountsData) {
+    const tableBody = document.querySelector(tableSelector);
     if (!tableBody) return;
 
     tableBody.innerHTML = '';
 
-    if (accountsData.length === 0) {
+    if (!list || list.length === 0) {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td colspan="6" style="text-align: center; padding: 40px;">
@@ -100,33 +126,27 @@ function renderAccounts() {
         return;
     }
 
-    accountsData.forEach(account => {
+    list.forEach(account => {
+        const createdDisplay = account.dateCreated ? new Date(account.dateCreated).toISOString().split('T')[0] : '';
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td class="table-name">${account.name}</td>
-            <td class="table-email">${account.email}</td>
-            <td class="table-username">${account.username}</td>
-            <td class="table-clubname">${account.clubname || 'Leader_Debate_Club'}</td>
-            <td class="table-created">${account.created}</td>
+            <td class="table-name">${escapeHtml(account.name || '')}</td>
+            <td class="table-email">${escapeHtml(account.email || '')}</td>
+            <td class="table-username">${escapeHtml(account.username || '')}</td>
+            <td class="table-clubname">${escapeHtml(account.clubname || '')}</td>
+            <td class="table-created">${escapeHtml(createdDisplay)}</td>
             <td>
                 <div class="table-actions">
-                    <button class="btn-action btn-edit" data-id="${account.id}" title="Edit">
-                        ✎
-                    </button>
-                    <button class="btn-action btn-reset-password" data-id="${account.id}" title="Reset Password">
-                        ↻
-                    </button>
-                    <button class="btn-action btn-deactivate" data-id="${account.id}" title="Deactivate">
-                        ✕
-                    </button>
+                    <button class="btn-action btn-edit" data-id="${account._id}" title="Edit">✎</button>
+                    <button class="btn-action btn-reset-password" data-id="${account._id}" title="Reset Password">↻</button>
+                    <button class="btn-action btn-deactivate" data-id="${account._id}" title="Deactivate">✕</button>
                 </div>
             </td>
         `;
-
         tableBody.appendChild(row);
     });
 
-    // Add event listeners to buttons
+    // Attach listeners after DOM insertion
     document.querySelectorAll('.btn-edit').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -152,85 +172,106 @@ function renderAccounts() {
     });
 }
 
-function filterAccounts() {
-    const searchTerm = document.getElementById('search-accounts')?.value.toLowerCase() || '';
-
-    const filteredAccounts = accountsData.filter(account => {
-        return account.name.toLowerCase().includes(searchTerm) ||
-               account.email.toLowerCase().includes(searchTerm) ||
-               account.username.toLowerCase().includes(searchTerm);
+// small helper to avoid XSS when inserting text
+function escapeHtml(str) {
+    if (typeof str !== 'string') return '';
+    return str.replace(/[&<>"'`=\/]/g, function(s) {
+        return ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;",
+            "/": "&#x2F;",
+            "`": "&#x60;",
+            "=": "&#x3D;"
+        })[s];
     });
-
-    // Temporarily replace data to render filtered results
-    const originalData = accountsData;
-    accountsData = filteredAccounts;
-    renderAccounts();
-    accountsData = originalData;
 }
 
+// ============================================
+// Search / Filter
+// ============================================
+
+function initializeAccounts() {
+    const searchBox = document.getElementById(searchInputId);
+    if (searchBox) {
+        searchBox.addEventListener('input', filterAccounts);
+    }
+
+    const createBtn = document.querySelector('.btn-create-account');
+    if (createBtn) {
+        createBtn.addEventListener('click', openCreateAccountModal);
+    }
+}
+
+function filterAccounts() {
+    const searchTerm = document.getElementById(searchInputId)?.value.toLowerCase() || '';
+
+    const filteredAccounts = accountsData.filter(account => {
+        return (account.name || '').toLowerCase().includes(searchTerm) ||
+               (account.email || '').toLowerCase().includes(searchTerm) ||
+               (account.username || '').toLowerCase().includes(searchTerm) ||
+               (account.clubname || '').toLowerCase().includes(searchTerm);
+    });
+
+    renderAccounts(filteredAccounts);
+}
+
+// ============================================
+// Modals & CRUD handlers (uses your existing modal IDs)
+// ============================================
+
 function editAccount(id) {
-    const account = accountsData.find(a => a.id == id);
+    const account = accountsData.find(a => a._id == id);
     if (account) {
-        // Populate the edit form with account data
-        document.getElementById('edit-account-id').value = account.id;
-        document.getElementById('edit-fullname').value = account.name;
-        document.getElementById('edit-email').value = account.email;
-        document.getElementById('edit-username').value = account.username;
+        document.getElementById('edit-account-id').value = account._id;
+        document.getElementById('edit-fullname').value = account.name || '';
+        document.getElementById('edit-email').value = account.email || '';
+        document.getElementById('edit-username').value = account.username || '';
         document.getElementById('edit-clubname').value = account.clubname || '';
         
-        // Show the edit modal
         const modal = document.getElementById('edit-account-modal');
-        if (modal) {
-            modal.classList.add('show');
-        }
+        if (modal) modal.classList.add('show');
+    } else {
+        showNotification('Account not found', 'error');
     }
 }
 
 function resetPassword(id) {
-    const account = accountsData.find(a => a.id == id);
+    const account = accountsData.find(a => a._id == id);
     if (account) {
-        // Store the account ID in the modal
-        document.getElementById('reset-password-id').value = account.id;
-        
-        // Show the reset password modal
+        document.getElementById('reset-password-id').value = account._id;
         const modal = document.getElementById('reset-password-modal');
-        if (modal) {
-            modal.classList.add('show');
-        }
+        if (modal) modal.classList.add('show');
+    } else {
+        showNotification('Account not found', 'error');
     }
 }
 
 function deactivateAccount(id) {
-    const account = accountsData.find(a => a.id == id);
+    const account = accountsData.find(a => a._id == id);
     if (account) {
-        // Store the account ID in the modal
-        document.getElementById('remove-account-id').value = account.id;
-        
-        // Update the confirmation message
-        const message = `Are you sure you want to remove the account for <strong>${account.name}</strong>?`;
-        document.getElementById('remove-account-message').innerHTML = message;
-        
-        // Show the remove account modal
+        document.getElementById('remove-account-id').value = account._id;
+        const message = `Are you sure you want to remove the account for <strong>${escapeHtml(account.name || '')}</strong>?`;
+        const msgEl = document.getElementById('remove-account-message');
+        if (msgEl) msgEl.innerHTML = message;
         const modal = document.getElementById('remove-account-modal');
-        if (modal) {
-            modal.classList.add('show');
-        }
+        if (modal) modal.classList.add('show');
+    } else {
+        showNotification('Account not found', 'error');
     }
 }
 
 function openCreateAccountModal() {
-    // Clear the form
-    document.getElementById('create-account-form').reset();
-    
-    // Show the create modal
+    const form = document.getElementById('create-account-form');
+    if (form) form.reset();
     const modal = document.getElementById('create-account-modal');
-    if (modal) {
-        modal.classList.add('show');
-    }
+    if (modal) modal.classList.add('show');
 }
 
 // ============================================
-// Modal Handlers
+// Modal Handlers wiring (create / edit / reset / remove)
 // ============================================
 
 function initializeModalHandlers() {
@@ -238,9 +279,7 @@ function initializeModalHandlers() {
     document.querySelectorAll('.modal-close').forEach(btn => {
         btn.addEventListener('click', function() {
             const modal = this.closest('.modal');
-            if (modal) {
-                modal.classList.remove('show');
-            }
+            if (modal) modal.classList.remove('show');
         });
     });
 
@@ -248,16 +287,15 @@ function initializeModalHandlers() {
     document.querySelectorAll('.btn-cancel').forEach(btn => {
         btn.addEventListener('click', function() {
             const modal = this.closest('.modal');
-            if (modal) {
-                modal.classList.remove('show');
-            }
+            if (modal) modal.classList.remove('show');
         });
     });
 
     // Create Account Submit
     const createSubmitBtn = document.getElementById('create-account-submit');
     if (createSubmitBtn) {
-        createSubmitBtn.addEventListener('click', function() {
+        createSubmitBtn.addEventListener('click', async function(e) {
+            e.preventDefault();
             const form = document.getElementById('create-account-form');
             if (!form.checkValidity()) {
                 showNotification('Please fill in all required fields', 'error');
@@ -265,32 +303,31 @@ function initializeModalHandlers() {
             }
 
             const newAccount = {
-                id: Math.max(...accountsData.map(a => a.id), 0) + 1,
                 name: document.getElementById('create-fullname').value,
                 email: document.getElementById('create-email').value,
                 username: document.getElementById('create-username').value,
                 clubname: document.getElementById('create-clubname').value,
-                created: new Date().toISOString().split('T')[0],
-                status: 'active'
+                password: document.getElementById('create-password') ? document.getElementById('create-password').value : undefined
             };
 
-            accountsData.push(newAccount);
-            saveAccountsData();
-            renderAccounts();
-            
-            const modal = document.getElementById('create-account-modal');
-            if (modal) {
-                modal.classList.remove('show');
+            try {
+                await createAccountOnServer(newAccount);
+                const modal = document.getElementById('create-account-modal');
+                if (modal) modal.classList.remove('show');
+                showNotification('Account created successfully!', 'success');
+                fetchAccounts();
+            } catch (err) {
+                console.error(err);
+                showNotification('Failed to create account: ' + (err.message || ''), 'error');
             }
-            
-            showNotification('Account created successfully!', 'success');
         });
     }
 
     // Edit Account Submit
     const editSubmitBtn = document.getElementById('edit-account-submit');
     if (editSubmitBtn) {
-        editSubmitBtn.addEventListener('click', function() {
+        editSubmitBtn.addEventListener('click', async function(e) {
+            e.preventDefault();
             const form = document.getElementById('edit-account-form');
             if (!form.checkValidity()) {
                 showNotification('Please fill in all required fields', 'error');
@@ -298,23 +335,22 @@ function initializeModalHandlers() {
             }
 
             const id = document.getElementById('edit-account-id').value;
-            const account = accountsData.find(a => a.id == id);
-            
-            if (account) {
-                account.name = document.getElementById('edit-fullname').value;
-                account.email = document.getElementById('edit-email').value;
-                account.username = document.getElementById('edit-username').value;
-                account.clubname = document.getElementById('edit-clubname').value;
-                
-                saveAccountsData();
-                renderAccounts();
-                
+            const update = {
+                name: document.getElementById('edit-fullname').value,
+                email: document.getElementById('edit-email').value,
+                username: document.getElementById('edit-username').value,
+                clubname: document.getElementById('edit-clubname').value
+            };
+
+            try {
+                await updateAccountOnServer(id, update);
                 const modal = document.getElementById('edit-account-modal');
-                if (modal) {
-                    modal.classList.remove('show');
-                }
-                
+                if (modal) modal.classList.remove('show');
                 showNotification('Account updated successfully!', 'success');
+                fetchAccounts();
+            } catch (err) {
+                console.error(err);
+                showNotification('Failed to update account: ' + (err.message || ''), 'error');
             }
         });
     }
@@ -322,27 +358,25 @@ function initializeModalHandlers() {
     // Reset Password Submit
     const resetSubmitBtn = document.getElementById('reset-password-submit');
     if (resetSubmitBtn) {
-        resetSubmitBtn.addEventListener('click', function() {
+        resetSubmitBtn.addEventListener('click', async function(e) {
+            e.preventDefault();
             const newPassword = document.getElementById('reset-new-password').value;
-            
             if (!newPassword) {
                 showNotification('Please enter a new password', 'error');
                 return;
             }
 
             const id = document.getElementById('reset-password-id').value;
-            const account = accountsData.find(a => a.id == id);
-            
-            if (account) {
-                // In a real app, this would hash and store the password securely
-                saveAccountsData();
-                
+            try {
+                await resetPasswordOnServer(id, newPassword);
                 const modal = document.getElementById('reset-password-modal');
-                if (modal) {
-                    modal.classList.remove('show');
-                }
-                
-                showNotification('Password reset successfully for ' + account.name, 'success');
+                if (modal) modal.classList.remove('show');
+                showNotification('Password reset successfully!', 'success');
+                // No need to refetch accounts for password change, but you can if you want:
+                // fetchAccounts();
+            } catch (err) {
+                console.error(err);
+                showNotification('Failed to reset password: ' + (err.message || ''), 'error');
             }
         });
     }
@@ -350,23 +384,18 @@ function initializeModalHandlers() {
     // Remove Account Submit
     const removeSubmitBtn = document.getElementById('remove-account-submit');
     if (removeSubmitBtn) {
-        removeSubmitBtn.addEventListener('click', function() {
+        removeSubmitBtn.addEventListener('click', async function(e) {
+            e.preventDefault();
             const id = document.getElementById('remove-account-id').value;
-            const accountIndex = accountsData.findIndex(a => a.id == id);
-            
-            if (accountIndex !== -1) {
-                const account = accountsData[accountIndex];
-                // Remove the account from the array
-                accountsData.splice(accountIndex, 1);
-                saveAccountsData();
-                renderAccounts();
-                
+            try {
+                await deleteAccountOnServer(id);
                 const modal = document.getElementById('remove-account-modal');
-                if (modal) {
-                    modal.classList.remove('show');
-                }
-                
-                showNotification(`Account for ${account.name} has been removed!`, 'success');
+                if (modal) modal.classList.remove('show');
+                showNotification('Account removed successfully!', 'success');
+                fetchAccounts();
+            } catch (err) {
+                console.error(err);
+                showNotification('Failed to remove account: ' + (err.message || ''), 'error');
             }
         });
     }
@@ -474,7 +503,7 @@ function showNotification(message, type = 'info') {
     notification.innerHTML = `
         <div class="toast-content">
             <div class="toast-icon">${type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ'}</div>
-            <div class="toast-message">${message}</div>
+            <div class="toast-message">${escapeHtml(message)}</div>
         </div>
         <button class="toast-close">×</button>
     `;
@@ -497,4 +526,4 @@ function showNotification(message, type = 'info') {
     });
 }
 
-console.log('Accounts Management initialized');
+console.log('Accounts Management initialized (MongoDB integrated)');
