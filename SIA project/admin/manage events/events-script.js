@@ -28,15 +28,22 @@ async function fetchEventsFromDB() {
         // SEPARATE DATA BASED ON STATUS
         // 1. Pending goes to "Requests"
         eventRequestsData = allEvents.filter(e => e.status === 'Pending');
-        populateFilterDropdowns();
+        
         // 2. Active/Archived goes to "Manage Events" list
         eventsData = allEvents.filter(e => e.status === 'Active' || e.status === 'Archived');
+        populateFilterDropdowns();
+        renderEvents();
 
 // --- POPULATE FILTERS DYNAMICALLY ---
 function populateFilterDropdowns() {
     const statusSelect = document.getElementById('filter-status');
     const eventSelect = document.getElementById('filter-events');
     const orgSelect = document.getElementById('filter-organization');
+
+    if (!eventSelect || !orgSelect) return;
+
+    eventSelect.innerHTML = '<option value="">All Events</option>';
+    orgSelect.innerHTML = '<option value="">All Organizations</option>';
 
     // 1. STATUSES (Hardcoded or Dynamic)
     // We usually want these specific options, so we ensure they exist
@@ -63,6 +70,14 @@ function populateFilterDropdowns() {
             eventSelect.appendChild(option);
         });
     }
+
+    const uniqueOrgs = [...new Set(eventsData.map(e => e.organization))].sort();
+    uniqueOrgs.forEach(org => {
+        const option = document.createElement('option');
+        option.value = org;
+        option.textContent = org;
+        orgSelect.appendChild(option);
+    });
 
     // 3. ORGANIZATIONS (Extract Unique Organizers)
     if (orgSelect) {
@@ -301,6 +316,7 @@ async function confirmRejectEventRequest() {
 }
 
 // --- 5. RENDER MAIN EVENTS LIST (FIXED WITH FILTERS) ---
+// --- RENDER EVENTS WITH FILTERS ---
 function renderEvents() {
     const activeEventsGrid = document.getElementById('active-events');
     const archivedEventsGrid = document.getElementById('archived-events');
@@ -308,28 +324,29 @@ function renderEvents() {
     if (!activeEventsGrid || !archivedEventsGrid) return;
 
     // 1. GET FILTER VALUES
-    const searchTerm = document.getElementById('event-search')?.value.toLowerCase() || '';
-    const statusFilter = document.getElementById('filter-status')?.value || '';
-    const eventFilter = document.getElementById('filter-events')?.value || ''; // Filter by Title
+    const searchTerm = document.getElementById('event-search')?.value.toLowerCase().trim() || '';
+    const statusFilter = document.getElementById('filter-status')?.value || ''; // "Active" or "Archived"
+    const eventFilter = document.getElementById('filter-events')?.value || '';
     const orgFilter = document.getElementById('filter-organization')?.value || '';
 
-    // 2. FILTER THE DATA
+    // 2. FILTER DATA
     const filteredList = eventsData.filter(e => {
-        // Search Bar Logic (Checks Title, Location, or Organizer)
+        // Search Term (Check Title, Location, Organizer)
         const matchesSearch = !searchTerm || 
-            e.title.toLowerCase().includes(searchTerm) || 
-            e.location.toLowerCase().includes(searchTerm) || 
-            e.organization.toLowerCase().includes(searchTerm);
+            (e.title || '').toLowerCase().includes(searchTerm) || 
+            (e.location || '').toLowerCase().includes(searchTerm) || 
+            (e.organization || '').toLowerCase().includes(searchTerm);
 
-        // Dropdown Logic
+        // Dropdown Filters
+        // If statusFilter is empty, show both. If set, match exact status.
         const matchesStatus = !statusFilter || e.status === statusFilter;
-        const matchesEventTitle = !eventFilter || e.title === eventFilter;
+        const matchesTitle = !eventFilter || e.title === eventFilter;
         const matchesOrg = !orgFilter || e.organization === orgFilter;
 
-        return matchesSearch && matchesStatus && matchesEventTitle && matchesOrg;
+        return matchesSearch && matchesStatus && matchesTitle && matchesOrg;
     });
 
-    // 3. SEPARATE INTO ACTIVE VS ARCHIVED
+    // 3. SEPARATE INTO COLUMNS
     const activeEvents = filteredList.filter(e => e.status === 'Active');
     const archivedEvents = filteredList.filter(e => e.status === 'Archived');
 
@@ -337,14 +354,23 @@ function renderEvents() {
     document.querySelector('.active-column .section-title').textContent = `Active Events (${activeEvents.length})`;
     document.querySelector('.archived-column .section-title').textContent = `Archived Events (${archivedEvents.length})`;
 
-    // 5. RENDER GRIDS
-    activeEventsGrid.innerHTML = activeEvents.length ? '' : '<p style="text-align:center; padding:20px; color:#999;">No active events found</p>';
-    activeEvents.forEach(e => activeEventsGrid.appendChild(createEventCard(e)));
+    // 5. RENDER ACTIVE GRID
+    activeEventsGrid.innerHTML = '';
+    if (activeEvents.length === 0) {
+        activeEventsGrid.innerHTML = '<p style="text-align:center; padding:20px; color:#999;">No active events match filters.</p>';
+    } else {
+        activeEvents.forEach(e => activeEventsGrid.appendChild(createEventCard(e)));
+    }
 
-    archivedEventsGrid.innerHTML = archivedEvents.length ? '' : '<p style="text-align:center; padding:20px; color:#999;">No archived events found</p>';
-    archivedEvents.forEach(e => archivedEventsGrid.appendChild(createEventCard(e)));
+    // 6. RENDER ARCHIVED GRID
+    archivedEventsGrid.innerHTML = '';
+    if (archivedEvents.length === 0) {
+        archivedEventsGrid.innerHTML = '<p style="text-align:center; padding:20px; color:#999;">No archived events match filters.</p>';
+    } else {
+        archivedEvents.forEach(e => archivedEventsGrid.appendChild(createEventCard(e)));
+    }
 
-    // Re-attach button listeners
+    // Re-attach button listeners for the new cards
     attachEventCardListeners();
 }
 
@@ -359,7 +385,7 @@ function createEventCard(event) {
 
     card.innerHTML = `
         <div class="event-banner">
-            <img src="${event.banner}" onerror="this.src='https://https://placehold.co/800x300'">
+            <img src="${event.banner}" onerror="this.src='https://placehold.co/800x300'">
         </div>
         <div class="event-container">
             <div class="event-title-section">
