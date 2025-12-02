@@ -25,7 +25,7 @@
                 </div>
 
                 <nav class="sidebar-nav">
-                    <div class="nav-item" data-page="events">
+                    <div class="nav-item" data-page="index">
                         <span>Manage Events</span>
                     </div>
                     <div class="nav-item active" data-page="registrations">
@@ -51,40 +51,30 @@
             <!-- Main Panel -->
             <main class="main-panel">
                 <div class="registrations-container">
-                    <!-- Search and Filter Header -->
-                    <div class="registrations-header">
+                    <!-- Search Bar -->
+                    <div class="search-header">
                         <input type="text" id="search-input" class="search-box" placeholder="Search by student name, ID, or event...">
-                        <select id="filter-event" class="filter-dropdown">
+                    </div>
+
+                    <!-- Filter Bar -->
+                    <div class="filter-header" style="display: flex; gap: 12px; margin: 20px 0; align-items: center; flex-wrap: wrap;">
+                        <select class="filter-dropdown" id="filter-status">
+                            <option value="">All Statuses</option>
+                            <option value="Confirmed">Confirmed</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                        <select class="filter-dropdown" id="filter-events">
                             <option value="">All Events</option>
-                            <option value="Tech Talk: IT Summit">Tech Talk: IT Summit</option>
-                            <option value="Schedule Adjustment">Schedule Adjustment</option>
-                            <option value="QCU Bayanihan Week">QCU Bayanihan Week</option>
-                            <option value="Career Fair 2025">Career Fair 2025</option>
+                        </select>
+                        <select class="filter-dropdown" id="filter-organization">
+                            <option value="">All Organizations</option>
                         </select>
                     </div>
 
                     <!-- Stats Cards -->
-                    <div class="event-stats">
-                        <div class="stat-card">
-                            <h3>Tech Talk: IT Summit</h3>
-                            <p class="number">56</p>
-                            <p class="subtitle">/150 confirmed</p>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Schedule Adjustment</h3>
-                            <p class="number">178</p>
-                            <p class="subtitle">/300 confirmed</p>
-                        </div>
-                        <div class="stat-card">
-                            <h3>QCU Bayanihan Week</h3>
-                            <p class="number">45</p>
-                            <p class="subtitle">/100 confirmed</p>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Career Fair 2025</h3>
-                            <p class="number">231</p>
-                            <p class="subtitle">/350 confirmed</p>
-                        </div>
+                    <div class="event-stats" id="stats-container">
+                        <!-- Stats cards will be populated here -->
                     </div>
 
                     <!-- Registrations Table -->
@@ -99,70 +89,10 @@
                                     <th>Student ID</th>
                                     <th>Event</th>
                                     <th>Registration Date</th>
-                                    <th>Actions</th>
                                 </tr>
                             </thead>
-                            <tbody id="registrations-tbody">
-                                <tr>
-                                    <td>Juan Dela Cruz</td>
-                                    <td>23-9995</td>
-                                    <td><span class="event-badge academic">Tech Talk: IT Summit</span></td>
-                                    <td>15/10/2025</td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <button class="btn-view">View</button>
-                                            <button class="btn-cancel-reg">Cancel</button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Maria Santos</td>
-                                    <td>23-9996</td>
-                                    <td><span class="event-badge community">QCU Bayanihan Week</span></td>
-                                    <td>15/10/2025</td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <button class="btn-view">View</button>
-                                            <button class="btn-cancel-reg">Cancel</button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Pedro Reyes</td>
-                                    <td>23-9997</td>
-                                    <td><span class="event-badge academic">Tech Talk: IT Summit</span></td>
-                                    <td>15/10/2025</td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <button class="btn-view">View</button>
-                                            <button class="btn-cancel-reg">Cancel</button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Ana Garcia</td>
-                                    <td>23-9998</td>
-                                    <td><span class="event-badge institutional">Schedule Adjustment</span></td>
-                                    <td>15/10/2025</td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <button class="btn-view">View</button>
-                                            <button class="btn-cancel-reg">Cancel</button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Carlos Mendoza</td>
-                                    <td>23-9999</td>
-                                    <td><span class="event-badge academic">Tech Talk: IT Summit</span></td>
-                                    <td>15/10/2025</td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <button class="btn-view">View</button>
-                                            <button class="btn-cancel-reg">Cancel</button>
-                                        </div>
-                                    </td>
-                                </tr>
+                            <tbody id="registrations-tbody">                                  
+                                
                             </tbody>
                         </table>
                     </div>

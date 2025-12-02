@@ -11,7 +11,8 @@ const app = express();
 
 // --- 3. CONFIGURE MIDDLEWARE ---
 app.use(cors()); 
-app.use(express.json()); 
+app.use(express.json({ limit: '50mb' })); 
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // --- 4. CONNECT TO MONGODB ---
 connectMainDB();
@@ -31,6 +32,7 @@ const savedEventRoutes = require('./routes/savedEvent.routes.js');
 const notificationRoutes = require('./routes/notification.routes.js');
 const dashboardRoutes = require('./routes/dashboard.routes.js'); // <-- NEW Dashboard Route
 const accountRoutes = require("./routes/accounts.routes.js");
+const eventAnnouncementRoutes = require('./routes/eventAnnouncement.rout.js');
 
 // --- 5B. USE YOUR ROUTES (Mapping the path to the imported file) ---
 app.use('/api/clubs', clubRoutes);
@@ -47,6 +49,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/dashboard', dashboardRoutes); // <-- Dashboard is now available at /api/dashboard/...
 app.use('/api', activityRoutes);
 app.use('/api/accounts', accountRoutes);
+app.use('/api/event-announcements', eventAnnouncementRoutes); // <-- Event Announcements
 
 
 // --- 6. START THE SERVER ---

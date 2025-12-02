@@ -16,8 +16,14 @@ const eventSchema = new Schema({
     location: { type: String, required: true },
     category: { type: String, default: 'academic' }, // From your CSS (academic, institutional)
 
+    status: { 
+        type: String, 
+        default: 'Active',
+        enum: ['Pending','Active', 'Archived','Rejected'] // Optional: Helps prevents typos
+    },
+
     // Modal Details (from photo 2 & 3)
-    organizer: { type: String, required: true },
+    organization: { type: String, required: true },
     availability: { type: String }, // e.g., "156 participating"
     capacity: { type: String }, // e.g., "156/200"
     description: { type: String, required: true },
