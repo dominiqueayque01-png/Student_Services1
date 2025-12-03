@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Create Event</title>
+    <link rel="stylesheet" href="events-styles.css">
+</head>
+<body>
+    <div class="container">
+        
+        <div class="main-content">
+            <aside class="sidebar">
+                <div class="logo-section">
+                    <div class="logo"><img src="qculogo.png.png" class="logo-img"></div>
+                    <div class="logo-text">
+                        <h3>QCU Student Services</h3>
+                        <p>Admin Portal - Events</p>
+                    </div>
+                </div>
+                <nav class="sidebar-nav">
+                    <div class="nav-item active" data-page="index"><span>Manage Events</span></div>
+                    <div class="nav-item" data-page="registrations"><span>Registrations</span></div>
+                    <div class="nav-item" data-page="announcements"><span>Announcements</span></div>
+                </nav>
+                <div class="sidebar-footer">
+                    <button class="logout-btn">Logout</button>
+                </div>
+            </aside>
+
+            <main class="main-panel">
+                <div class="events-header-top">
+                    <h1 class="events-page-title">Create New Event</h1>
+                </div>
+
+                <div class="event-details-view"> <div class="event-main-content"> <p class="modal-subtitle">Fill in the details to create a new campus event.</p>
+
+                        <div class="form-group">
+                            <label>Event Banner <span class="required">*</span></label>
+                            
+                            <div class="upload-area" id="upload-area" style="border: 2px dashed #ccc; padding: 20px; text-align: center; cursor: pointer; border-radius: 6px;">
+                                <p style="margin:0; color:#666;">Click to upload banner image</p>
+                                <small style="color:#999;">PNG, JPG up to 5MB</small>
+                            </div>
+
+                            <input type="file" id="event-banner" style="display: none;" accept="image/*">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Event Title <span class="required">*</span></label>
+                            <input type="text" id="event-title" placeholder="e.g., Tech Talk: IT Summit">
+                        </div>
+
+                        <div class="form-row"> <div class="form-group">
+                                <label>Category <span class="required">*</span></label>
+                                <select id="event-category">
+                                    <option value="Academic">Academic</option>
+                                    <option value="Community">Community</option>
+                                    <option value="Institutional">Institutional</option>
+                                    <option value="Recreation">Recreation</option>
+                                    <option value="Culture">Culture & Arts</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Date <span class="required">*</span></label>
+                                <input type="date" id="event-date">
+                            </div>
+                            <div class="form-group">
+                                <label>Time <span class="required">*</span></label>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <input type="time" id="event-start-time" style="flex: 1;">
+                                    <span style="color: #666; font-size: 12px;">to</span>
+                                    <input type="time" id="event-end-time" style="flex: 1;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row"> <div class="form-group">
+                                <label>Location <span class="required">*</span></label>
+                                <input type="text" id="event-location" placeholder="e.g., QCU Auditorium">
+                            </div>
+                            <div class="form-group">
+                                <label>Capacity <span class="required">*</span></label>
+                                <input type="number" id="event-capacity" placeholder="e.g., 200">
+                            </div>
+                            <div class="form-group">
+                                <label>Organization <span class="required">*</span></label>
+                                <input type="text" id="event-organization" placeholder="e.g., SSC">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>About this Event <span class="required">*</span></label>
+                            <textarea id="event-about" rows="4" placeholder="Describe your event..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Requirements</label>
+                            <div id="requirements-list">
+                                </div>
+                            <button class="btn-add-agenda" id="btn-add-req" type="button" style="margin-top: 5px;">
+                                + Add Requirement
+                            </button>
+                        </div>
+
+<div class="form-group">
+    <label>Event Agenda</label>
+    <div id="agenda-list">
+        <div class="agenda-item" style="display: grid; grid-template-columns: 100px 1fr 30px; gap: 10px; margin-bottom: 10px; align-items: center;">
+            <input type="time" class="agenda-time" style="width: 100%;">
+            <input type="text" class="agenda-title" placeholder="Activity Name" style="width: 100%;">
+            <button class="btn-remove-agenda" style="background: white; border: 1px solid #ddd; color: #d32f2f; padding: 4px 8px; cursor: pointer; border-radius: 3px;">×</button>
+        </div>
+    </div>
+    
+    <button class="btn-add-agenda" type="button" style="margin-top: 5px; color: #2d5aa8; background: none; border: 1px solid #2d5aa8; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer;">
+        + Add Agenda Item
+    </button>
+</div>
+
+                        <div class="modal-footer" style="background: transparent; padding: 20px 0 0 0;">
+                            <button class="btn-cancel" onclick="window.history.back()">Cancel</button>
+                            <button class="btn-submit" id="btn-publish">Submit Request</button>
+                        </div>
+
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div id="notification-area"></div>
+
+    <script src="script.js"></script>
+    <script src="create-event.js"></script>
+</body>
+</html>

@@ -8,6 +8,7 @@
 </head>
 <body>
     <div class="container">
+        
 
         <div class="main-content">
             <!-- Sidebar -->
@@ -23,7 +24,7 @@
                 </div>
 
                 <nav class="sidebar-nav">
-                    <div class="nav-item active" data-page="events">
+                    <div class="nav-item active" data-page="index">
                         <span>Manage Events</span>
                     </div>
                     <div class="nav-item" data-page="registrations">
@@ -48,16 +49,42 @@
 
             <!-- Main Panel -->
             <main class="main-panel events-panel">
-                <!-- Search Bar at Top -->
-                <div class="search-header">
-                    <input type="text" class="search-box" id="event-search" placeholder="Search events by title, location, or organizer...">
-                    <select class="filter-dropdown">
-                        <option value="">All Events</option>
-                        <option value="upcoming">Upcoming</option>
-                        <option value="past">Past</option>
-                        <option value="archived">Archived</option>
-                    </select>
+                <!-- Header with Create Event Button -->
+                <div class="events-header-top">
+                    <h1 class="events-page-title">Manage Events</h1>
                     <button class="btn-create-event">+ Create Event</button>
+                </div>
+
+            <!-- Event Requests Section -->
+            <div class="event-requests-section">
+                <div class="requests-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <h3>Event Requests</h3>
+                        <span class="requests-badge" id="requests-count">0</span>
+                    </div>
+                    <button id="btn-see-all-requests" onclick="openAllRequestsModal()" style="background: none; border: none; color: #2d5aa8; font-size: 13px; font-weight: 600; cursor: pointer; display: none;">
+                        See all requests &rarr;
+                    </button>
+                </div>
+
+                <div class="event-request-card" id="event-request-container">
+                    </div>
+            </div>
+
+                <!-- Search and Filter Bar -->
+                <div class="search-filter-header">
+                    <input type="text" class="search-box" id="event-search" placeholder="Search events by title, location, or organization...">
+                    <select class="filter-dropdown" id="filter-status">
+                        <option value="">All Statuses</option>
+                        <option value="Active">Active</option>
+                        <option value="Archived">Archived</option>
+                    </select>
+                    <select class="filter-dropdown" id="filter-events">
+                        <option value="">All Events</option>
+                    </select>
+                    <select class="filter-dropdown" id="filter-organization">
+                        <option value="">All Organizations</option>
+                    </select>
                 </div>
 
                 <!-- Events Sections -->
@@ -128,8 +155,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="event-organizer">Organized by <span class="required">*</span></label>
-                    <input type="text" id="event-organizer" placeholder="e.g., QCU IT Department">
+                    <label for="event-organization">Organized by <span class="required">*</span></label>
+                    <input type="text" id="event-organization" placeholder="e.g., QCU IT Department">
                 </div>
 
                 <div class="form-group">
@@ -186,6 +213,47 @@
         </div>
     </div>
 
+    <!-- Reject Event Request Modal -->
+    <div class="modal" id="reject-event-modal">
+        <div class="modal-content modal-confirm">
+            <div class="modal-header">
+                <h2>Reject Event Request</h2>
+                <button class="modal-close" onclick="document.getElementById('reject-event-modal').style.display='none'">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="reject-instruction">Please provide a reason for rejecting this event request</p>
+                
+                <div class="reject-event-info">
+                    <strong>Event:</strong> <span id="reject-event-title">Full-Stack Workshop</span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="rejection-reason">Rejection Reason *</label>
+                    <textarea 
+                        id="rejection-reason" 
+                        class="rejection-textarea" 
+                        placeholder="Please explain why this event request is being rejected..."
+                        rows="4"
+                    ></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="rejection-suggestion">Suggested Resolution (Optional)</label>
+                    <textarea 
+                        id="rejection-suggestion" 
+                        class="rejection-textarea" 
+                        placeholder="Do you have suggestions for improvement?"
+                        rows="3"
+                    ></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="document.getElementById('reject-event-modal').style.display='none'">Cancel</button>
+                <button class="btn-reject-announcement" onclick="confirmRejectEventRequest()">Reject Announcement</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Event View Modal -->
     <div class="modal" id="event-view-modal">
         <div class="modal-content event-view-modal">
@@ -204,7 +272,7 @@
             <div class="modal-body">
                 <div class="event-details-container">
                     <div class="event-banner">
-                        <img id="view-banner" src="https://via.placeholder.com/800x300" alt="Event Banner">
+                        <img id="view-banner" src="https://placehold.co/800x300" alt="Event Banner">
                     </div>
                     
                     <div class="event-info-grid">
@@ -300,7 +368,7 @@
                             <strong>Requirements:</strong>
                         </div>
                         <div class="requirements-box" id="view-requirements">
-                            Bring your laptop for hands-on workshops
+                           
                         </div>
                     </div>
 
@@ -313,6 +381,37 @@
             <div class="modal-footer">
                 <button class="btn-cancel-details" onclick="document.getElementById('event-view-modal').style.display='none'">Cancel</button>
                 <button class="btn-save-changes" onclick="document.getElementById('event-view-modal').style.display='none'">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- All Event Requests Modal -->
+    <div class="modal" id="all-requests-modal">
+        <div class="modal-content all-requests-modal-content">
+            <div class="modal-header">
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <button class="modal-back-btn" onclick="closeAllRequestsModal()">&larr;</button>
+                    <h2>Event Requests</h2>
+                    <span class="requests-badge" id="all-requests-count">2</span>
+                </div>
+                <button class="modal-close" onclick="closeAllRequestsModal()">&times;</button>
+            </div>
+            <div class="filter-bar-requests">
+                <input type="text" id="requests-search" class="search-input-requests" placeholder="Search requests...">
+                <select id="requests-filter-category" class="filter-select-requests">
+                    <option value="">All Categories</option>
+                    <option value="Academic">Academic</option>
+                    <option value="Community">Community</option>
+                    <option value="Institutional">Institutional</option>
+                </select>
+                <select id="requests-filter-organization" class="filter-select-requests">
+                    <option value="">All Organization</option>
+                </select>
+            </div>
+            <div class="modal-body all-requests-body">
+                <div class="requests-list" id="requests-list-container">
+                    <!-- All event requests will be populated here -->
+                </div>
             </div>
         </div>
     </div>

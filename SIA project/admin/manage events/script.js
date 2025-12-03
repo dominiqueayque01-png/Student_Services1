@@ -526,8 +526,8 @@ if (navItems.length > 0) {
             this.classList.add('active');
             
             // Navigate to corresponding page
-            if (page === 'events') {
-                window.location.href = 'events.html';
+            if (page === 'index') {
+                window.location.href = 'index.html';
             } else if (page === 'registrations') {
                 window.location.href = 'registrations.html';
             } else if (page === 'announcements') {

@@ -3,12 +3,69 @@
    ============================================ */
 
 /* Featured Banner */
-.featured-event-banner { background: linear-gradient(135deg, #666 0%, #555 100%); padding: 40px; display: flex; justify-content: space-between; align-items: center; gap: 30px; color: white; margin: 30px 40px 30px 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
-.banner-content-event { flex: 1; }
-.featured-title { font-size: 36px; font-weight: 700; margin-bottom: 10px; line-height: 1.2; }
-.featured-details { font-size: 15px; color: #ddd; }
-.view-details-btn { background-color: #f39c12; color: white; border: none; padding: 12px 30px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; white-space: nowrap; height: fit-content; }
-.view-details-btn:hover { background-color: #e67e22; box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3); }
+/* Featured Event Banner - Old Size, New Background Support */
+.featured-event-banner {
+    /* --- OLD DIMENSIONS & SPACING --- */
+    margin: 30px 40px 30px 40px; /* Restored margins */
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    min-height: 150px; /* Ensure it has height */
+    
+    /* --- LAYOUT --- */
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Vertically center content */
+    gap: 30px;
+    color: white;
+    
+    /* --- REQUIRED FOR DYNAMIC IMAGE (Do not remove) --- */
+    position: relative;
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+}
+
+/* Ensure text stays readable on top of images */
+.banner-content-event {
+    flex: 1;
+    z-index: 2; /* Sit on top of image */
+    text-shadow: 0 2px 4px rgba(0,0,0,0.6); /* Shadow for contrast */
+}
+
+.featured-title {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    line-height: 1.2;
+}
+
+.featured-details {
+    font-size: 15px;
+    color: #f0f0f0; /* Slightly brighter than #ddd for image backgrounds */
+    font-weight: 500;
+}
+
+.view-details-btn {
+    z-index: 2; /* Sit on top of image */
+    background-color: #f39c12;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    height: fit-content;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
+.view-details-btn:hover {
+    background-color: #e67e22;
+    transform: translateY(-2px);
+}
 
 /* Grid Layout */
 .events-content-wrapper { display: grid; grid-template-columns: 1fr 330px; gap: 30px; padding: 30px 40px 40px 40px; width: 100%; }
@@ -56,7 +113,33 @@
 .latest-section { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08); }
 .latest-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #e8e8e8; }
 .latest-title { font-size: 15px; color: #333; font-weight: 600; }
-.latest-items { display: flex; flex-direction: column; gap: 12px; }
+/* --- SCROLLABLE NOTIFICATIONS --- */
+.latest-items {
+    /* 1. Set a fixed height that fits roughly 3 items */
+    /* Adjust this number (e.g., 240px or 300px) until exactly 3 items show */
+    max-height: 170px; 
+    
+    /* 2. Enable vertical scrolling */
+    overflow-y: auto; 
+    
+    /* 3. Prevent content from hitting the scrollbar */
+    padding-right: 5px; 
+}
+
+/* Optional: Make the scrollbar look cleaner */
+.latest-items::-webkit-scrollbar {
+    width: 6px;
+}
+.latest-items::-webkit-scrollbar-track {
+    background: transparent;
+}
+.latest-items::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+.latest-items::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
 .latest-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f1f5f9; transition: all 0.2s ease; }
 .latest-item:last-child { border-bottom: none; }
 .notif-icon { flex-shrink: 0; margin-top: 2px; }

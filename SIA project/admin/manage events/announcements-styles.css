@@ -8,6 +8,37 @@ svg {
     padding: 30px;
 }
 
+.announcements-header-section {
+    margin-bottom: 30px;
+}
+
+.announcements-tabs {
+    display: flex;
+    gap: 30px;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 0;
+}
+
+.tab-item {
+    padding: 12px 0;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    color: #999;
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: -2px;
+    transition: all 0.3s ease;
+}
+
+.tab-item:hover {
+    color: #333;
+}
+
+.tab-item.active {
+    border-bottom-color: #2d5aa8;
+    color: #2d5aa8;
+}
+
 .announcements-container {
     display: flex;
     flex-direction: column;
@@ -81,7 +112,7 @@ svg {
     display: flex;
     flex-direction: column;
     border: 1px solid #e8e8e8;
-    padding: 20px;
+    padding: 24px;
 }
 
 .announcement-card:hover {
@@ -94,54 +125,83 @@ svg {
     justify-content: space-between;
     align-items: flex-start;
     gap: 15px;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
 }
 
 .announcement-card-header h3 {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
     color: #1a1a1a;
     margin: 0;
     flex: 1;
     line-height: 1.5;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.announcement-card-header h3::before {
+    content: "●";
+    color: #ffc107;
+    font-size: 12px;
 }
 
 .status-badge {
     display: inline-block;
-    padding: 5px 12px;
-    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-    color: #1565c0;
-    border-radius: 16px;
+    padding: 6px 14px;
+    background: #f5f5f5;
+    color: #666;
+    border-radius: 14px;
     font-size: 11px;
     font-weight: 700;
-    text-transform: uppercase;
+    text-transform: capitalize;
     letter-spacing: 0.5px;
     white-space: nowrap;
-    border: 1px solid #90caf9;
+    border: 1px solid #e0e0e0;
 }
 
 .status-badge.published {
-    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    background: #e3f2fd;
     color: #1565c0;
     border-color: #90caf9;
 }
 
+.status-badge.pending {
+    background: #fff3e0;
+    color: #e65100;
+    border-color: #ffe0b2;
+}
+
 .status-badge.draft {
-    background: linear-gradient(135deg, #fff9c4 0%, #ffe082 100%);
+    background: #fff9c4;
     color: #f57f17;
     border-color: #ffb300;
 }
 
+.status-badge.rejected {
+    background: #ffebee;
+    color: #c62828;
+    border-color: #ef5350;
+}
+
 .announcement-card-content {
-    margin-bottom: 14px;
+    margin-bottom: 16px;
     flex: 1;
 }
 
 .announcement-card-content p {
-    font-size: 13px;
+    font-size: 14px;
     color: #555;
-    line-height: 1.7;
-    margin: 0;
+    line-height: 1.6;
+    margin: 0 0 8px 0;
+}
+
+.announcement-meta {
+    display: flex;
+    gap: 20px;
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 14px;
 }
 
 .announcement-card-footer {
@@ -153,7 +213,7 @@ svg {
 }
 
 .announcement-date {
-    font-size: 11px;
+    font-size: 12px;
     color: #999;
     display: flex;
     align-items: center;
@@ -162,45 +222,101 @@ svg {
 
 .announcement-actions {
     display: flex;
-    gap: 8px;
+    gap: 10px;
 }
 
-.btn-edit {
+.btn-view,
+.btn-approve,
+.btn-reject {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid;
+}
+
+.btn-view {
+    background-color: white;
+    color: #666;
+    border-color: #ddd;
+}
+
+.btn-view:hover {
+    background-color: #f5f5f5;
+    border-color: #ccc;
+}
+
+.btn-approve {
+    background-color: #e3f2fd;
+    color: #2d5aa8;
+    border-color: #90caf9;
+}
+
+.btn-approve:hover {
+    background-color: #bbdefb;
+    border-color: #64b5f6;
+}
+
+.btn-reject {
+    background-color: #ffebee;
+    color: #c62828;
+    border-color: #ef5350;
+}
+
+.btn-reject:hover {
+    background-color: #ffcdd2;
+    border-color: #e53935;
+}
+
+.announcement-card .btn-restore {
+    padding: 8px 14px;
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #a5d6a7;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 4px;
+}
+
+.announcement-card .btn-restore:hover {
+    background-color: #c8e6c9;
+    border-color: #81c784;
+}
+
+.announcement-card .btn-edit {
     padding: 8px 14px;
     background-color: #f0f7ff;
     color: #2d5aa8;
     border: 1px solid #cce0ff;
-    border-radius: 4px;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    border-radius: 4px;
 }
 
-.btn-edit:hover {
+.announcement-card .btn-edit:hover {
     background-color: #e3f2fd;
     border-color: #90caf9;
 }
 
-.btn-delete {
+.announcement-card .btn-delete {
     padding: 8px 14px;
     background-color: #ffebee;
     color: #c62828;
     border: 1px solid #ffcdd2;
-    border-radius: 4px;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    border-radius: 4px;
 }
 
-.btn-delete:hover {
+.announcement-card .btn-delete:hover {
     background-color: #ffcdd2;
     border-color: #ef5350;
 }

@@ -23,7 +23,7 @@
                 </div>
 
                 <nav class="sidebar-nav">
-                    <div class="nav-item" data-page="events">
+                    <div class="nav-item" data-page="index">
                         <span>Manage Events</span>
                     </div>
                     <div class="nav-item" data-page="registrations">
@@ -48,14 +48,31 @@
 
             <!-- Main Panel -->
             <main class="main-panel announcements-panel">
-                <!-- Header with Create Button and Search -->
-                <div class="announcements-header">
-                    <button class="btn-new-announcement" type="button" onclick="window.openNewAnnouncementModal(); return false;">+ New Announcement</button>
-                    <input type="text" class="search-box" id="announcement-search" placeholder="Search for an announcement...">
+                <!-- Header Section -->
+                <div class="announcements-header-section" style="margin-bottom: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">
+                        <div>
+                            <h1 style="font-size: 32px; font-weight: 700; color: #333; margin: 0 0 8px 0;">Announcements</h1>
+                            <p style="font-size: 14px; color: #666; margin: 0;">Manage and approve organization announcements</p>
+                        </div>
+                        <button class="btn-new-announcement" type="button" onclick="window.openNewAnnouncementModal(); return false;" style="background: #2d5aa8; color: white; border: none; padding: 12px 20px; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">+ New Announcement</button>
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="announcements-tabs" style="display: flex; gap: 30px; border-bottom: 2px solid #e0e0e0; padding-bottom: 0;">
+                        <div class="tab-item" data-tab="pending" style="padding: 12px 0; border-bottom: 3px solid transparent; cursor: pointer; color: #999; font-weight: 600; font-size: 14px; margin-bottom: -2px;">Pending</div>
+                        <div class="tab-item" data-tab="published" style="padding: 12px 0; border-bottom: 3px solid transparent; cursor: pointer; color: #999; font-weight: 600; font-size: 14px; margin-bottom: -2px;">Published</div>
+                        <div class="tab-item" data-tab="rejected" style="padding: 12px 0; border-bottom: 3px solid transparent; cursor: pointer; color: #999; font-weight: 600; font-size: 14px; margin-bottom: -2px;">Rejected</div>
+                    </div>
+                </div>
+
+                <!-- Search Bar -->
+                <div style="margin-bottom: 30px;">
+                    <input type="text" class="search-box" id="announcement-search" placeholder="Search for an announcement..." style="width: 100%; max-width: 500px; padding: 12px 16px; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 14px; background: #f9f9f9;">
                 </div>
 
                 <!-- Announcements List -->
-                <div class="announcements-list" id="announcements-container">
+                <div class="announcements-list" id="announcements-container" style="display: flex; flex-direction: column; gap: 16px;">
                     <!-- Announcements will be populated here -->
                 </div>
             </main>
@@ -99,18 +116,10 @@
                     <label for="announcement-content" style="display: block; font-weight: 600; font-size: 14px; color: #333; margin-bottom: 8px;">Content <span class="required" style="color: #d32f2f;">*</span></label>
                     <textarea id="announcement-content" placeholder="Write your announcement message" rows="5" style="width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 14px; box-sizing: border-box; background: #f5f5f5; font-family: inherit; resize: vertical;"></textarea>
                 </div>
-
-                <div class="form-group" style="margin-top: 20px; display: none;">
-                    <label for="announcement-status" style="display: block; font-weight: 600; font-size: 14px; color: #333; margin-bottom: 8px;">Status <span class="required" style="color: #d32f2f;">*</span></label>
-                    <select id="announcement-status" style="width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 14px; box-sizing: border-box; background: #f5f5f5;">
-                        <option value="Published">Published</option>
-                        <option value="Draft">Draft</option>
-                    </select>
-                </div>
             </div>
             <div class="modal-footer" style="display: flex; gap: 12px; justify-content: flex-end; padding-top: 20px; border-top: 1px solid #e0e0e0; margin-top: 20px;">
                 <button class="btn-cancel" type="button" onclick="document.getElementById('announcement-modal').style.display='none'; return false;" style="padding: 12px 24px; border: 1px solid #e0e0e0; background: white; color: #333; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer;">Cancel</button>
-                <button class="btn-submit" type="button" onclick="window.saveAnnouncement(); return false;" style="padding: 12px 24px; background: #2d5aa8; color: white; border: none; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer;">Publish Announcement</button>
+                <button class="btn-submit" id="announcement-submit-btn" type="button" onclick="window.saveAnnouncement(); return false;" style="padding: 12px 24px; background: #2d5aa8; color: white; border: none; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer;">Publish Announcement</button>
             </div>
         </div>
     </div>
@@ -134,9 +143,5 @@
 
     <script src="script.js"></script>
     <script src="announcements-script.js"></script>
-    
-
-
-
 </body>
 </html>
