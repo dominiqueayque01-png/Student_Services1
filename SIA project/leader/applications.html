@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Membership Applications - Club Leaders Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="applications-styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo-section">
+                <img src="qculogo.png.png" class="logo-img">
+                <div class="logo-text">
+                    <h3>QCU</h3>
+                    <p>Student Services</p>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="index.html" class="nav-item" data-page="overview">
+                    <span>Overview</span>
+                </a>
+                <a href="profile.html" class="nav-item" data-page="profile">
+                    <span>Club Profile</span>
+                </a>
+                <a href="members.html" class="nav-item" data-page="members">
+                    <span>Members</span>
+                </a>
+                <a href="applications.html" class="nav-item active" data-page="applications">
+                    <span>Applications</span>
+                </a>
+                <a href="analytics.html" class="nav-item" data-page="analytics">
+                    <span>Analytics</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">JD</div>
+                    <div class="user-info">
+                        <h4>John Doe</h4>
+                        <p>Club Leader</p>
+                    </div>
+                </div>
+                <button class="logout-btn"> Logout</button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1>Membership Applications</h1>
+                <p>Review and approve student applications to join your club</p>
+            </div>
+
+            <!-- Pending Applications Section -->
+            <div class="applications-section">
+                <h2 class="section-title">Pending Applications</h2>
+                <div class="applications-table-container">
+                    <table class="applications-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Program</th>
+                                <th>Year</th>
+                                <th>Applied</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pending-table-body">
+                            <!-- Pending applications will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Reviewed Applications Section -->
+            <div class="applications-section">
+                <h2 class="section-title">Reviewed Applications</h2>
+                <div class="applications-table-container">
+                    <table class="applications-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Applied</th>
+                                <th>Program</th>
+                                <th>Year</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reviewed-table-body">
+                            <!-- Reviewed applications will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Modal -->
+    <div id="logout-modal" class="logout-modal">
+        <div class="logout-modal-content">
+            <div class="logout-modal-header">
+                <h2>Confirm Logout</h2>
+                <button class="logout-modal-close">&times;</button>
+            </div>
+            <div class="logout-modal-body">
+                <p>Are you sure you want to log out from your account? You will need to login again to access the system.</p>
+            </div>
+            <div class="logout-modal-footer">
+                <button class="logout-modal-cancel">Cancel</button>
+                <button class="logout-modal-confirm">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Details Modal -->
+    <div id="app-details-modal" class="app-details-modal">
+        <div class="app-details-content">
+            <div class="app-details-header">
+                <div>
+                    <h2>Application Details</h2>
+                    <p class="app-details-description">Review the full application before making a decision</p>
+                </div>
+                <button class="app-details-close">&times;</button>
+            </div>
+            <div class="app-details-body">
+                <!-- Applicant Name and Email -->
+                <div class="app-field-row">
+                    <div class="app-field">
+                        <label class="app-field-label">Applicant Name</label>
+                        <div class="app-field-value" id="app-details-name">Juan Sy</div>
+                    </div>
+                    <div class="app-field">
+                        <label class="app-field-label">Email</label>
+                        <div class="app-field-value" id="app-details-email">juansy.edu.ph</div>
+                    </div>
+                </div>
+
+                <!-- Program and Year -->
+                <div class="app-field-row">
+                    <div class="app-field">
+                        <label class="app-field-label">Program</label>
+                        <div class="app-field-value" id="app-details-program">Business</div>
+                    </div>
+                    <div class="app-field">
+                        <label class="app-field-label">Year</label>
+                        <div class="app-field-value" id="app-details-year">Sophomore</div>
+                    </div>
+                </div>
+
+                <!-- Why do you want to join -->
+                <div class="app-field">
+                    <label class="app-field-label">Why do you want to join?</label>
+                    <div class="app-field-value" id="app-details-reason">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut</div>
+                </div>
+
+                <!-- Application Date -->
+                <div class="app-field">
+                    <label class="app-field-label">Application Date</label>
+                    <div class="app-field-value" id="app-details-applied">2025-10-25</div>
+                </div>
+
+                <!-- Status -->
+                <div class="app-field" id="app-details-status-row">
+                    <label class="app-field-label">Status</label>
+                    <div id="app-details-status"></div>
+                </div>
+            </div>
+            <div class="app-details-footer">
+                <button class="btn-modal btn-modal-close">Close</button>
+                <button class="btn-modal btn-modal-approve" style="display: none;">✓ Approve</button>
+                <button class="btn-modal btn-modal-reject" style="display: none;">✕ Reject</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="applications-script.js"></script>
+</body>
+</html>

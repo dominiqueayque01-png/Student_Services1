@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club Analytics - Club Leaders Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="analytics-styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo-section">
+                <img src="qculogo.png.png" class="logo-img">
+                <div class="logo-text">
+                    <h3>QCU</h3>
+                    <p>Student Services</p>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="index.html" class="nav-item" data-page="overview">
+                    <span>Overview</span>
+                </a>
+                <a href="profile.html" class="nav-item" data-page="profile">
+                    <span>Club Profile</span>
+                </a>
+                <a href="members.html" class="nav-item" data-page="members">
+                    <span>Members</span>
+                </a>
+                <a href="applications.html" class="nav-item" data-page="applications">
+                    <span>Applications</span>
+                </a>
+                <a href="analytics.html" class="nav-item active" data-page="analytics">
+                    <span>Analytics</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">JD</div>
+                    <div class="user-info">
+                        <h4>John Doe</h4>
+                        <p>Club Leader</p>
+                    </div>
+                </div>
+                <button class="logout-btn">Logout</button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1>Club Analytics</h1>
+                <p>Track your club's growth and engagement metrics</p>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Current Members</div>
+                    <p class="stat-value" id="current-members">98</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Approval Rating</div>
+                    <p class="stat-value" id="approval-rating">84%</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">New Members(30d)</div>
+                    <p class="stat-value" id="new-members">12</p>
+                </div>
+            </div>
+
+            <!-- Charts Grid -->
+            <div class="charts-grid">
+                <!-- Membership Growth Chart -->
+                <div class="chart-container">
+                    <h3 class="chart-title">Membership Growth</h3>
+                    <div id="membership-growth">
+                        <!-- Chart will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Application Trends Chart -->
+                <div class="chart-container">
+                    <h3 class="chart-title">Application Trends</h3>
+                    <div id="application-trends">
+                        <!-- Chart will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Modal -->
+    <div id="logout-modal" class="logout-modal">
+        <div class="logout-modal-content">
+            <div class="logout-modal-header">
+                <h2>Confirm Logout</h2>
+                <button class="logout-modal-close">&times;</button>
+            </div>
+            <div class="logout-modal-body">
+                <p>Are you sure you want to log out from your account? You will need to login again to access the system.</p>
+            </div>
+            <div class="logout-modal-footer">
+                <button class="logout-modal-cancel">Cancel</button>
+                <button class="logout-modal-confirm">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="analytics-script.js"></script>
+</body>
+</html>
