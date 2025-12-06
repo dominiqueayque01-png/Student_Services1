@@ -51,7 +51,7 @@ async function fetchAndRenderAnnouncements() {
         const readIds = getReadAnnouncements();
 
     try {
-        const response = await fetch('http://localhost:3001/api/announcements'); 
+        const response = await fetch('http://localhost:3001/api/counseling-announcements'); 
         allAnnouncements = await response.json(); 
         listEl.innerHTML = ''; 
         noAnnouncementsMessageEl.style.display = 'none';
@@ -130,17 +130,34 @@ async function handleRequestFormSubmit(e) {
     if (e && e.preventDefault) e.preventDefault(); 
 
     const form = document.getElementById('requestForm'); 
+    if (!form.checkValidity()) { form.reportValidity(); return; }
 
-    if (!form.checkValidity()) { form.reportValidity(); 
-        return; 
-    }
     const formData = new FormData(form); 
+
+    // --- FIX: DEFINE THE VARIABLE HERE ---
+    // 1. Get the values from the form inputs
+    const dateStr = formData.get('preferredDate');
+    const timeStr = formData.get('preferredTime');
+    
+    // 2. Combine them into a Date object (ISO format)
+    // If date/time are missing, this might be Invalid Date, but let's assume required=true works
+    let scheduledDateTime = null;
+    if (dateStr && timeStr) {
+        scheduledDateTime = new Date(`${dateStr}T${timeStr}`);
+    }
+    // -------------------------------------
+
     const payload = { 
         studentId: formData.get('studentId'), 
         studentFullName: formData.get('fullName'), 
         studentPhone: formData.get('phone'), 
         studentEmail: formData.get('email'), 
         preferredMode: formData.get('preferredMode'), 
+        
+        // --- NOW IT IS DEFINED ---
+        scheduledDateTime: scheduledDateTime, 
+        // -------------------------
+        
         referenceContact: { 
             name: formData.get('refName'), 
             relationship: formData.get('relationship'), 
@@ -161,20 +178,17 @@ async function handleRequestFormSubmit(e) {
         localStorage.setItem('currentStudentId', payload.studentId); 
         form.reset(); 
 
-        if (typeof closeRequestFormModal === 'function') 
-            closeRequestFormModal(); 
+        if (typeof closeRequestFormModal === 'function') closeRequestFormModal(); 
         
         if (typeof showSuccessModal === 'function') {
             showSuccessModal(savedData._id); 
         } else {
             alert('Request Submitted! ID: ' + savedData._id);
         }
-        try { 
-            if (typeof fetchAndRenderSessions === 'function') 
-                await fetchAndRenderSessions(); 
-            } catch (uiError) { 
-                console.warn('List refresh failed (minor UI issue):', uiError); 
-            }
+        
+        // Refresh the list immediately
+        if (typeof fetchAndRenderSessions === 'function') await fetchAndRenderSessions(); 
+            
     } catch (error) { 
         console.error('Submission Error:', error); 
         alert('There was a problem submitting your request: ' + error.message); 
@@ -230,7 +244,9 @@ async function fetchAndRenderSessions() {
 
         const response = await fetch(`http://localhost:3001/api/counseling/my-appointments/${studentId}`); 
         allStudentSessions = await response.json(); 
+
         if (typeof updateTabCounts === 'function') updateTabCounts(); 
+        updateDashboardBadge();
         const activeTabBtn = document.querySelector('#sessionsModal .tab-btn.active'); 
         const activeTabName = activeTabBtn ? activeTabBtn.getAttribute('onclick').match(/'([^']+)'/)[1] : 'pending'; 
         renderSessionsList(activeTabName);
@@ -240,15 +256,37 @@ async function fetchAndRenderSessions() {
     }
 }
 
+function updateDashboardBadge() {
+    const badge = document.getElementById('session-badge');
+    if (!badge) return;
+
+    // Count sessions with status 'Scheduled'
+    // You can also add 'Pending' if you want to notify about everything
+    const scheduledCount = allStudentSessions.filter(s => s.status === 'Scheduled').length;
+
+    if (scheduledCount > 0) {
+        badge.textContent = scheduledCount;
+        badge.style.display = 'block'; // Show badge
+    } else {
+        badge.style.display = 'none'; // Hide if 0
+    }
+}
+
 function renderSessionsList(filterTab = 'pending') {
     const listEl = document.getElementById('sessionsList'); 
-    if (!listEl) 
-        return; 
-    const filtered = allStudentSessions.filter(s => s.status.toLowerCase() === filterTab.toLowerCase()); listEl.innerHTML = '';
+    if (!listEl) return; 
+
+    // Clear list first
+    listEl.innerHTML = '';
+
+    // Filter Data
+    const filtered = allStudentSessions.filter(s => s.status.toLowerCase() === filterTab.toLowerCase()); 
+    
+    // Empty State
     if (filtered.length === 0) {
          listEl.innerHTML = '<p style="padding: 20px; text-align: center; color: #666; font-size: 13px;">No sessions found in this category.</p>'; 
          return; 
-        }
+    }
 
     filtered.forEach(session => {
         const card = document.createElement('div'); 
@@ -256,39 +294,81 @@ function renderSessionsList(filterTab = 'pending') {
         const badgeClass = `badge-${session.status.toLowerCase()}`; 
         card.className = `session-card ${statusClass}`;
 
+        // 1. Format Date
         const submittedDate = new Date(session.createdAt).toLocaleDateString(); 
-        const counselorName = session.assignedCounselor ? session.assignedCounselor.name : 'Waiting for assignment...'; 
+
+        // 2. Format Counselor
+        const counselorName = (session.counselor && session.counselor !== 'N/A') 
+            ? session.counselor 
+            : 'Waiting for assignment...';
+
+        // 3. Format Schedule
         let scheduleDisplay = 'Not Scheduled'; 
         if (session.scheduledDateTime) { 
             const dateObj = new Date(session.scheduledDateTime); 
-            scheduleDisplay = `${dateObj.toLocaleDateString()} • ${dateObj.toLocaleTimeString([], {
-                hour:'2-digit', minute:'2-digit'
-                }
-            )}`; 
+            scheduleDisplay = `${dateObj.toLocaleDateString()} • ${dateObj.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })}`; 
         }
 
+        // 4. Format Mode Badge
         let modeBadge = ''; 
-        if (session.preferredMode === 'Virtual') modeBadge = `<span style="font-size:10px; background:#e0f2fe; color:#0284c7; padding:2px 6px; border-radius:4px; border:1px solid #bae6fd;">📹 Virtual</span>`; 
-            else 
-                modeBadge = `
-            <span style="font-size:10px; background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; border:1px solid #cbd5e1;">🏫 In-Person</span>
-            `;
+        if (session.preferredMode === 'Virtual') {
+            modeBadge = `<span style="font-size:10px; background:#e0f2fe; color:#0284c7; padding:2px 6px; border-radius:4px; border:1px solid #bae6fd;">📹 Virtual</span>`; 
+        } else {
+            modeBadge = `<span style="font-size:10px; background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; border:1px solid #cbd5e1;">🏫 In-Person</span>`;
+        }
 
+        // 5. (NEW) Meeting Link Logic
+        // Only show if Scheduled + Virtual + Link exists
+        let meetingAction = '';
+        if (session.status === 'Scheduled' && session.preferredMode === 'Virtual' && session.meetingLink) {
+            meetingAction = `
+                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #e2e8f0;">
+                    <a href="${session.meetingLink}" target="_blank" class="btn-join-meet" 
+                       style="display: block; text-align: center; background: #2c3e7f; color: white; text-decoration: none; padding: 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
+                       📹 Join Google Meet
+                    </a>
+                </div>
+            `;
+        }
+
+        // 6. Cancel Button Logic
+        let cancelButton = '';
+        if (session.status === 'Pending') {
+            cancelButton = `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed #e2e8f0; text-align: right;">
+                <button class="btn-cancel-request" onclick="cancelSession(event, '${session._id}')">Cancel Request</button>
+            </div>`;
+        }
+
+        // Construct HTML
         card.innerHTML = `
-            <div class="session-header"><span class="session-id">Case #${session._id.slice(-6).toUpperCase()}</span><span class="status-badge ${badgeClass}">${session.status}</span></div>
+            <div class="session-header">
+                <span class="session-id">Case #${session._id.slice(-6).toUpperCase()}</span>
+                <span class="status-badge ${badgeClass}">${session.status}</span>
+            </div>
             <div class="session-date">Requested on: ${submittedDate}</div>
+            <div style="margin-bottom: 5px;">${modeBadge}</div>
+            
             <div class="session-details-grid">
                 <div class="detail-item"><span class="detail-label">Student Name</span><span class="detail-value">${session.studentFullName}</span></div>
                 <div class="detail-item"><span class="detail-label">Counselor</span><span class="detail-value">${counselorName}</span></div>
-                <div class="detail-item" style="grid-column: 1 / -1; margin-top: 6px;"><span class="detail-label">Schedule</span><span class="detail-value" style="color: #2c3e7f;">${scheduleDisplay}</span></div>
+                <div class="detail-item" style="grid-column: 1 / -1; margin-top: 6px;">
+                    <span class="detail-label">Schedule</span>
+                    <span class="detail-value" style="color: #2c3e7f;">${scheduleDisplay}</span>
+                </div>
             </div>
-            ${session.status === 'Pending' ? `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed #e2e8f0; text-align: right;"><button class="btn-cancel-request" onclick="cancelSession(event, '${session._id}')">Cancel Request</button></div>` : ''}
+            
+            ${meetingAction}
+            ${cancelButton}
         `;
-        card.addEventListener('click', (e)=>{ 
-            if (e.target.tagName === 'BUTTON') 
-                return; 
-            console.log('Clicked session:', session._id); 
-        }); listEl.appendChild(card);
+
+        card.addEventListener('click', (e) => { 
+            // Don't trigger if clicking a button or link
+            if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A') return; 
+            // console.log('Clicked session:', session._id); 
+            // Call your detail modal function here if needed
+        }); 
+        
+        listEl.appendChild(card);
     });
 }
 
@@ -441,4 +521,140 @@ function closeFAQsModal() {
         modal.classList.remove('open'); 
         document.removeEventListener('keydown', handleModalKeydown); 
     } 
+}
+
+// ... (Keep all your existing code above) ...
+
+// ==========================================
+//  MISSING FUNCTIONS FIX
+// ==========================================
+
+// 1. SWITCH TABS LOGIC
+function switchSessionTab(tabName) {
+    // Update Buttons
+    document.querySelectorAll('.sessions-tabs .tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Highlight clicked button
+    const tabId = 'tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1);
+    const activeBtn = document.getElementById(`tab${capitalize(tabName)}`);
+    if(activeBtn) activeBtn.classList.add('active');
+
+// --- 2. MARK AS SEEN LOGIC (FIXED) ---
+    if (tabName === 'scheduled') {
+        // Find all scheduled IDs currently in memory
+        const scheduledIds = allStudentSessions
+            .filter(s => s.status === 'Scheduled')
+            .map(s => s._id);
+        
+        if (scheduledIds.length > 0) {
+            markScheduledAsSeen(scheduledIds);
+            
+            // FORCE VISUAL UPDATE: Hide the badge immediately
+            const badge = document.getElementById('session-badge');
+            if(badge) {
+                badge.style.display = 'none'; 
+                badge.textContent = '0';
+            }
+        }
+    }
+
+    // Render the list for this specific tab
+    renderSessionsList(tabName);
+}
+
+// Helper to capitalize first letter
+function capitalize(s) {
+    return s && s[0].toUpperCase() + s.slice(1);
+}
+
+// 2. UPDATE TAB COUNTS (Call this after fetching data)
+function updateTabCounts() {
+    if (!allStudentSessions) return;
+
+    const pending = allStudentSessions.filter(s => s.status === 'Pending').length;
+    const scheduled = allStudentSessions.filter(s => s.status === 'Scheduled').length;
+    const completed = allStudentSessions.filter(s => s.status === 'Completed').length;
+
+    const elPending = document.getElementById('countPending');
+    const elScheduled = document.getElementById('countScheduled');
+    const elCompleted = document.getElementById('countCompleted');
+
+    if(elPending) elPending.textContent = pending;
+    if(elScheduled) elScheduled.textContent = scheduled;
+    if(elCompleted) elCompleted.textContent = completed;
+}
+
+// 3. HANDLE ESCAPE KEY (Missing helper)
+function handleModalKeydown(e) {
+    if (e.key === 'Escape') {
+        const openModals = document.querySelectorAll('.modal.open');
+        openModals.forEach(modal => {
+            modal.classList.remove('open');
+            modal.setAttribute('aria-hidden', 'true');
+        });
+    }
+}
+
+// 4. BACK BUTTON LOGIC (For details view)
+function backToSessionsList() {
+    document.getElementById('sessionDetailsContainer').style.display = 'none';
+    document.getElementById('sessionsListContainer').style.display = 'block';
+    document.querySelector('.sessions-toolbar').style.display = 'flex';
+    document.querySelector('.sessions-tabs').style.display = 'flex';
+}
+
+// 5. INITIALIZATION
+document.addEventListener('DOMContentLoaded', () => {
+    fetchAndRenderAnnouncements();
+    
+    // Check if we have a student ID
+    const studentId = localStorage.getItem('currentStudentId');
+    if(studentId) {
+        // If we have an ID, try to load sessions immediately in background
+        // so they are ready when modal opens
+        fetchAndRenderSessions(); 
+    }
+    
+    // Setup Request Form Listener
+    const requestForm = document.getElementById('requestForm');
+    if(requestForm) {
+        requestForm.addEventListener('submit', handleRequestFormSubmit);
+    }
+});
+
+// --- SEEN NOTIFICATION LOGIC ---
+function getSeenScheduledIds() {
+    const seen = localStorage.getItem('seenScheduledSessions');
+    return seen ? JSON.parse(seen) : [];
+}
+
+function markScheduledAsSeen(ids) {
+    const current = getSeenScheduledIds();
+    // Add new IDs to the list
+    const updated = [...new Set([...current, ...ids])];
+    localStorage.setItem('seenScheduledSessions', JSON.stringify(updated));
+    
+    // Trigger the badge update function to verify
+    updateDashboardBadge();
+}
+
+function updateDashboardBadge() {
+    const badge = document.getElementById('session-badge');
+    if (!badge) return;
+
+    const seenIds = getSeenScheduledIds();
+
+    // Count sessions that are 'Scheduled' AND NOT in the 'seenIds' list
+    const unreadCount = allStudentSessions.filter(s => 
+        s.status === 'Scheduled' && !seenIds.includes(s._id)
+    ).length;
+
+    if (unreadCount > 0) {
+        badge.textContent = unreadCount;
+        badge.style.display = 'block';
+    } else {
+        badge.style.display = 'none';
+    }
 }

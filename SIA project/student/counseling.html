@@ -239,6 +239,18 @@
                             </div>
                         </fieldset>
 
+                        <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
+    <div>
+        <label for="preferredDate" style="font-size:13px; color:#333;">Preferred Date <span style="color:#d00">*</span></label>
+        <input id="preferredDate" name="preferredDate" type="date" required style="width:100%; padding:10px; border:1px solid #e8e8e8; border-radius:6px; margin-top:6px;">
+    </div>
+
+    <div>
+        <label for="preferredTime" style="font-size:13px; color:#333;">Preferred Time <span style="color:#d00">*</span></label>
+        <input id="preferredTime" name="preferredTime" type="time" required style="width:100%; padding:10px; border:1px solid #e8e8e8; border-radius:6px; margin-top:6px;">
+    </div>
+</div>
+
                             <div style="margin-top:12px;display:flex;align-items:center;gap:10px;">
                                 <input id="consent" name="consent" type="checkbox" required>
                                 <label for="consent" style="font-size:13px;color:#666;">I understand that my information will be handled confidentially by licensed QCU counselors. <a href="#" style="color:#2c3e7f;text-decoration:underline;">View Privacy Policy</a></label>
@@ -289,7 +301,7 @@
                     </div>
 
                     <!-- My Sessions Card -->
-                    <div class="action-card" role="button" tabindex="0" onclick="openSessionsModal()">
+                    <div class="action-card" id="my-sessions-card" role="button" tabindex="0" onclick="openSessionsModal()" style="position: relative;">
                         <div class="card-icon">
                             <svg width="50" height="50" viewBox="0 0 50 50" fill="none" stroke="#2c3e7f" stroke-width="1.5">
                                 <rect x="10" y="8" width="30" height="34" rx="2"/>
@@ -299,6 +311,8 @@
                             </svg>
                         </div>
                         <h3 class="card-title">My Sessions</h3>
+                        
+                        <span id="session-badge" class="card-badge" style="display: none;">0</span>
                     </div>
 
                     <!-- FAQs Card -->

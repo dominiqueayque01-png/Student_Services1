@@ -1642,3 +1642,150 @@ textarea::placeholder {
         transform: translateX(0);
     }
 }
+
+
+
+.btn-reject {
+    display: none;
+    background-color: #d32f2f;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+/* --- STATUS MODAL STYLES --- */
+.status-content {
+    max-width: 350px;
+    text-align: center;
+    padding: 30px 20px;
+    border-radius: 12px;
+    /* Animation Trigger */
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* The Pop In Animation */
+@keyframes popIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Icon Styles */
+.status-icon-container {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px auto;
+}
+
+#status-icon {
+    font-size: 30px;
+    color: white;
+    font-weight: bold;
+}
+
+/* Success Colors */
+.status-success .status-icon-container {
+    background-color: #4CAF50;
+    box-shadow: 0 0 0 8px rgba(76, 175, 80, 0.2);
+}
+.status-success .btn-status-ok {
+    background-color: #4CAF50;
+}
+
+/* Error Colors */
+.status-error .status-icon-container {
+    background-color: #d32f2f;
+    box-shadow: 0 0 0 8px rgba(211, 47, 47, 0.2);
+}
+.status-error .btn-status-ok {
+    background-color: #d32f2f;
+}
+
+/* Button */
+.btn-status-ok {
+    color: white;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 20px;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+.btn-status-ok:active {
+    transform: scale(0.95);
+}
+
+/* --- STATUS MODAL STYLES --- */
+.status-content {
+    max-width: 350px;
+    text-align: center;
+    padding: 30px 20px;
+    border-radius: 12px;
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.status-icon-container {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px auto;
+    font-size: 30px;
+    color: white;
+    font-weight: bold;
+}
+
+/* Success State */
+.status-success .status-icon-container {
+    background-color: #4CAF50;
+    box-shadow: 0 0 0 8px rgba(76, 175, 80, 0.2);
+}
+.status-success .btn-status-ok {
+    background-color: #4CAF50;
+}
+
+/* Error State */
+.status-error .status-icon-container {
+    background-color: #d32f2f;
+    box-shadow: 0 0 0 8px rgba(211, 47, 47, 0.2);
+}
+.status-error .btn-status-ok {
+    background-color: #d32f2f;
+}
+
+
+
+.btn-status-ok {
+    color: white;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 20px;
+    cursor: pointer;
+    width: 100%;
+}   

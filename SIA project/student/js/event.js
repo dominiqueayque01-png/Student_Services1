@@ -68,6 +68,8 @@ async function fetchAndInitializeEvents() {
             renderFeaturedEvent(futureEvents[0]); 
         }
 
+        updateMySessionsBadge();
+
     } catch (error) { 
         console.error('Error initializing events:', error); 
     }
@@ -819,4 +821,43 @@ function renderAnnouncements(announcements) {
         // Prepend adds it to the TOP of the list
         container.prepend(item);
     });
+}
+
+// --- BADGE SYNC LOGIC ---
+
+function getSeenScheduledIds() {
+    const seen = localStorage.getItem('seenScheduledSessions');
+    return seen ? JSON.parse(seen) : [];
+}
+
+async function updateMySessionsBadge() {
+    const badge = document.getElementById('session-badge'); // Ensure HTML has this ID on the card
+    if (!badge) return;
+
+    const studentId = localStorage.getItem('currentStudentId');
+    if (!studentId) return;
+
+    try {
+        // We need to fetch counseling data here to know the count
+        const response = await fetch(`http://localhost:3001/api/counseling/my-appointments/${studentId}`);
+        if (!response.ok) return;
+        
+        const sessions = await response.json();
+        const seenIds = getSeenScheduledIds();
+
+        // Count sessions that are 'Scheduled' AND NOT in 'seenIds'
+        const unreadCount = sessions.filter(s => 
+            s.status === 'Scheduled' && !seenIds.includes(s._id)
+        ).length;
+
+        if (unreadCount > 0) {
+            badge.textContent = unreadCount;
+            badge.style.display = 'block';
+        } else {
+            badge.style.display = 'none';
+        }
+
+    } catch (error) {
+        console.error("Error updating badge:", error);
+    }
 }

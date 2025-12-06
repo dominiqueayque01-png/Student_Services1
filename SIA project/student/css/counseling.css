@@ -81,3 +81,27 @@
 @media (max-width: 1024px) { .content-grid { grid-template-columns: 1fr; gap: 20px; padding: 20px; } .quick-actions-sidebar { grid-column: 1; grid-row: 2; flex-direction: row; flex-wrap: wrap; } .action-card { flex: 1; min-width: 150px; } }
 @media (max-width: 768px) { .content-grid { padding: 20px; } .quick-actions-sidebar { flex-direction: row; gap: 15px; } .action-card { flex: 1; } }
 @media (max-width: 640px) { .content-grid { grid-template-columns: 1fr; padding: 15px; gap: 15px; } .quick-actions-sidebar { grid-template-columns: repeat(2, 1fr); } }
+
+/* Notification Badge for Cards */
+.card-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: #d32f2f; /* Red */
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 50%;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    border: 2px solid white;
+    min-width: 24px;
+    text-align: center;
+    animation: popIn 0.3s ease-out;
+}
+
+@keyframes popIn {
+    0% { transform: scale(0); }
+    80% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}

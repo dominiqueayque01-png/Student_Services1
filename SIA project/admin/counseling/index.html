@@ -1,19 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Counseling - All Sessions</title>
     <link rel="stylesheet" href="counseling-styles.css">
 </head>
+
 <body>
     <div class="container">
-        
+
         <div class="main-content">
             <!-- Sidebar -->
             <aside class="sidebar">
                 <div class="logo-section">
-                <img src="qculogo.png.png" class="logo-img">
+                    <img src="qculogo.png.png" class="logo-img">
                     <div class="logo-text">
                         <h3>QCU Student Services</h3>
                         <p>Admin Portal - Counseling</p>
@@ -21,7 +23,7 @@
                 </div>
 
                 <nav class="sidebar-nav">
-                    <div class="nav-item active" data-page="counseling">
+                    <div class="nav-item active" data-page="index">
                         <span>All Sessions</span>
                     </div>
                     <div class="nav-item" data-page="counselors">
@@ -49,10 +51,11 @@
                 <!-- Tabs -->
                 <div class="tabs-section">
                     <div class="tabs">
-                        <button class="tab-button" data-filter="all">All</button>
-                        <button class="tab-button active" data-filter="pending">Pending</button>
+                        <button class="tab-button active" data-filter="all">All</button>
+                        <button class="tab-button" data-filter="pending">Pending</button>
                         <button class="tab-button" data-filter="scheduled">Scheduled</button>
                         <button class="tab-button" data-filter="completed">Completed</button>
+                        <button class="tab-button" data-filter="rejected">Rejected</button>
                     </div>
                     <input type="text" class="search-box" id="search-box" placeholder="Search for a session...">
                 </div>
@@ -60,78 +63,10 @@
                 <div class="content-wrapper">
                     <!-- Sessions List -->
                     <div class="sessions-list" id="sessions-list">
-                        <div class="session-card selected" data-status="pending" data-id="C2025-001">
-                            <div class="session-header">
-                                <h4>C2025-001</h4>
-                                <span class="status-badge pending">Pending</span>
-                            </div>
-                            <p class="session-name">Juan Batumbakal</p>
-                            <div class="session-info">
-                                <div class="info-item">
-                                    <span class="info-label">◆ Created:</span>
-                                    <span>11/10/2025</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">◆ Date: dd/mm/yyyy</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">◆ Counselor:</span>
-                                    <span>N/A</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">◆ Time: -----</span>
-                                </div>
-                            </div>
-                        </div>
 
-                        <div class="session-card" data-status="pending" data-id="C2025-002">
-                            <div class="session-header">
-                                <h4>C2025-002</h4>
-                                <span class="status-badge pending">Pending</span>
-                            </div>
-                            <p class="session-name">Aiden Richards</p>
-                            <div class="session-info">
-                                <div class="info-item">
-                                    <span class="info-label">◆ Created:</span>
-                                    <span>11/10/2025</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">◆ Date: dd/mm/yyyy</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">◆ Counselor:</span>
-                                    <span>N/A</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">◆ Time: -----</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="session-card" data-status="pending" data-id="C2025-003">
-                            <div class="session-header">
-                                <h4>C2025-003</h4>
-                                <span class="status-badge pending">Pending</span>
-                            </div>
-                            <p class="session-name">Jammy Cruz</p>
-                            <div class="session-info">
-                                <div class="info-item">
-                                    <span class="info-label">◆ Created:</span>
-                                    <span>11/10/2025</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">◆ Date: dd/mm/yyyy</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">◆ Counselor:</span>
-                                    <span>N/A</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">◆ Time: -----</span>
-                                </div>
-                            </div>
-                        </div>
                     </div>
+
+
 
                     <!-- Details Panel -->
                     <div class="details-panel" id="details-panel">
@@ -144,10 +79,10 @@
                         <div class="session-details" id="session-details" style="display: none;">
                             <div class="details-header">
                                 <div>
-                                    <h3 id="detail-session-id">C2025-001</h3>
+                                    <h3 id="detail-session-id"></h3>
                                     <p class="detail-subtitle">Session Details</p>
                                 </div>
-                                <span class="status-badge pending" id="detail-status">Pending</span>
+                                <span class="status-badge pending" id="detail-status"></span>
                             </div>
 
                             <!-- Student Information Section -->
@@ -159,19 +94,19 @@
                                 <div class="detail-grid">
                                     <div class="detail-item">
                                         <label>Student Name</label>
-                                        <p id="detail-student-name">Juan Batumbakal</p>
+                                        <p id="detail-student-name"></p>
                                     </div>
                                     <div class="detail-item">
                                         <label>Student ID</label>
-                                        <p id="detail-student-id">23-0000</p>
+                                        <p id="detail-student-id"></p>
                                     </div>
                                     <div class="detail-item">
                                         <label>Email Address</label>
-                                        <p id="detail-student-email">juanbatumbakal@gmail.com</p>
+                                        <p id="detail-student-email"></p>
                                     </div>
                                     <div class="detail-item">
                                         <label>Phone Number</label>
-                                        <p id="detail-student-phone">0XXX XXX XXXX</p>
+                                        <p id="detail-student-phone"></p>
                                     </div>
                                 </div>
                             </div>
@@ -195,6 +130,13 @@
                                         <label>Status</label>
                                         <p id="detail-detail-status">Pending</p>
                                     </div>
+
+                                    <div class="detail-item">
+                                        <label>Preferred Mode</label>
+                                        <p id="detail-mode">Loading...</p>
+
+                                        
+                                    </div>
                                 </div>
                             </div>
 
@@ -214,7 +156,7 @@
                                         <p id="detail-last-session">N/A</p>
                                     </div>
                                     <div class="timeline-item">
-                                        <label>Next Scheduled</label>
+                                        <label>Preferred Time and Date</label>
                                         <p id="detail-next-scheduled">N/A</p>
                                     </div>
                                 </div>
@@ -231,7 +173,13 @@
                             <!-- Action Buttons -->
                             <div class="action-buttons">
                                 <button class="btn-close">Close</button>
+                                 <button class="btn-edit" id="btn-reschedule" style="flex: 1; padding: 10px 20px; background-color: #dfeb3d; color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer;">
+                                    Edit
+                                </button>
+                                <button class="btn-reject" id="btn-reject-session">Reject Request</button>
                                 <button class="btn-schedule" id="btn-schedule-or-edit">Schedule Session</button>
+
+                               
                             </div>
                         </div>
                     </div>
@@ -245,35 +193,82 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="modal-title">Schedule Session</h2>
-                <button class="modal-close">&times;</button>
+                <button class="modal-close" onclick="closeScheduleModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <p class="modal-subtitle" id="modal-subtitle">Assign a date and time for this counselling session.</p>
-                
+                <p class="modal-subtitle">Assign a date and time for this counseling session.</p>
+
                 <div class="form-group">
-                    <label for="schedule-date">Date</label>
-                    <input type="date" id="schedule-date" placeholder="dd/mm/yyyy">
+                    <label>Date</label>
+                    <input type="date" id="schedule-date">
                 </div>
 
                 <div class="form-group">
-                    <label for="schedule-time">Time</label>
-                    <input type="time" id="schedule-time" placeholder="HH:MM">
+                    <label>Time</label>
+                    <input type="time" id="schedule-time">
                 </div>
 
                 <div class="form-group">
-                    <label for="schedule-counselor">Select a counselor to assign to this session.</label>
+                    <label>Select Counselor</label>
                     <select id="schedule-counselor">
                         <option value="">Choose a counselor</option>
                         <option value="Dr. Maria Santos">Dr. Maria Santos</option>
                         <option value="Dr. Juan Dela Cruz">Dr. Juan Dela Cruz</option>
-                        <option value="Ms. Patricia Martinez">Ms. Patricia Martinez</option>
-                        <option value="Dr. Anna Rodriguez">Dr. Anna Rodriguez</option>
                     </select>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn-cancel">Cancel</button>
-                <button class="btn-schedule-save" id="btn-modal-action">Schedule Session</button>
+                <button class="btn-cancel" onclick="closeScheduleModal()">Cancel</button>
+                <button class="btn-submit" id="btn-save-schedule">Confirm Schedule</button>
+            </div>
+
+<div class="form-group" id="meet-link-group" style="display:none; margin:20px">
+    <label>Google Meet Link</label>
+    <div style="display: flex; gap: 10px; align-items: center;"> <input type="text" id="schedule-meet-link" placeholder="Paste Google Meet link here..." style="flex: 1; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px;">
+        
+        <a href="https://meet.google.com/" target="_blank" title="Get a Link from Google" 
+           style="
+               padding: 10px 10px; /* Increased padding for better look */
+               border: 1px solid #ddd; 
+               background: #f0f0f0; 
+               border-radius: 4px; 
+               text-decoration: none; 
+               color: #333; 
+               display: flex; 
+               align-items: center; 
+               white-space: nowrap; /* Prevent text wrapping */
+               flex-shrink: 0; /* Prevent button from shrinking */
+           ">
+            🔗 <span style="font-size: 12px; margin-left: 5px; font-weight: 600;">Get Link</span>
+        </a>
+    </div>
+    <small style="color: #2d5aa8; display: block; margin-top: 5px;">* Click "Get Link" to create a room, then paste the URL here.</small>
+</div>
+        </div>
+    </div>
+
+    <div class="modal" id="reject-modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>Reject Request</h2>
+                <button class="modal-close" onclick="closeRejectModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 10px; color: #666;">Please provide a reason for rejecting this request.</p>
+                <div class="form-group">
+                    <label>Reason</label>
+                    <textarea id="reject-reason" rows="3"
+                        placeholder="e.g., Schedule conflict, Duplicate request..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px;">
+                <button class="btn-cancel" onclick="closeRejectModal()"
+                    style="padding: 10px 20px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer;">Cancel</button>
+
+                <button id="btn-confirm-reject"
+                    style="padding: 10px 20px; background-color: #d32f2f; color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer;">
+                    Reject Request
+                </button>
             </div>
         </div>
     </div>
@@ -290,7 +285,8 @@
                 <button class="completion-modal-close" id="completion-modal-close">&times;</button>
             </div>
             <div class="completion-modal-body">
-                <p class="completion-warning">⚠ This action will mark the session as completed and remove it from the active list. This action cannot be undone.</p>
+                <p class="completion-warning">⚠ This action will mark the session as completed and remove it from the
+                    active list. This action cannot be undone.</p>
             </div>
             <div class="completion-modal-footer">
                 <button class="completion-btn-cancel" id="completion-modal-cancel">Cancel</button>
@@ -316,6 +312,43 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
-</body>
+    <div class="modal" id="completion-modal" style="display: none; align-items: center; justify-content: center;">
+    <div class="modal-content" style="max-width: 400px;">
+        <div class="modal-header">
+            <h2>Mark as Completed</h2>
+            <button class="modal-close" onclick="closeCompletionModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p style="color: #666; margin-bottom: 15px;">
+                Are you sure you want to mark this session as <strong>Completed</strong>?
+            </p>
+            <p style="font-size: 12px; color: #888; background: #f9f9f9; padding: 10px; border-radius: 4px;">
+                This will move the student to the "Completed" tab and archive the session.
+            </p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeCompletionModal()">Cancel</button>
+            <button class="btn-submit" id="btn-confirm-complete" style="background-color: #2c3e7f; color: white; border: none;">
+                Yes, Mark Completed
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="status-modal" style="display: none; align-items: center; justify-content: center; z-index: 9999;">
+    <div class="modal-content status-content">
+        <div class="status-icon-container">
+            <div id="status-icon">✓</div>
+        </div>
+        <h2 id="status-title">Success</h2>
+        <p id="status-message">Action completed successfully.</p>
+        <button class="btn-status-ok" onclick="closeStatusModal()">OK</button>
+    </div>
+</div>
+
+
+
+        <script src="counseling-script.js"></script>
+    </body>
+
 </html>

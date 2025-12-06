@@ -22,7 +22,7 @@
                 </div>
 
                 <nav class="sidebar-nav">
-                    <div class="nav-item" data-page="counseling">
+                    <div class="nav-item" data-page="index">
                         <span>All Sessions</span>
                     </div>
                     <div class="nav-item active" data-page="counselors">
@@ -92,20 +92,20 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="counselor-availability-days">Availability <span class="required">*</span></label>
-                    <div class="availability-group">
-                        <select id="counselor-availability-days">
-                            <option value="">Days</option>
-                            <option value="Monday">Monday</option>
-                            <option value="Tuesday">Tuesday</option>
-                            <option value="Wednesday">Wednesday</option>
-                            <option value="Thursday">Thursday</option>
-                            <option value="Friday">Friday</option>
-                            <option value="Mon-Fri">Mon-Fri</option>
-                        </select>
-                        <input type="time" id="counselor-availability-time" placeholder="9:00 AM - 5 PM">
-                    </div>
+                    <label>Availability Schedule</label>
+                    <div id="availability-list">
+                        </div>
+                    <button type="button" id="btn-add-avail" style="margin-top: 5px; color: #2d5aa8; background: none; border: 1px solid #2d5aa8; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer;">
+                        + Add Schedule
+                    </button>
                 </div>
+
+                <div class="form-group">
+                    <label>Permanent Google Meet Link</label>
+                    <input type="text" id="counselor-meet-link" placeholder="https://meet.google.com/abc-defg-hij">
+                    <small style="color:#666;">This link will auto-fill when scheduling virtual sessions.</small>
+                </div>
+
             </div>
             <div class="modal-footer">
                 <button class="btn-cancel">Cancel</button>
@@ -148,6 +148,26 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+
+    <div class="modal" id="success-modal" style="display: none; align-items: center; justify-content: center;">
+        <div class="modal-content" style="max-width: 400px; text-align: center; padding: 30px;">
+            
+            <div style="margin: 0 auto 15px auto; width: 60px; height: 60px; background-color: #d4edda; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#155724" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            </div>
+
+            <h2 id="success-modal-title" style="color: #155724; margin-bottom: 10px;">Success!</h2>
+            <p id="success-modal-message" style="color: #555; margin-bottom: 25px;">Action completed successfully.</p>
+            
+            <button class="btn-submit" onclick="closeSuccessModal()" style="width: 100%; justify-content: center;">OK, Great!</button>
+        </div>
+    </div>
+
+    </body>
+</html>
+
+<script src="counselors-script.js"></script>
 </body>
 </html>
