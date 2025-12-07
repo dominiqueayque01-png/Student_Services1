@@ -8,6 +8,35 @@ document.addEventListener('DOMContentLoaded', function() {
     loadDashboardStats();
     loadDashboardLists();
     setActiveNavItem();
+
+    // =============================
+    // Sidebar Dropdown Functionality (Smooth Slide)
+    // =============================
+ document.querySelectorAll('.dropdown-btn').forEach(button => {
+    button.addEventListener('click', () => {
+        const container = button.nextElementSibling;
+
+        if (container.style.maxHeight && container.style.maxHeight !== '0px') {
+            // Smooth close
+            container.style.maxHeight = container.scrollHeight + 'px'; // set current height
+            requestAnimationFrame(() => { // wait for next frame
+                container.style.maxHeight = '0';
+            });
+            container.addEventListener('transitionend', () => {
+                container.classList.remove('open');
+            }, { once: true });
+
+            button.classList.remove('active');
+        } else {
+            // Smooth open
+            container.classList.add('open');
+            container.style.maxHeight = container.scrollHeight + 'px';
+            button.classList.add('active');
+        }
+    });
+});
+
+
 });
 
 // ============================================
@@ -40,10 +69,10 @@ async function loadDashboardStats() {
         const statValues = document.querySelectorAll('.stat-value');
 
         // Map API data to stat cards
-        statValues[0].textContent = data.newMembers || 0;           // New Members
-        statValues[1].textContent = data.totalMembers || 0;         // Total Members
-        statValues[2].textContent = data.pendingApplications || 0;  // Pending Applications
-        statValues[3].textContent = data.rejectedApplications || 0; // Rejected Applications
+        statValues[0].textContent = data.newMembers || 0;
+        statValues[1].textContent = data.totalMembers || 0;
+        statValues[2].textContent = data.pendingApplications || 0;
+        statValues[3].textContent = data.rejectedApplications || 0;
     } catch (err) {
         console.error('Error fetching stats:', err);
     }
@@ -54,7 +83,6 @@ async function loadDashboardStats() {
 // ============================================
 async function loadDashboardLists() {
     try {
-        // --- Recent Applications ---
         const resApps = await fetch('http://localhost:3001/api/leader-overview/recent-applications');
         const applications = await resApps.json();
         const appListEl = document.getElementById('recent-applications-list');
@@ -73,7 +101,6 @@ async function loadDashboardLists() {
             `).join('') : '<p class="empty-state">No recent applications</p>';
         }
 
-        // --- New Members (latest active clubs) ---
         const resMembers = await fetch('http://localhost:3001/api/leader-overview/new-members');
         const members = await resMembers.json();
         const membersListEl = document.getElementById('new-members-list');
@@ -124,6 +151,7 @@ function editStatMeta(element, index) {
 // ============================================
 // Navigation
 // ============================================
+
 function setActiveNavItem() {
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
     const navItems = document.querySelectorAll('.nav-item');

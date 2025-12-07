@@ -115,7 +115,31 @@ function renderAnalytics() {
 // --------------------------
 document.addEventListener('DOMContentLoaded', () => {
     fetchAnalyticsData(); // Fetch live data from backend
+    // ============================================
+    // Sidebar Dropdown Functionality
+    // ============================================
+    document.querySelectorAll('.dropdown-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const container = button.nextElementSibling;
 
+            if (container.style.maxHeight && container.style.maxHeight !== '0px') {
+                // Close smoothly
+                container.style.maxHeight = container.scrollHeight + 'px';
+                requestAnimationFrame(() => {
+                    container.style.maxHeight = '0';
+                });
+                container.addEventListener('transitionend', () => {
+                    container.classList.remove('open');
+                }, { once: true });
+                button.classList.remove('active');
+            } else {
+                // Open smoothly
+                container.classList.add('open');
+                container.style.maxHeight = container.scrollHeight + 'px';
+                button.classList.add('active');
+            }
+        });
+    });
   // ----------------------
 // Navigation
 // ----------------------
@@ -160,3 +184,4 @@ navItems.forEach(item => {
         });
     }
 });
+

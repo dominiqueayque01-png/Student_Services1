@@ -237,6 +237,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Navigation & Logout
     initializeNavigationAndLogout();
+// ============================================
+// Sidebar Dropdown Functionality
+// ============================================
+document.querySelectorAll('.dropdown-btn').forEach(button => {
+    button.addEventListener('click', () => {
+        const container = button.nextElementSibling;
+
+        if (container.style.maxHeight && container.style.maxHeight !== '0px') {
+            container.style.maxHeight = container.scrollHeight + 'px';
+            requestAnimationFrame(() => container.style.maxHeight = '0');
+            container.addEventListener('transitionend', () => container.classList.remove('open'), { once: true });
+            button.classList.remove('active');
+        } else {
+            container.classList.add('open');
+            container.style.maxHeight = container.scrollHeight + 'px';
+            button.classList.add('active');
+        }
+    });
+});
 
     function initializeNavigationAndLogout() {
         const navItems = document.querySelectorAll('.nav-item');

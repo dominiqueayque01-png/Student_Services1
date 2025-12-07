@@ -44,6 +44,11 @@ const leaderOverviewRoutes = require('./routes/leader-overview.routes');
 const clubProfileRoutes = require('./routes/clubProfile.routes');
 const leaderAnalyticsRoutes = require('./routes/leader-analytics.routes');
 
+
+
+
+
+
 const applicationsRoutes = require('./routes/applications.routes.js'); // NEW: club leader applications
 // --- 5B. USE YOUR ROUTES ---
 app.use('/api/clubs', clubRoutes);
@@ -72,6 +77,10 @@ app.use('/api/counseling-announcements', counselingAnnouncementRoutes); // URL B
 app.use('/api/leader-overview', leaderOverviewRoutes);
 app.use('/api/club-profile', clubProfileRoutes);
 app.use('/api/leader-analytics', leaderAnalyticsRoutes);
+
+
+
+
 
 
 app.use('/api', applicationsRoutes); // NEW: leader applications API

@@ -10,44 +10,53 @@
 <body>
     <div class="container">
         <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="logo-section">
-                <img src="qculogo.png.png" class="logo-img">
-                <div class="logo-text">
-                    <h3>QCU</h3>
-                    <p>Student Services</p>
-                </div>
-            </div>
+     <aside class="sidebar">
+    <div class="logo-section">
+        <img src="qculogo.png.png" class="logo-img">
+        <div class="logo-text">
+            <h3>QCU</h3>
+            <p>Student Services</p>
+        </div>
+    </div>
 
-            <nav class="sidebar-nav">
-                <a href="index.html" class="nav-item" data-page="overview">
-                    <span>Overview</span>
-                </a>
-                <a href="profile.html" class="nav-item active" data-page="profile">
-                    <span>Club Profile</span>
-                </a>
-                <a href="members.html" class="nav-item" data-page="members">
-                    <span>Members</span>
-                </a>
-                <a href="applications.html" class="nav-item" data-page="applications">
-                    <span>Applications</span>
-                </a>
-                <a href="analytics.html" class="nav-item" data-page="analytics">
-                    <span>Analytics</span>
-                </a>
-            </nav>
-
-            <div class="sidebar-footer">
-                <div class="user-profile">
-                    <div class="user-avatar">JD</div>
-                    <div class="user-info">
-                        <h4>John Doe</h4>
-                        <p>Club Leader</p>
-                    </div>
-                </div>
-                <button class="logout-btn"> Logout</button>
+    <nav class="sidebar-nav">
+        <!-- Dropdown: Club Organization -->
+        <div class="dropdown">
+            <button class="dropdown-btn">Club Organization</button>
+            <div class="dropdown-container">
+                <a href="index.html" class="nav-item" data-page="overview">Overview</a>
+                <a href="profile.html" class="nav-item active" data-page="profile">Club Profile</a>
+                <a href="members.html" class="nav-item" data-page="members">Members</a>
+                <a href="applications.html" class="nav-item" data-page="applications">Applications</a>
+                <a href="analytics.html" class="nav-item" data-page="analytics">Analytics</a>
             </div>
-        </aside>
+        </div>
+     <!-- Dropdown: Events Management -->
+        <div class="dropdown">
+            <button class="dropdown-btn">Events Management</button>
+            <div class="dropdown-container">
+                <a href="dashboard.html" class="nav-item">Dashboard</a>
+                <a href="manage-events.html" class="nav-item">Manage Events</a>
+                <a href="eventregistration.html" class="nav-item">Registrations</a>
+                <a href="announcements.html" class="nav-item">Announcements</a>
+            </div>
+        </div>
+    </nav>
+
+
+
+    <div class="sidebar-footer">
+        <div class="user-profile">
+            <div class="user-avatar">JD</div>
+            <div class="user-info">
+                <h4>John Doe</h4>
+                <p>Club Leader</p>
+            </div>
+        </div>
+        <button class="logout-btn"> Logout</button>
+    </div>
+</aside>
+
 
         <!-- Main Content -->
         <main class="main-content">
