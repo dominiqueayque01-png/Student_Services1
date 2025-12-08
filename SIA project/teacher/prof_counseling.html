@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher - Counseling - Referrals</title>
+    <link rel="stylesheet" href="prof_counseling-styles.css">
+    <style>
+    /* Prevent resizing of additional notes */
+    #additional-notes {
+        resize: none;
+    }
+
+    /* Field group container - vertical layout */
+    .field-group {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    /* Custom error message styling */
+    .error-message {
+        display: block;
+        color: #d32f2f;
+        font-size: 12px;
+        margin-top: 4px;
+        font-weight: 500;
+        min-height: 16px;
+    }
+
+    /* Red border for fields with errors */
+    .input-error {
+        border-color: #d32f2f !important;
+        background-color: #ffebee !important;
+    }
+
+    /* Card icons styling - larger size for better visibility */
+    .form-card-icon,
+    .history-card-icon {
+        width: 76px;
+        height: 76px;
+        object-fit: contain;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-content">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="logo-section">
+                    <img src="qculogo.png" class="logo-img" alt="QCU Logo">
+                    <div class="logo-text">
+                        <h3>QCU Student Services</h3>
+                        <p>Teacher Portal - Counseling</p>
+                    </div>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <div class="nav-item active" id="nav-dashboard">
+                        <span>Dashboard</span>
+                    </div>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <div class="user-profile">
+                        <div class="user-avatar">A</div>
+                        <div class="user-info">
+                            <h4>Admin User</h4>
+                            <p>admin@qcu.edu</p>
+                        </div>
+                    </div>
+                    <button class="logout-option" id="logout-option">
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Panel -->
+            <main class="main-panel">
+                <!-- Header Section -->
+                <div class="header-section">
+                    <div class="header-card">
+                        <div class="header-left">
+                            <h1>Counseling Unit</h1>
+                            <p>Confidential counseling services to support your wellbeing.<br>Free for all QCU students. Get started starting today.</p>
+                            <div class="office-hours">
+                                <svg class="clock-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                                    <!-- Circle outline -->
+                                    <circle cx="32" cy="32" r="28" fill="none" stroke="#4a5dbd" stroke-width="2.5"/>
+                                    <!-- Exclamation mark -->
+                                    <line x1="32" y1="18" x2="32" y2="36" stroke="#4a5dbd" stroke-width="4" stroke-linecap="round"/>
+                                    <!-- Dot below exclamation -->
+                                    <circle cx="32" cy="44" r="3" fill="#4a5dbd"/>
+                                </svg>
+                                <div class="hours-info">
+                                    <strong>Office Hours •</strong> <span>Monday - Friday | 8:00 AM - 5:00 PM</span>
+                                </div>
+                                <button class="btn-learn-more">Learn More</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-wrapper">
+                    <!-- Left Section - Notifications -->
+                    <div class="left-section">
+                        <div class="notifications-container">
+                            <div class="notifications-header">
+                                <h2>Notifications</h2>
+                                <div class="tabs-filter">
+                                    <button class="filter-tab active" data-filter="unread">
+                                        Unread <span class="badge" id="unread-count">1</span>
+                                    </button>
+                                    <button class="filter-tab" data-filter="all">All</button>
+                                    <a href="#" class="mark-all-read">Mark All As Read</a>
+                                </div>
+                            </div>
+
+                            <div class="notifications-list" id="notifications-list">
+                                <!-- Notification items will be inserted here -->
+                                <div class="notification-item unread" data-id="R2025-003">
+                                    <div class="notification-header">
+                                        <h4>Referral Delivered: R2025-003</h4>
+                                    </div>
+                                    <p class="notification-text">Your referral for Jammy Cruz was successfully sent. The student has been informed and may choose to proceed with counseling.</p>
+                                    <div class="notification-meta">
+                                        <span class="time">Just now</span>
+                                    </div>
+                                </div>
+
+                                <div class="notification-item unread" data-id="R2025-002">
+                                    <div class="notification-header">
+                                        <h4>Referral Delivered: R2025-002</h4>
+                                    </div>
+                                    <p class="notification-text">Your referral for Aiden Richards was successfully sent. The student has been informed and may choose to proceed with counseling.</p>
+                                    <div class="notification-meta">
+                                        <span class="time">2 hours ago</span>
+                                    </div>
+                                </div>
+
+                                <div class="notification-item unread" data-id="R2025-001">
+                                    <div class="notification-header">
+                                        <h4>Referral Delivered: R2025-001</h4>
+                                    </div>
+                                    <p class="notification-text">Your referral for Ameer Andres was successfully sent. The student has been informed and may choose to proceed with counseling.</p>
+                                    <div class="notification-meta">
+                                        <span class="time">5 hours ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Section - Forms -->
+                    <div class="right-section">
+                        <!-- Referral Form Card -->
+                        <div class="referral-form-card" id="btn-referral-form">
+                            <img src="icons/referral_form_icon.png" class="form-card-icon" alt="Referral Form">
+                            <h3 class="form-card-title">Referral Form</h3>
+                        </div>
+
+                        <!-- Referral History Card -->
+                        <div class="referral-history-card" id="btn-referral-history">
+                            <img src="icons/referral_history_icon.png" class="history-card-icon" alt="Referral History">
+                            <h3 class="history-card-title">Referral History</h3>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Referral Form Modal -->
+    <div class="modal-overlay" id="referral-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-header-title">
+                    <img src="icons/article icon.png" class="modal-icon" alt="Referral Form">
+                    <h2>Referral Form</h2>
+                </div>
+                <button class="modal-close" id="close-referral-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-intro-text">Fill out this form to refer a student for counseling support. This will be kept confidential by the Guidance Office.</p>
+                
+                <form id="referral-form" novalidate>
+                    <!-- Personal Information Section -->
+                    <div class="form-section">
+                        <h3 class="section-title"><img src="icons/person icon.png" class="inline-icon" alt="Personal Information"> Personal Information</h3>
+                        <div class="form-row">
+                            <div class="form-group half-width">
+                                <label for="student-id">Student ID <span class="required-asterisk">*</span></label>
+                                <div class="field-group">
+                                    <input type="text" id="student-id" placeholder="e.g., 23-0000" required pattern="[\d-]+" title="Student ID must contain only numbers and dashes">
+                                    <span class="error-message" id="student-id-error"></span>
+                                </div>
+                            </div>
+                            <div class="form-group half-width">
+                                <label for="student-name">Student Full Name <span class="required-asterisk">*</span></label>
+                                <div class="field-group">
+                                    <input type="text" id="student-name" placeholder="Full Name" required pattern="[A-Za-z ]+" title="Student name must contain only letters and spaces">
+                                    <span class="error-message" id="student-name-error"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group course-group">
+                                <label for="course">Course / Year Level / Section <span class="required-asterisk">*</span></label>
+                                <div class="course-inputs">
+                                    <div class="field-group">
+                                        <input type="text" id="course" placeholder="e.g., BSIT" required>
+                                        <span class="error-message" id="course-error"></span>
+                                    </div>
+                                    <div class="field-group">
+                                        <input type="text" id="year-level" placeholder="e.g., 3rd" required>
+                                        <span class="error-message" id="year-level-error"></span>
+                                    </div>
+                                    <div class="field-group">
+                                        <input type="text" id="section" placeholder="e.g., G" required>
+                                        <span class="error-message" id="section-error"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group half-width">
+                                <label for="student-email">Email Address <span class="required-asterisk">*</span></label>
+                                <div class="field-group">
+                                    <input type="email" id="student-email" placeholder="student.email@gmail.com" required>
+                                    <span class="error-message" id="student-email-error"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Referral Details Section -->
+                    <div class="form-section">
+                        <h3 class="section-title"><img src="icons/group icon.svg" class="inline-icon" alt="Referral Details"> Referral Details</h3>
+                        <div class="form-group">
+                            <label for="reason">Reason for Referral <span class="required-asterisk">*</span></label>
+                            <div class="field-group">
+                                <input type="text" id="reason" placeholder="Attendance Concern" required>
+                                <span class="error-message" id="reason-error"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="observation-date">Date of Observation <span class="required-asterisk">*</span></label>
+                            <div class="field-group">
+                                <input type="date" id="observation-date" placeholder="mm/dd/yyyy" required>
+                                <span class="error-message" id="observation-date-error"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="additional-notes">Additional Notes (Optional)</label>
+                            <textarea id="additional-notes" placeholder="e.g., Student has missed 5 consecutive classes" rows="3"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Confidentiality Checkbox -->
+                    <div class="confidentiality-section">
+                        <input type="checkbox" id="confidentiality-checkbox">
+                        <div class="confidentiality-content">
+                            <label for="confidentiality-checkbox">I understand that my information will be handled confidentially by licensed QCU counselors.</label>
+                            <a href="#" class="privacy-policy-link">View Privacy Policy</a>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" id="cancel-referral">Cancel</button>
+                        <button type="submit" class="btn-submit">Submit Request</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submit Referral Confirmation Modal -->
+    <div class="modal-overlay" id="submit-confirmation-modal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2>Submit Referral?</h2>
+                <button class="modal-close" id="close-confirmation-modal">&times;</button>
+            </div>
+            <div class="modal-body confirmation-body">
+                <p>Are you sure you want to submit this counseling referral? Once submitted, it cannot be canceled or edited. Please review carefully before submitting.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" id="cancel-submission">Cancel</button>
+                <button type="button" class="btn-submit" id="confirm-submission">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Referral Success Modal -->
+    <div class="modal-overlay" id="success-modal">
+        <div class="modal-content modal-small">
+            <div class="modal-body success-body">
+                <div class="success-icon">✓</div>
+                <h2>Referral Submitted</h2>
+                <p class="case-id">CASE ID: <span id="case-id-display">R2025-001</span></p>
+                <p class="success-message">Your referral has been forwarded. The student will be notified and can decide whether to continue.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" id="done-button">Done</button>
+                <button type="button" class="btn-submit" id="track-status-button">Track Referral Status</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Referral History Modal -->
+    <div class="modal-overlay" id="history-modal">
+        <div class="modal-content modal-history">
+            <div class="modal-header">
+                <div class="modal-header-title">
+                    <img src="icons/quick reference icon.png" class="modal-icon" alt="Referral History">
+                    <h2>Referral History</h2>
+                </div>
+                <button class="modal-close" id="close-history-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="history-description">Monitor your submitted counseling referrals.<br>This section keeps a log of what you've submitted.</p>
+                
+                <div class="history-controls">
+                    <div class="search-wrapper">
+                        <input type="text" id="history-search" placeholder="Search for a referral by code, date, or name..." class="search-input">
+                    </div>
+                    <div class="filter-controls">
+                        <select id="history-sort" class="sort-dropdown">
+                            <option value="newest">Newest to Oldest</option>
+                            <option value="oldest">Oldest to Newest</option>
+                        </select>
+                        <button id="filter-btn" class="filter-btn">Filter</button>
+                    </div>
+                </div>
+
+                <div class="history-items" id="history-items">
+                    <!-- History cards will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Referral Detail Modal -->
+    <div class="modal-overlay" id="referral-detail-modal">
+        <div class="modal-content modal-detail">
+            <div class="modal-header detail-header">
+                <div class="detail-header-top">
+                    <h2 id="detail-referral-id">R2025-001</h2>
+                    <button class="modal-close" id="close-detail-modal">&times;</button>
+                </div>
+                <p class="detail-student-id" id="detail-student-id">Student ID: 23-0000</p>
+            </div>
+            <div class="modal-body detail-body">
+                <!-- Student Information Section -->
+                <div class="detail-section">
+                    <div class="section-header">
+                        <svg class="section-icon-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Envelope rectangle -->
+                            <rect x="12" y="20" width="40" height="28" fill="none" stroke="#4a5dbd" stroke-width="3.5" rx="1"/>
+                            <!-- Top flap triangle -->
+                            <polyline points="12,20 32,32 52,20" fill="none" stroke="#4a5dbd" stroke-width="3.5" stroke-linejoin="round"/>
+                        </svg>
+                        <h3>Student Information</h3>
+                    </div>
+                    <div class="detail-grid">
+                        <div class="detail-field">
+                            <label>Student Full Name</label>
+                            <p id="detail-student-name">Ameer Andres</p>
+                        </div>
+                        <div class="detail-field">
+                            <label>Student ID</label>
+                            <p id="detail-student-id-field">23-XXXX</p>
+                        </div>
+                        <div class="detail-field">
+                            <label>Student Email</label>
+                            <p id="detail-student-email">kampon.ng.diablo@gmail.com</p>
+                        </div>
+                        <div class="detail-field">
+                            <label>Course / Year Level / Section</label>
+                            <p id="detail-course">BSIT-3G</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Referred By Section -->
+                <div class="detail-section">
+                    <div class="section-header">
+                        <svg class="section-icon-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Envelope rectangle -->
+                            <rect x="12" y="20" width="40" height="28" fill="none" stroke="#4a5dbd" stroke-width="3.5" rx="1"/>
+                            <!-- Top flap triangle -->
+                            <polyline points="12,20 32,32 52,20" fill="none" stroke="#4a5dbd" stroke-width="3.5" stroke-linejoin="round"/>
+                        </svg>
+                        <h3>Referred By</h3>
+                    </div>
+                    <div class="detail-grid">
+                        <div class="detail-field">
+                            <label>Instructor Full Name</label>
+                            <p id="detail-instructor-name">Dr. John Cruz</p>
+                        </div>
+                        <div class="detail-field">
+                            <label>Instructor Email</label>
+                            <p id="detail-instructor-email">johncruz@gmail.com</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Referral Details Section -->
+                <div class="detail-section">
+                    <div class="section-header">
+                        <img src="icons/group icon.svg" class="section-icon-svg" alt="Referral Details">
+                        <h3>Referral Details</h3>
+                    </div>
+                    <div class="detail-grid">
+                        <div class="detail-field full-width">
+                            <label>Reason for Referral</label>
+                            <p id="detail-reason">Attendance Concern</p>
+                        </div>
+                        <div class="detail-field">
+                            <label>Date of Observation</label>
+                            <p id="detail-date">11/28/2025</p>
+                        </div>
+                    </div>
+                    <div class="detail-grid">
+                        <div class="detail-field full-width">
+                            <label>Additional Notes</label>
+                            <p id="detail-notes">The student's attendance record indicates a sustained lack of participation, raising concern for academic progress.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer detail-footer">
+                <button class="btn-cancel" id="detail-go-back">Go Back</button>
+                <button class="btn-submit" id="detail-close">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Notification -->
+    <div class="toast-notification" id="toast-notification">
+        <div class="toast-content">
+            <span class="toast-icon">✓</span>
+            <span class="toast-message" id="toast-message">Referral sent successfully!</span>
+        </div>
+    </div>
+
+    <!-- Learn More Modal -->
+    <div class="modal-overlay" id="learn-more-modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>Counseling Unit • Student Services</h2>
+                <button class="modal-close" id="close-learn-more-modal">&times;</button>
+            </div>
+            <div class="modal-body learn-more-content">
+                <p class="intro-text">Your mental health and wellbeing are our priority.</p>
+                
+                <div class="section">
+                    <h3>About Our Services</h3>
+                    <p>The QCU Counseling Unit provides free, confidential mental health services to all students. Our professional counselors are here to support you through academic stress, personal challenges, relationship issues, anxiety, depression, and other concerns affecting your wellbeing.</p>
+                </div>
+
+                <div class="section">
+                    <h3>Services We Provide</h3>
+                    <ul>
+                        <li>Individual counseling sessions</li>
+                        <li>Group therapy and support groups</li>
+                        <li>Crisis intervention and emergency support</li>
+                        <li>Academic stress and time management counseling</li>
+                        <li>Anxiety and depression management</li>
+                        <li>Relationship and family counseling</li>
+                        <li>Mental health workshops and seminars</li>
+                        <li>Referrals to specialized mental health professionals</li>
+                    </ul>
+                </div>
+
+                <div class="section">
+                    <h3>Office Hours</h3>
+                    <div class="office-hours-info">
+                        <div class="time-slot">
+                            <strong>Monday - Friday</strong>
+                            <span>8:00 AM - 5:00 PM</span>
+                        </div>
+                    </div>
+                    <p class="note">Walk-ins welcome, but appointments are recommended for shorter wait times.</p>
+                </div>
+
+                <div class="section">
+                    <h3>Contact Information</h3>
+                    <div class="contact-item">
+                        <span class="contact-icon">☎</span>
+                        <div>
+                            <strong>Phone</strong>
+                            <p>09XX XXX XXXX</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-icon">✉</span>
+                        <div>
+                            <strong>Email</strong>
+                            <p>guidance.unit@qcu.edu.ph</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <img src="icons/distance icon.svg" class="contact-icon" alt="Location">
+                        <div>
+                            <strong>Location</strong>
+                            <p>IL Building</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Confidentiality</h3>
+                    <p>All counseling sessions are completely confidential. Information shared with counselors will not be disclosed to anyone without your written consent, except in cases where there is imminent danger to yourself or others.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Duplicate Request Modal -->
+    <div class="modal-overlay" id="duplicate-modal">
+        <div class="modal-content modal-small">
+            <div class="modal-body duplicate-body">
+                <div class="duplicate-icon">✕</div>
+                <h2>Duplicate Request</h2>
+                <p class="case-id">CASE ID: <span id="duplicate-case-id">R2025-001</span></p>
+                <p class="duplicate-message">A referral for this student was submitted in the last 30 days. You may resubmit after the waiting period.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" id="duplicate-close">Close</button>
+                <button class="btn-submit" id="duplicate-return">Return to Form</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="logout-modal">
+        <div class="modal-content modal-small logout-modal">
+            <div class="logout-header">
+                <h2>Logout Confirmation</h2>
+                <button class="modal-close" id="close-logout-modal">&times;</button>
+            </div>
+            <div class="modal-body logout-body">
+                <p>Are you sure you want to log out?</p>
+            </div>
+            <div class="modal-footer logout-footer">
+                <button class="btn-logout-cancel" id="cancel-logout">Cancel</button>
+                <button class="btn-logout-confirm" id="confirm-logout">Yes, Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="prof_counseling-script.js"></script>
+</body>
+</html>

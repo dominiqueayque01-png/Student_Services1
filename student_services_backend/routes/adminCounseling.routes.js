@@ -128,4 +128,5 @@ router.post('/appointments', async (req, res) => {
 router.patch('/reschedule/:id', adminController.rescheduleAppointment);
 
 
+router.post('/', adminController.createAppointment);
 module.exports = router;

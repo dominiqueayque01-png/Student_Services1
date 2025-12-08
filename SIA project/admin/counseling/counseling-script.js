@@ -3,9 +3,12 @@
 // ==========================================
 
 const API_URL = 'http://localhost:3001/api/admin/counseling';
+const REFERRALS_API = 'http://localhost:3001/api/counseling-referrals/admin/all'; // <--- This is the missing line!
+
 let sessionsData = {}; 
+let referralData = []; 
 let currentFilter = 'all';
-let currentSessionId = null; // Global ID tracker
+let currentSessionId = null; 
 let allCounselors = [];
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -13,7 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
 });
 
-// --- 1. FETCH DATA FROM BACKEND ---
+// --- 1. FETCH DAT
+// A FROM BACKEND ---
 async function fetchSessions() {
     const listContainer = document.getElementById('sessions-list');
     if (!listContainer) return;
@@ -143,11 +147,24 @@ function renderSessions() {
 
 // --- 3. SHOW DETAILS PANEL ---
 function showSessionDetails(id) {
+    // --- 1. RESET LAYOUT (New Fix) ---
+    // This ensures standard sections are visible and referral details are hidden
+    const allSections = document.querySelectorAll('#session-details .detail-section');
+    
+    // Unhide "Counselling Details" and "Timeline"
+    if(allSections[1]) allSections[1].style.display = 'block'; 
+    if(allSections[2]) allSections[2].style.display = 'block'; 
+
+    // Hide "Referral Details" if it was previously created
+    const referralSection = document.getElementById('custom-referral-details');
+    if(referralSection) referralSection.style.display = 'none';
+    // ---------------------------------
+
     currentSessionId = id; 
     const data = sessionsData[id];
     if (!data) return;
 
-    // --- 1. FILL TEXT DATA ---
+    // --- 2. FILL TEXT DATA ---
     setText('detail-session-id', data.displayId);
     setText('detail-student-name', data.studentName);
     setText('detail-student-id', data.studentId);
@@ -200,12 +217,12 @@ function showSessionDetails(id) {
         }
     }
 
-    // --- 2. BUTTON LOGIC (FIXED) ---
+    // --- 3. BUTTON LOGIC ---
     const scheduleBtn = document.getElementById('btn-schedule-or-edit');
     const rejectBtn = document.getElementById('btn-reject-session'); 
-    const rescheduleBtn = document.getElementById('btn-reschedule'); // New Button
+    const rescheduleBtn = document.getElementById('btn-reschedule'); 
 
-    // A. RESET: Hide ALL buttons first (Fixes the ghost button bug)
+    // A. RESET: Hide ALL buttons first
     if (scheduleBtn) scheduleBtn.style.display = 'none';
     if (rejectBtn) rejectBtn.style.display = 'none';
     if (rescheduleBtn) rescheduleBtn.style.display = 'none';
@@ -216,13 +233,27 @@ function showSessionDetails(id) {
         if (scheduleBtn) {
             scheduleBtn.textContent = 'Schedule Session';
             scheduleBtn.style.display = 'inline-block';
-            scheduleBtn.onclick = openScheduleModal;
             
+            // RESET BUTTON STYLES (In case Referral changed them)
+            scheduleBtn.style.backgroundColor = ''; // Reset color
+            scheduleBtn.style.flex = ''; // Reset size
+            scheduleBtn.style.marginLeft = ''; 
+            
+            // Re-clone to clear old listeners (like the referral "Accept" listener)
+            scheduleBtn.replaceWith(scheduleBtn.cloneNode(true));
+            const newScheduleBtn = document.getElementById('btn-schedule-or-edit');
+            newScheduleBtn.onclick = openScheduleModal;
         }
         if (rejectBtn) {
             rejectBtn.style.display = 'inline-block'; 
-            // Ensure 'openRejectModal' exists in your code!
-            rejectBtn.onclick = (typeof openRejectModal === 'function') ? openRejectModal : null; 
+            
+            // RESET BUTTON STYLES
+            rejectBtn.style.flex = ''; 
+            
+            // Re-clone to clear old listeners
+            rejectBtn.replaceWith(rejectBtn.cloneNode(true));
+            const newRejectBtn = document.getElementById('btn-reject-session');
+            newRejectBtn.onclick = (typeof openRejectModal === 'function') ? openRejectModal : null; 
         }
     } 
     else if (data.status === 'Scheduled') {
@@ -230,7 +261,16 @@ function showSessionDetails(id) {
         if (scheduleBtn) {
             scheduleBtn.textContent = 'Mark as Completed';
             scheduleBtn.style.display = 'inline-block';
-            scheduleBtn.onclick = function() {
+            
+            // RESET STYLES
+            scheduleBtn.style.backgroundColor = ''; 
+            scheduleBtn.style.flex = '';
+            scheduleBtn.style.marginLeft = '';
+
+            scheduleBtn.replaceWith(scheduleBtn.cloneNode(true));
+            const newCompleteBtn = document.getElementById('btn-schedule-or-edit');
+
+            newCompleteBtn.onclick = function() {
                  if(typeof openCompletionModal === 'function') openCompletionModal();
                  else completeSession();
             };
@@ -239,10 +279,9 @@ function showSessionDetails(id) {
         // SHOW RESCHEDULE BUTTON
         if (rescheduleBtn) {
             rescheduleBtn.style.display = 'inline-block';
-            rescheduleBtn.onclick = openScheduleModal; // Re-open same modal to edit
+            rescheduleBtn.onclick = openScheduleModal; 
         }
     } 
-    // For 'Completed' or 'Cancelled', buttons remain hidden
 }
 
 // --- 4. MODAL LOGIC ---
@@ -324,56 +363,89 @@ function closeRejectModal() {
 // --- 5. API ACTIONS ---
 
 // Handle Schedule Submit
+// Handle Schedule Submit (Smart Version)
 document.getElementById('btn-save-schedule')?.addEventListener('click', async () => {
+    // 1. Get Form Data
     const dateStr = document.getElementById('schedule-date').value;
     const timeStr = document.getElementById('schedule-time').value;
     const counselorName = document.getElementById('schedule-counselor').value;
-    
-    // Get Meet Link if it exists
     const meetLinkVal = document.getElementById('schedule-meet-link') ? document.getElementById('schedule-meet-link').value : '';
 
     if (!dateStr || !timeStr || !counselorName) {
         alert("Please fill in all fields.");
         return;
     }
-    
-    // Validate Link if Virtual
-    const session = sessionsData[currentSessionId];
-    if (session.preferredMode === 'Virtual' && !meetLinkVal) {
-        alert("Please provide a Google Meet link for this virtual session.");
-        return;
-    }
 
+    // 2. Prepare Data
     const scheduledDateTime = new Date(`${dateStr}T${timeStr}`);
+    const session = sessionsData[currentSessionId];
+    
+    // Check if this is a Referral (ID starts with 'R')
+    const isReferral = currentSessionId.toString().startsWith('R');
 
     try {
-        const response = await fetch(`${API_URL}/${currentSessionId}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                status: 'Scheduled',
-                counselor: counselorName,
-                scheduledDateTime: scheduledDateTime,
-                meetingLink: meetLinkVal
-            })
-        });
+        let response;
+        
+        if (isReferral) {
+            // === CASE A: IT IS A REFERRAL ===
+            // We need to CREATE a new appointment (POST)
+            response = await fetch(API_URL, {  // POST to the main URL to create
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    studentId: session.studentId, // Ensure this maps correctly
+                    studentName: session.studentName,
+                    studentEmail: session.studentEmail, // Pass email if you have it
+                    counselor: counselorName,
+                    scheduledDateTime: scheduledDateTime,
+                    meetingLink: meetLinkVal,
+                    preferredMode: session.preferredMode || 'Face-to-Face',
+                    status: 'Scheduled',
+                    referralId: currentSessionId // Optional: Save the referral ID for reference
+                })
+            });
 
+            // If creation worked, ALSO update the Referral Status to "Session Scheduled"
+            if (response.ok) {
+                await updateReferralStatus(currentSessionId, 'Session Scheduled');
+            }
+
+        } else {
+            // === CASE B: EXISTING APPOINTMENT ===
+            // We need to UPDATE the existing one (PATCH)
+            response = await fetch(`${API_URL}/${currentSessionId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    status: 'Scheduled',
+                    counselor: counselorName,
+                    scheduledDateTime: scheduledDateTime,
+                    meetingLink: meetLinkVal
+                })
+            });
+        }
+
+        // 3. Handle Success/Error
         if (response.ok) {
-
             closeScheduleModal();
-
-            showStatusModal('Session Scheduled', 'The session has been scheduled successfully!', 'success');
+            showStatusModal('Session Scheduled', 'The session has been successfully added to the calendar!', 'success');
             
+            // Refresh UI
             document.getElementById('session-details').style.display = 'none';
             document.getElementById('empty-state').style.display = 'flex';
-            fetchSessions();
+            
+            // Reload the list (Switch back to 'Scheduled' tab if you want, or just refresh current view)
+            if(isReferral) fetchReferrals(); 
+            else fetchSessions();
+
         } else {
             const err = await response.json();
-            alert('Error: ' + err.message);
+            alert('Error: ' + (err.message || 'Operation failed'));
         }
+
     } catch (error) {
         console.error(error);
-        alert('Network Error');
+        alert('Network Error: Check console for details');
     }
 });
 
@@ -472,6 +544,235 @@ function closeCompletionModal() {
     }
 }
 
+
+// ==========================================
+//   NEW: REFERRAL HANDLING
+// ==========================================
+
+// 1. Fetch Referrals from Backend
+async function fetchReferrals() {
+    const listContainer = document.getElementById('sessions-list');
+    listContainer.innerHTML = '<p style="text-align:center; padding:20px;">Loading Referrals...</p>';
+
+    try {
+        const response = await fetch(REFERRALS_API);
+        if (!response.ok) throw new Error('Failed to fetch referrals');
+
+        referralData = await response.json();
+        renderReferrals(referralData); // Call the renderer
+
+    } catch (error) {
+        console.error('Error:', error);
+        listContainer.innerHTML = '<p style="color:red; text-align:center;">Error loading referrals.</p>';
+    }
+}
+
+// 2. Render Referral Cards (Filtered)
+function renderReferrals(data) {
+    const listContainer = document.getElementById('sessions-list');
+    listContainer.innerHTML = '';
+
+    // --- FILTER LOGIC ---
+    // Only show items that are strictly 'Pending' or 'Acknowledged'.
+    // Hide 'Session Scheduled', 'Rejected', 'Closed', etc.
+    const pendingReferrals = data.filter(item => {
+        const status = (item.status || 'Pending');
+        return status === 'Pending' || status === 'Acknowledged';
+    });
+
+    // --- EMPTY STATE ---
+    if (pendingReferrals.length === 0) {
+        listContainer.innerHTML = `
+            <div style="text-align:center; padding:40px; color:#999;">
+                <p style="font-size: 20px;">✓</p>
+                <p>No pending referrals.</p>
+            </div>`;
+        return;
+    }
+
+    // --- RENDER LOOP ---
+    pendingReferrals.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'session-card';
+        card.style.borderLeft = "4px solid #ff9800"; 
+
+        // Extract Instructor Name safely
+        let profName = "Unknown Instructor";
+        if (item.referredBy && item.referredBy.name) {
+            profName = item.referredBy.name;
+        } else if (item.instructorName) {
+            profName = item.instructorName;
+        }
+
+        const reasonShort = item.reason 
+            ? (item.reason.length > 30 ? item.reason.substring(0, 30) + '...' : item.reason)
+            : 'No reason provided';
+
+        card.innerHTML = `
+            <div class="session-header">
+                <h4>${item.referralId}</h4>
+                <span class="status-badge pending">Referral</span>
+            </div>
+            <p class="session-name">${item.studentName}</p>
+            <div style="margin-bottom:8px;">
+                <span style="font-size:10px; background:#fff3e0; color:#e65100; padding:2px 4px; border-radius:4px;">
+                    👨‍🏫 Referred by Teacher
+                </span>
+            </div>
+            <div class="session-info">
+                <div class="info-item"><span class="info-label">◆ From:</span> <span>${profName}</span></div>
+                <div class="info-item"><span class="info-label">◆ Reason:</span> <span>${reasonShort}</span></div>
+                <div class="info-item"><span class="info-label">◆ Date:</span> <span>${new Date(item.createdAt).toLocaleDateString()}</span></div>
+            </div>
+        `;
+
+        card.addEventListener('click', () => {
+            document.querySelectorAll('.session-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            showReferralDetails(item);
+        });
+
+        listContainer.appendChild(card);
+    });
+}
+
+// 3. Show Referral Details (Reusing the existing panel)
+// admin/counseling/counseling-script.js
+
+// admin/counseling/counseling-script.js
+
+function showReferralDetails(item) {
+    // 1. Fill Basic Info
+    setText('detail-session-id', item.referralId);
+    setText('detail-student-name', item.studentName);
+    setText('detail-student-id', item.studentIdNumber);
+    setText('detail-student-email', item.studentEmail);
+    
+    // Use the Phone field to show Course/Year/Section instead (since Phone is often N/A for referrals)
+    const courseInfo = `${item.course || ''} ${item.yearLevel || ''}-${item.section || ''}`;
+    setText('detail-student-phone', courseInfo.trim() || 'N/A');
+    // Optional: Change the label "Phone Number" to "Course/Section" via JS if you want
+    // document.querySelector('#detail-student-phone').previousElementSibling.textContent = "Course / Section";
+
+    setText('detail-counselor', item.instructorName || 'N/A');
+    setText('detail-detail-status', item.status || 'Pending');
+
+    // 2. Hide "Standard" Sections that don't apply to Referrals
+    // (We hide the standard "Counselling Details" and "Timeline" sections)
+    const allSections = document.querySelectorAll('#session-details .detail-section');
+    if(allSections.length >= 2) {
+        // Usually: [0]=Student Info, [1]=Counselling Details, [2]=Timeline
+        // We keep [0] (Student Info) and hide the others temporarily
+        if(allSections[1]) allSections[1].style.display = 'none'; 
+        if(allSections[2]) allSections[2].style.display = 'none';
+    }
+
+    // 3. Inject "Referral Specifics" Section
+    // Check if we already created our custom section
+    let referralSection = document.getElementById('custom-referral-details');
+    
+    if (!referralSection) {
+        // If not, create it!
+        referralSection = document.createElement('div');
+        referralSection.id = 'custom-referral-details';
+        referralSection.className = 'detail-section'; // Re-use existing class for styling
+        
+        // Insert it after the Student Info section (which is the first .detail-section)
+        const studentInfoSection = document.querySelector('#session-details .detail-section');
+        studentInfoSection.parentNode.insertBefore(referralSection, studentInfoSection.nextSibling);
+    }
+
+    // 4. Populate the Custom Section
+    referralSection.style.display = 'block'; // Make sure it's visible
+    referralSection.innerHTML = `
+        <div class="section-header">
+            <span class="section-icon">📝</span>
+            <h4>Referral Details</h4>
+        </div>
+        <div class="detail-grid">
+            <div class="detail-item" style="grid-column: span 2;">
+                <label>Reason for Referral</label>
+                <p style="background: #f8f9fa; padding: 10px; border-radius: 4px; border-left: 3px solid #ff9800;">
+                    ${item.reason || 'No reason provided.'}
+                </p>
+            </div>
+            <div class="detail-item">
+                <label>Date of Observation</label>
+                <p>${item.observationDate ? new Date(item.observationDate).toLocaleDateString() : 'N/A'}</p>
+            </div>
+             <div class="detail-item">
+                <label>Referred By</label>
+                <p>${item.instructorName}</p>
+            </div>
+            <div class="detail-item" style="grid-column: span 2;">
+                <label>Additional Notes</label>
+                <p>${item.additionalNotes || 'No notes.'}</p>
+            </div>
+        </div>
+    `;
+
+    // --- BUTTON LOGIC (Keep your existing button logic below) ---
+    
+    // 1. Force Hide the "Edit" Button
+    const editBtn = document.getElementById('btn-reschedule');
+    if(editBtn) editBtn.style.display = 'none';
+
+    const scheduleBtn = document.getElementById('btn-schedule-or-edit');
+    const rejectBtn = document.getElementById('btn-reject-session');
+
+    // 2. Setup "Accept" Button
+    if(scheduleBtn) {
+        scheduleBtn.style.display = 'inline-block';
+        scheduleBtn.textContent = 'Accept & Schedule'; 
+        scheduleBtn.style.backgroundColor = '#4caf50'; 
+        scheduleBtn.style.flex = '1'; 
+        scheduleBtn.style.marginLeft = '10px'; 
+
+        scheduleBtn.replaceWith(scheduleBtn.cloneNode(true));
+        const newAcceptBtn = document.getElementById('btn-schedule-or-edit');
+        newAcceptBtn.style.flex = '1'; 
+        newAcceptBtn.style.marginLeft = '10px';
+
+        newAcceptBtn.addEventListener('click', () => {
+             // Prepare data for the modal
+             sessionsData[item.referralId] = {
+                 id: item.referralId,
+                 displayId: item.referralId,
+                 studentName: item.studentName,
+                 studentId: item.studentIdNumber,
+                 studentEmail: item.studentEmail,
+                 counselor: 'N/A',
+                 status: 'Pending', 
+                 preferredMode: 'Face-to-Face',
+                 nextScheduled: 'N/A'
+             };
+             currentSessionId = item.referralId;
+             openScheduleModal(); 
+        });
+    }
+
+    // 3. Setup "Reject" Button
+    if(rejectBtn) {
+        rejectBtn.style.display = 'inline-block';
+        rejectBtn.textContent = 'Reject Referral';
+        rejectBtn.style.flex = '1'; 
+
+        rejectBtn.replaceWith(rejectBtn.cloneNode(true));
+        const newRejectBtn = document.getElementById('btn-reject-session');
+        newRejectBtn.style.flex = '1';
+
+        newRejectBtn.addEventListener('click', () => {
+             if(confirm('Are you sure you want to reject this referral?')) {
+                 updateReferralStatus(item.referralId, 'Rejected');
+             }
+        });
+    }
+
+    // Show Panel
+    document.getElementById('empty-state').style.display = 'none';
+    document.getElementById('session-details').style.display = 'block';
+}
+
 // --- 6. GLOBAL LISTENERS ---
 function setupEventListeners() {
     // Tabs
@@ -482,6 +783,15 @@ function setupEventListeners() {
             btn.classList.add('active');
             currentFilter = btn.getAttribute('data-filter');
             renderSessions();
+
+                if (currentFilter === 'referrals') {
+                    // If they clicked "Teacher Referrals", run the NEW function
+                    fetchReferrals();
+                } else {
+                    // Otherwise, run the OLD function (fetchSessions)
+                    // But only if we aren't already viewing sessions
+                    fetchSessions(); 
+                }
             
             // Reset view
             const emptyState = document.getElementById('empty-state');
@@ -564,4 +874,33 @@ function populateCounselorDropdown() {
         option.dataset.link = c.googleMeetLink || ''; 
         select.appendChild(option);
     });
+}
+
+
+// --- HELPER FUNCTION: Update Referral Status ---
+// This was missing! It tells the database to change the referral from "Pending" to "Session Scheduled"
+async function updateReferralStatus(referralId, newStatus) {
+    // Ensure the ID is valid
+    if (!referralId) return;
+
+    // Use the route we made earlier: PATCH /api/counseling-referrals/:id/status
+    const url = `http://localhost:3001/api/counseling-referrals/${referralId}/status`;
+
+    try {
+        const response = await fetch(url, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status: newStatus })
+        });
+
+        if (!response.ok) {
+            console.error('Failed to update referral status in background.');
+        } else {
+            console.log(`Referral ${referralId} updated to ${newStatus}`);
+        }
+    } catch (error) {
+        console.error('Error updating status:', error);
+    }
 }
