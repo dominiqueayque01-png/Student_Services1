@@ -44,13 +44,30 @@ const leaderOverviewRoutes = require('./routes/leader-overview.routes');
 const clubProfileRoutes = require('./routes/clubProfile.routes');
 const leaderAnalyticsRoutes = require('./routes/leader-analytics.routes');
 
-
-
+const EMdashboardRoutes = require('./routes/EMdashboard.routes');
+const managementRoutes = require('./routes/management.routes');;
 
 
 
 const applicationsRoutes = require('./routes/applications.routes.js'); // NEW: club leader applications
 // --- 5B. USE YOUR ROUTES ---
+
+// --- Use specific routes first ---
+app.use('/api/management', managementRoutes);
+
+// --- Then use generic routes ---
+app.use('/api', activityRoutes);
+app.use('/api', applicationsRoutes);
+
+
+
+
+
+
+
+
+
+
 app.use('/api/clubs', clubRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/ojt', ojtRoutes);
@@ -68,22 +85,18 @@ app.use('/api/announcements', announcementRoutes);
 app.use('/api/faqs', faqRoutes);
 app.use('/api/saved-events', savedEventRoutes);
 app.use('/api/notifications', notificationRoutes);
-app.use('/api/dashboard', dashboardRoutes); 
-app.use('/api', activityRoutes);
+app.use('/api/dashboard', dashboardRoutes);   
 app.use('/api/accounts', accountRoutes);
 app.use('/api/event-announcements', eventAnnouncementRoutes); // URL A
 app.use('/api/counseling-announcements', counselingAnnouncementRoutes); // URL B
-
 app.use('/api/leader-overview', leaderOverviewRoutes);
 app.use('/api/club-profile', clubProfileRoutes);
 app.use('/api/leader-analytics', leaderAnalyticsRoutes);
+app.use('/api/emdashboard', EMdashboardRoutes);
 
 
 
-
-
-
-app.use('/api', applicationsRoutes); // NEW: leader applications API
+    
 
 // --- 6. START THE SERVER ---
 const PORT = process.env.PORT || 3001; 
