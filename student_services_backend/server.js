@@ -39,10 +39,16 @@ const dashboardRoutes = require('./routes/dashboard.routes.js');
 const accountRoutes = require("./routes/accounts.routes.js");
 const eventAnnouncementRoutes = require('./routes/eventAnnouncement.routes');
 const counselingAnnouncementRoutes = require('./routes/counselingAnnouncement.routes');
+const counselingReferralRoutes = require('./routes/counselingReferral.routes.js'); // NEW: Counseling Referrals Route
+const studentLookupRoutes = require('./routes/studentLookup.routes'); // <--- Import this
+
+
+app.use('/api/counseling-referrals', counselingReferralRoutes); // NEW: Use the Counseling Referrals Route
 
 const leaderOverviewRoutes = require('./routes/leader-overview.routes');
 const clubProfileRoutes = require('./routes/clubProfile.routes');
 const leaderAnalyticsRoutes = require('./routes/leader-analytics.routes');
+app.use('/api/lookup', studentLookupRoutes); // <--- Add this line
 
 const EMdashboardRoutes = require('./routes/EMdashboard.routes');
 const managementRoutes = require('./routes/management.routes');;
@@ -92,8 +98,12 @@ app.use('/api/counseling-announcements', counselingAnnouncementRoutes); // URL B
 app.use('/api/leader-overview', leaderOverviewRoutes);
 app.use('/api/club-profile', clubProfileRoutes);
 app.use('/api/leader-analytics', leaderAnalyticsRoutes);
+<<<<<<< HEAD
 app.use('/api/emdashboard', EMdashboardRoutes);
 
+=======
+app.use('/api/auth', require('./routes/auth.routes'));
+>>>>>>> 2ca2c7e5118de9816b7b3847097ce0dd4e954065
 
 
     
