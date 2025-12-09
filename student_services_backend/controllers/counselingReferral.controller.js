@@ -111,17 +111,20 @@ exports.submitReferral = async (req, res) => {
 
 exports.getReferralsByInstructor = async (req, res) => {
     try {
-       // if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
+        // 1. Get the Instructor ID from the URL (e.g., ?instructorId=654...)
+        const { instructorId } = req.query; 
 
-      //  const referrals = await CounselingReferral.find({ referredBy: req.user._id })
-          //  .sort({ createdAt: -1 });
+        // Validate
+        if (!instructorId) {
+            return res.status(400).json({ message: 'Instructor ID is required.' });
+        }
 
-          const dummyInstructorId = "507f1f77bcf86cd799439011"; 
-
-        const referrals = await CounselingReferral.find({ referredBy: dummyInstructorId })
-            .sort({ createdAt: -1 });
+        // 2. Find referrals belonging to this SPECIFIC instructor
+        const referrals = await CounselingReferral.find({ referredBy: instructorId })
+            .sort({ createdAt: -1 }); // Newest first
             
         res.json(referrals);
+
     } catch (err) {
         console.error('Error fetching referrals:', err);
         res.status(500).json({ message: 'Server error fetching history.' });

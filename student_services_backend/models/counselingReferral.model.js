@@ -15,6 +15,13 @@ const CounselingReferralSchema = new mongoose.Schema({
     enum: ['Pending', 'Acknowledged', 'In Progress', 'Closed', 'Session Scheduled', 'Rejected', 'Cancelled'], 
     default: 'Pending'
 },
+
+    status: {   
+    type: String,
+    // 👇 YOU MUST ADD 'Session Scheduled' HERE!
+    enum: ['Pending', 'Acknowledged', 'In Progress', 'Closed', 'Session Scheduled', 'Rejected', 'Cancelled'],
+    default: 'Pending'
+},
     
     // --- Student Information ---
     // We link to the Student model to ensure data integrity
