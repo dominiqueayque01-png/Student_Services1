@@ -65,15 +65,6 @@ app.use('/api/management', managementRoutes);
 app.use('/api', activityRoutes);
 app.use('/api', applicationsRoutes);
 
-
-
-
-
-
-
-
-
-
 app.use('/api/clubs', clubRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/ojt', ojtRoutes);
@@ -98,12 +89,11 @@ app.use('/api/counseling-announcements', counselingAnnouncementRoutes); // URL B
 app.use('/api/leader-overview', leaderOverviewRoutes);
 app.use('/api/club-profile', clubProfileRoutes);
 app.use('/api/leader-analytics', leaderAnalyticsRoutes);
-<<<<<<< HEAD
+
 app.use('/api/emdashboard', EMdashboardRoutes);
 
-=======
+
 app.use('/api/auth', require('./routes/auth.routes'));
->>>>>>> 2ca2c7e5118de9816b7b3847097ce0dd4e954065
 
 
     
